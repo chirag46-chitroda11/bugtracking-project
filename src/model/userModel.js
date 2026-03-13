@@ -25,8 +25,9 @@ const userSchema = new mongoose.Schema({
     },
     status:{
         type:String,
-        default:active,
-        enum:["blocked","active","inactive","deleted"]
+         default:"active",
+        enum:["blocked","active","inactive","deleted"],
+       
 
     }
 },{timestamps:true});

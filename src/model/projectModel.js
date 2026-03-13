@@ -13,9 +13,17 @@ const projectSchema = new mongoose.Schema({
         // foreignKey concepts
         ref:"User"  
     },
+     projectId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"project"},
+
+     createdBy:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"user"
+    },
     startDate:Date,
     endDate:Date,
-    stutus:{
+    status:{
         type:String,
         enum:["Active","completed"],
         default:"Active"
