@@ -1,0 +1,14 @@
+index.html
+   ↓
+main.jsx
+   ↓
+App.jsx
+   ↓
+Router (AppRouter.jsx)
+   ↓
+Components (Login, Dashboard, etc.)
+   ↓
+API call (axios / fetch)
+   ↓
+Backend
+main ,app.jsx ,   approuter.jsx ,,,     pages ,, layout ma bija componetns import karvan like sidebar,navbar bugcard andetc ,,, dashboard name pages ma layout ne import karavanu 
