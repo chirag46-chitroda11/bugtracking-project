@@ -14,7 +14,7 @@ const moduleSchema = new mongoose.Schema({
         ref:"project"
     },
     createdBy:{
-        type:mongoosr.Schema.Types.ObjectId,
+        type:mongoose.Schema.Types.ObjectId,
         ref:"user"
     },
     status:{

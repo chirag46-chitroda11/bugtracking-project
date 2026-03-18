@@ -1,9 +1,10 @@
 const mongoose =require("mongoose");
-
+require("./taskModel");
 const bugSchema = new mongoose.Schema({
     taskId:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"task"
+        ref:"Task",
+        required:false
     },
     bugTitle:{
         type:String

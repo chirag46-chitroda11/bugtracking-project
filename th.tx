@@ -1,0 +1,29 @@
+work flow 
+Admin
+  ↓
+Create Project
+  ↓
+Project Manager
+  ↓
+Create Modules
+  ↓
+Create Tasks
+  ↓
+Assign Tasks to Developers
+  ↓
+Developer works on task
+  ↓
+Tester tests the task
+  ↓
+Tester reports Bug
+  ↓
+Developer fixes bug
+  ↓
+Tester verifies bug
+  ↓
+Task marked completed
+
+
+------------------------------->
+dependency order of bugtracking sys.
+User → Project → Module → Task → Bug → TimeLog
