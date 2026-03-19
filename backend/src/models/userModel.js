@@ -22,9 +22,9 @@ const userSchema = new mongoose.Schema({
     designation:{
         type:String
     },
-    imagePath:{
-        type:String
-    },
+    // imagePath:{
+    //     type:String
+    // },
     status:{
         type:String,
         default:"active",
