@@ -1,209 +1,99 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import API from "../api/axios";
-import bugMascot from "../assets/vite.svg"; 
+import { loginUser } from "../services/authService";
+import bugMascot from "../assets/vite.svg";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMsg, setToastMsg] = useState("");
+  const [toast, setToast] = useState({ show: false, msg: "", isError: false });
+
+  const triggerToast = (msg, isError = false) => {
+    setToast({ show: true, msg, isError });
+    setTimeout(() => setToast({ show: false, msg: "", isError: false }), 3000);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) return;
     setLoading(true);
-
     try {
-      const response = await API.post("/user/login", { email, password });
-      const userData = response.data.data;
-      
-      // Store user data in local storage
-      localStorage.setItem("user", JSON.stringify(userData));
-      
-      setToastMsg(`Login successful! Welcome back, ${userData.name}.`);
-      setShowToast(true);
+      const response = await loginUser(form);
 
-      // --- ROLE BASED ROUTING LOGIC ---
-      setTimeout(() => {
-        const role = userData.role; // Assuming backend returns role: 'admin', 'developer', etc.
-        
-        switch (role) {
-          case 'admin':
-            navigate("/admin-dashboard");
-            break;
-          case 'developer':
-            navigate("/developer-dashboard");
-            break;
-          case 'tester':
-            navigate("/tester-dashboard");
-            break;
-          case 'project_manager':
-            navigate("/pm-dashboard");
-            break;
-          default:
-            navigate("/"); // Fallback to main dashboard
-        }
-      }, 1000);
+      const user = response.data.data;
+      const token = response.data.token;
 
-    } catch (error) {
-      const errMsg = error.response?.data?.message || "Invalid email or password";
-      setToastMsg(errMsg);
-      setShowToast(true);
-    } finally {
-      setLoading(false);
-      setTimeout(() => setShowToast(false), 3000);
-    }
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            ...user,
+            token: token
+          })
+        );
+      triggerToast(" 🎉 Access Granted!");
+      
+        const roleRoutes = {
+      admin: "/admin-dashboard",
+      developer: "/developer-dashboard",
+      tester: "/tester-dashboard",
+      project_manager: "/pm-dashboard",
+    };
+
+    setTimeout(() => {
+      navigate(roleRoutes[user.role] || "/dashboard");
+    }, 1000);
+    } catch (err) {
+      triggerToast(err.response?.data?.message || "Login failed!", true);
+    } finally { setLoading(false); }
   };
 
   return (
-    <>
+    <div className="auth-wrapper">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        
-        .login-page {
-          min-height: 100vh;
-          background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
-          display: flex; align-items: center; justify-content: center;
-          font-family: 'Plus Jakarta Sans', sans-serif;
-          position: relative; overflow: hidden; padding: 20px;
-        }
-
-        .floating-bug {
-          position: absolute; font-size: 30px; opacity: 0.2;
-          animation: floatBug 8s infinite ease-in-out;
-          pointer-events: none;
-        }
-
-        @keyframes floatBug {
-          0%, 100% { transform: translate(0, 0) rotate(0deg); }
-          50% { transform: translate(30px, -50px) rotate(15deg); }
-        }
-
-        .login-card {
-          position: relative; z-index: 10;
-          background: rgba(255, 255, 255, 0.6);
-          backdrop-filter: blur(20px);
-          border-radius: 2.5rem;
-          border: 1px solid rgba(255, 255, 255, 0.8);
-          box-shadow: 0 40px 100px rgba(79, 70, 229, 0.1);
-          width: 900px; max-width: 100%;
-          display: flex; overflow: hidden;
-          min-height: 550px;
-        }
-
-        .form-section { 
-          flex: 1.2; padding: 60px; 
-          display: flex; flex-direction: column; justify-content: center;
-        }
-
-        .visual-section { 
-          flex: 1; 
-          background: rgba(79, 70, 229, 0.05);
-          display: flex; flex-direction: column; align-items: center; 
-          justify-content: center; text-align: center; padding: 40px;
-          border-left: 1px solid rgba(79, 70, 229, 0.05);
-        }
-
-        .brand-logo {
-          width: 50px; height: 50px; background: #000;
-          border-radius: 15px; display: flex; align-items: center;
-          justify-content: center; margin-bottom: 20px;
-        }
-
-        .card-title { font-size: 32px; font-weight: 800; color: #1a1a1a; letter-spacing: -1px; }
-        .card-title span { color: #4f46e5; }
-        .card-subtitle { font-size: 15px; color: #64748b; margin: 10px 0 30px 0; }
-
-        .input-field {
-          width: 100%; padding: 18px 25px;
-          background: white; border: 1px solid #e2e8f0; border-radius: 1.2rem;
-          font-size: 15px; outline: none; transition: 0.3s;
-          margin-bottom: 15px; color: #1a1a1a;
-        }
-
-        .input-field:focus { border-color: #4f46e5; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
-
-        .btn-login {
-          width: 100%; background: #000; color: #fff; padding: 18px;
-          border: none; border-radius: 1.2rem; font-size: 16px; font-weight: 700;
-          cursor: pointer; margin: 10px 0 25px 0; transition: 0.3s;
-        }
-
-        .btn-login:hover { background: #4f46e5; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2); }
-        .btn-login:disabled { background: #cbd5e1; transform: none; }
-
-        .subtext { font-size: 14px; color: #64748b; text-align: center; }
-        .link-text { color: #4f46e5; font-weight: 700; cursor: pointer; text-decoration: none; }
-
-        .toast {
-          position: fixed; top: 30px; right: 30px;
-          background: white; color: #1a1a1a; padding: 16px 24px;
-          border-radius: 1.2rem; border: 1px solid #e2e8f0;
-          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-          display: flex; align-items: center; gap: 12px;
-          z-index: 1000; transform: translateX(150%);
-          transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-          font-weight: 600;
-        }
-        .toast.show { transform: translateX(0); }
-        .toast.error { border-left: 5px solid #ef4444; }
-        .toast.success { border-left: 5px solid #10b981; }
+        /* Minimal Re-use from Register */
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        .auth-wrapper { font-family: 'Plus Jakarta Sans'; background: #ccd6ff; min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 20px; }
+        .circle { position: absolute; border: 15px solid rgba(79, 70, 229, 0.08); border-radius: 50%; animation: float 10s infinite; }
+        @keyframes float { 50% { transform: translateY(-20px) scale(1.05); } }
+        .toast-box { position: fixed; top: 20px; right: 20px; padding: 1rem 2rem; border-radius: 12px; color: #fff; font-weight: 700; z-index: 1000; transform: translateX(150%); transition: 0.4s; }
+        .toast-box.show { transform: translateX(0); }
+        .auth-card { width: 100%; max-width: 900px; background: rgba(255,255,255,0.7); backdrop-filter: blur(25px); border-radius: 40px; border: 1px solid #fff; display: grid; grid-template-columns: 1.1fr 0.9fr; overflow: hidden; z-index: 10; box-shadow: 0 30px 60px rgba(0,0,0,0.08); }
+        .form-side, .info-side { padding: 3.5rem; display: flex; flex-direction: column; justify-content: center; }
+        .info-side { background: rgba(79,70,229,0.03); border-left: 1px solid rgba(79,70,229,0.05); }
+        .field { width: 100%; padding: 0.9rem 1.2rem; border-radius: 15px; border: 1px solid rgba(0,0,0,0.05); background: #fff; margin-bottom: 1.2rem; outline: none; transition: 0.3s; }
+        .btn-reg { width: 100%; padding: 1rem; background: #121212; color: #fff; border-radius: 15px; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; }
+        .btn-reg:hover:not(:disabled) { background: #4f46e5; transform: translateY(-2px); }
+        @media (max-width: 800px) { .auth-card { grid-template-columns: 1fr; } .info-side { display: none; } }
       `}</style>
 
-      <div className="login-page">
-        <div className="floating-bug" style={{ top: '10%', left: '10%' }}>🪳</div>
-        <div className="floating-bug" style={{ bottom: '15%', right: '15%', animationDelay: '2s' }}>🕷️</div>
-        <div className="floating-bug" style={{ top: '20%', right: '20%', animationDelay: '4s' }}>🐝</div>
+      <div className="circle" style={{width: 300, height: 300, top: -100, left: -100}}></div>
+      <div className={`toast-box ${toast.show ? 'show' : ''}`} style={{ background: toast.isError ? '#ff4757' : '#2ed573' }}>{toast.msg}</div>
 
-        <div className={`toast ${showToast ? 'show' : ''} ${toastMsg.includes('successful') ? 'success' : 'error'}`}>
-          {toastMsg.includes('successful') ? '✅' : '❌'} {toastMsg}
-        </div>
-
-        <div className="login-card">
-          <div className="form-section">
-            <div className="brand-logo" onClick={() => navigate("/")} style={{cursor:'pointer'}}>
-              <img src={bugMascot} className="w-6 h-6 invert" alt="logo" />
-            </div>
-            <h1 className="card-title">Welcome back<span>.</span></h1>
-            <p className="card-subtitle">Please enter your details to sign in.</p>
-            
-            <form onSubmit={handleSubmit}>
-              <input 
-                type="email" className="input-field" placeholder="Email Address" 
-                value={email} onChange={e => setEmail(e.target.value)} required 
-              />
-              <input 
-                type="password" className="input-field" placeholder="Password" 
-                value={password} onChange={e => setPassword(e.target.value)} required 
-              />
-              
-              <button type="submit" className="btn-login" disabled={loading}>
-                {loading ? "Verifying Credentials..." : "Sign in to Dashboard"}
-              </button>
-            </form>
-
-            <p className="subtext">
-              Don't have an account? <span onClick={() => navigate("/register")} className="link-text">Create one for free</span>
-            </p>
+      <div className="auth-card">
+        <div className="form-side">
+          <div className="flex items-center gap-2 mb-8 cursor-pointer" onClick={() => navigate("/")}>
+            <img src={bugMascot} className="w-8 h-8 bg-black p-1.5 rounded-lg invert" alt="L" />
+            <span className="font-extrabold text-xl tracking-tighter uppercase font-sans">FIXIFY<span className="text-indigo-600">.</span></span>
           </div>
-
-          <div className="visual-section">
-            <div className="mb-6 opacity-40">
-               <img src={bugMascot} style={{width: '120px'}} alt="logo large" />
-            </div>
-            <h2 className="text-xl font-bold mb-4 text-slate-800">Secure Access Active</h2>
-            <p className="text-sm text-slate-500 leading-relaxed px-6">
-              "Quality is not an act, it is a habit."
-              <br/><br/>
-              Logging in will redirect you to your personalized engineering environment based on your role.
-            </p>
+          <h1 className="text-3xl font-extrabold text-slate-900 mb-1">Welcome Back.</h1>
+          <p className="text-slate-400 text-sm mb-10 font-medium">Enter credentials to access the console.</p>
+          <form onSubmit={handleSubmit}>
+            <input name="email" type="email" placeholder="Email Address" required className="field" onChange={e => setForm({...form, email: e.target.value})} />
+            <input name="password" type="password" placeholder="Password" required className="field" onChange={e => setForm({...form, password: e.target.value})} />
+            <button type="submit" className="btn-reg" disabled={loading}>{loading ? "Verifying..." : "Login to Console"}</button>
+          </form>
+          <p className="text-center mt-8 text-sm text-slate-500 font-bold">No account? <span onClick={() => navigate("/register")} className="text-indigo-600 cursor-pointer">Register</span></p>
+        </div>
+        <div className="info-side text-center">
+          <h3 className="text-xl font-extrabold text-indigo-950 mb-4">Security Gateway</h3>
+          <div className="space-y-4">
+            {['Secure Auth-Token', 'Encrypted Sessions', 'Role Protection'].map((item, i) => (
+              <div key={i} className="bg-white/70 p-3 rounded-xl border border-indigo-50 font-bold text-xs text-slate-700">🛡️ {item}</div>
+            ))}
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

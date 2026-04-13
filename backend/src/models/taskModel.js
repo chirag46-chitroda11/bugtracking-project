@@ -1,16 +1,18 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
+
+require("./userModel");   // 🔥 ADD THIS
 
 const taskSchema = new mongoose.Schema({
     taskTitle:{
         type:String,
-        require:true
+        required:true
     },
     description:{
         type:String
     },
     projectId:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"project"
+        ref:"Project"
     },
     moduleId:{
         type:mongoose.Schema.Types.ObjectId,
@@ -18,11 +20,11 @@ const taskSchema = new mongoose.Schema({
     },
     assignedDeveloper:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"user"
+        ref:"User"   // 🔥 FIXED
     },
     assignBy:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"user"
+        ref:"User"   // 🔥 FIXED
     },
     status:{
         type:String,
@@ -36,4 +38,5 @@ const taskSchema = new mongoose.Schema({
     startDate:Date,
     endDate:Date
 },{timestamps:true});
+
 module.exports = mongoose.model("Task",taskSchema);

@@ -1,34 +1,36 @@
-const mongoose =require("mongoose");
+const mongoose = require("mongoose");
 require("./taskModel");
-const bugSchema = new mongoose.Schema({
-    taskId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Task",
-        required:false
-    },
-    bugTitle:{
-        type:String
-    },
-    description:{
-        type:String
-    },
-    reportBy:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"user"
-    },
-    assignedDeveloper:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"user"
-    }, 
-    severity:{
-        type:String,
-        enum:["low","medium","high","critical"],
 
+const bugSchema = new mongoose.Schema({
+    taskId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Task",
+        required: false
     },
-    status:{
-        type:String,
-        enum:["open","fixxed","retest","closed"],
-        default:"open"
+
+    bugTitle: { type: String },
+    description: { type: String },
+
+    bugImage: { type: String },
+
+    reportBy: { type: String },
+   
+    assignedDeveloper: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+},
+
+    severity: {
+        type: String,
+        enum: ["low", "medium", "high", "critical"],
+    },
+
+    status: {
+        type: String,
+        enum: ["draft", "submitted", "in_progress", "retest", "closed"],
+        default: "draft"
     }
-},{timestamps:true});
-module.exports=mongoose.model("bug",bugSchema);
+
+}, { timestamps: true });
+
+module.exports = mongoose.model("Bug", bugSchema);

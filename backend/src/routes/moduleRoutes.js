@@ -1,25 +1,30 @@
-const express = require("express")
+const express = require("express");
+const router = express.Router();
 
-const router = express.Router()
+const {
+  createModule,
+  getAllModule,
+  getModuleById,
+  updateModule,
+  deleteModule,
+  getModulesByProject
+} = require("../controller/moduleController");
 
-const{
-    createModule,
-    getAllModule,
-     getModuleById,
-    updateModule,
-    deleteModule
-} =require("../controller/moduleController")
-router.post("/",createModule)
+// CREATE MODULE
+router.post("/", createModule);
 
+// GET ALL MODULES
+router.get("/", getAllModule);
 
-// get all modules
-router.get("/", getAllModule)
+// GET MODULE BY ID
+router.get("/:id", getModuleById);
 
-// get module by id
-router.get("/:id", getModuleById)
+// UPDATE MODULE
+router.put("/:id", updateModule);
 
-router.put("/:id", updateModule)//update module 
+// DELETE MODULE
+router.delete("/:id", deleteModule);
 
-router.delete("/:id", deleteModule)//delete module
+router.get("/project/:projectId", getModulesByProject);
 
-module.exports = router
+module.exports = router;

@@ -1,26 +1,35 @@
 const mongoose = require("mongoose");
-const { applyTimestamps } = require("./userModel");
 
-const moduleSchema = new mongoose.Schema({
-    moduleName:{
-        type:String,
-        require:true
+const moduleSchema = new mongoose.Schema(
+  {
+    moduleName: {
+      type: String,
+      required: true
     },
-    description:{
-        type:String
+
+    description: {
+      type: String,
+      required: true
     },
-    projectId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"project"
+
+    projectId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Project",   // ✅ FIX
+      required: true
     },
-    createdBy:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"user"
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"   // ✅ FIX
     },
-    status:{
-        type:String,
-        enum:["active","completed"],
-        default:"active"
+
+    status: {
+      type: String,
+      enum: ["active", "completed"],
+      default: "active"
     }
-},{timestamps:true});
-module.exports = mongoose.model("Module",moduleSchema);
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("Module", moduleSchema);

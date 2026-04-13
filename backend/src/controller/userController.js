@@ -1,22 +1,23 @@
 const User = require("../models/userModel")
 const uploadToCloudinary = require("../utils/CloudinaryUtil")
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const sendEmail = require("../utils/sendEmail"); // ✅ ADDED
 
 // ================= REGISTER USER =================
 const registerUser = async (req, res) => {
   console.log(req.body)
   try {
-    console.log("BODY:", req.body) // 🔥 debug
+    console.log("BODY:", req.body)
 
     const { name, email, password, role, designation } = req.body
 
-    // check required fields
     if (!name || !email || !password || !role) {
       return res.status(400).json({
         message: "All required fields missing"
       })
     }
 
-    // check existing user
     const existingUser = await User.findOne({ email })
 
     if (existingUser) {
@@ -27,21 +28,59 @@ const registerUser = async (req, res) => {
 
     let imageUrl = ""
 
-    // optional image upload
     if (req.file) {
       const cloudinaryResponse = await uploadToCloudinary(req.file.path)
       imageUrl = cloudinaryResponse.secure_url
     }
 
-    // create user
+    // ✅ HASH PASSWORD
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await User.create({
       name,
       email,
-      password,
+      password: hashedPassword,
       role,
       designation,
       // imagePath: imageUrl
     })
+
+    // ================= 📧 EMAIL FUNCTIONALITY ADDED =================
+ const html = `
+  <div style="font-family: Arial, sans-serif; background:#f5f6fa; padding:20px;">
+    
+    <div style="max-width:500px; margin:auto; background:#fff; padding:20px; border-radius:10px;">
+      
+      <h2 style="color:#4cafef; text-align:center;">
+        🚀 Fixify
+      </h2>
+
+      <h3 style="text-align:center;">Welcome to Fixify</h3>
+
+      <p>Hello <b>${name}</b>,</p>
+
+      <p>Your account has been successfully created.</p>
+
+      <div style="background:#f1f1f1; padding:10px; border-radius:8px;">
+        <p><b>Email:</b> ${email}</p>
+        <p><b>Password:</b> (your entered password)</p>
+      </div>
+
+      <p style="margin-top:15px;">
+        Please login and start managing your tasks.
+      </p>
+
+      <hr />
+
+      <p style="font-size:12px; color:gray; text-align:center;">
+        © Fixify - Bug Tracking System
+      </p>
+
+    </div>
+  </div>
+`;
+    await sendEmail(email, "Welcome to Fixify 🚀", html);
+    // ===============================================================
 
     res.status(201).json({
       message: "User created successfully",
@@ -64,14 +103,12 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body
 
-    // check fields
     if (!email || !password) {
       return res.status(400).json({
         message: "Email and password required"
       })
     }
 
-    // check user exist
     const user = await User.findOne({ email })
 
     if (!user) {
@@ -80,18 +117,37 @@ const loginUser = async (req, res) => {
       })
     }
 
-    // check password
-    if (user.password !== password) {
+    // ✅ SAFETY CHECK
+    if (!user.password) {
+      return res.status(400).json({
+        message: "Password missing in DB"
+      });
+    }
+
+    // ✅ PASSWORD MATCH
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
       return res.status(400).json({
         message: "Invalid password"
       })
     }
 
-    // success
+    // ✅ JWT TOKEN (ENV BASED)
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    // ✅ REMOVE PASSWORD FROM RESPONSE
+    const { password: _, ...safeUser } = user.toObject();
+
     res.status(200).json({
       message: "Login success",
-      data: user
-    })
+      token,
+      data: safeUser
+    });
 
   } catch (err) {
     console.log("LOGIN ERROR:", err)
@@ -103,9 +159,88 @@ const loginUser = async (req, res) => {
   }
 }
 
+// ================GET ALL USERS (ADMIN ONLY)===================
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password"); // 🔥 remove password
+
+    res.json({
+      success: true,
+      data: users
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: err.message
+    });
+  }
+};
+
+// ====================BLOCK / UNBLOCK USER (ADMIN ONLY )==
+const toggleUserStatus = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // 🔥 toggle logic
+    const newStatus = user.status === "blocked" ? "active" : "blocked";
+
+    user.status = newStatus;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: `User ${newStatus}`,
+      data: user
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+//================= SOFT DELETE USER (ADMIN ONLY )======
+const deleteUser = async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+
+    res.json({
+      success: true,
+      message: "User deleted permanently"
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: err.message
+    });
+  }
+};
+
+//====================GET SINGLE USER (ADMIN ONLY )======
+const getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .select("-password");
+
+    res.json({
+      success: true,
+      data: user
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 // ================= EXPORT =================
 module.exports = {
   registerUser,
-  loginUser
+  loginUser,
+  getAllUsers,
+  toggleUserStatus,
+  deleteUser,
+  getUserById
 }

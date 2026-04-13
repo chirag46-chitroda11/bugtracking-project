@@ -1,37 +1,53 @@
 const Task = require("../models/taskModel")
 
 // create task
-const createTask = async(req,res)=>{
+const createTask = async (req, res) => {
+  try {
+    const {
+      taskTitle,
+      description,
+      projectId,
+      moduleId,
+      assignedDeveloper,
+      status,
+      priority
+    } = req.body;
 
-    try{
-
-        const {taskName, description, projectId, moduleId, assignedDeveloper, status} = req.body
-
-        const task = await Task.create({
-            taskName,
-            description,
-            projectId,
-            moduleId,
-            assignedDeveloper,
-            status
-        })
-
-        res.status(201).json({
-            success:true,
-            message:"Task created successfully",
-            data:task
-        })
-
-    }catch(error){
-
-        res.status(500).json({
-            success:false,
-            message:error.message
-        })
-
+    // ✅ VALIDATION
+    if (!taskTitle || !description || !projectId || !moduleId) {
+      return res.status(400).json({
+        success: false,
+        message: "Task Title, Description, Project and Module are required"
+      });
     }
 
-}
+    // ✅ GET CURRENT USER (ASSIGN BY)
+    const assignBy = req.user?._id; // 🔥 from auth middleware
+
+    const task = await Task.create({
+      taskTitle,
+      description,
+      projectId,
+      moduleId,
+      assignedDeveloper: assignedDeveloper || null,
+      assignBy,
+      status: status || "pending",
+      priority: priority || "medium"
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Task created successfully",
+      data: task
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
 
 
 // get all tasks

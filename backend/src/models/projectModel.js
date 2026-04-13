@@ -3,10 +3,11 @@ const mongoose = require("mongoose")
 const projectSchema = new mongoose.Schema({
     projectName:{
         type:String,
-        require:true
+        required:true
     },
     description:{
-        type:String
+        type:String,
+        required:true
     },
     projectManager:{
         type:mongoose.Schema.Types.ObjectId,
@@ -19,7 +20,7 @@ const projectSchema = new mongoose.Schema({
 
      createdBy:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"user"
+        ref:"User"
     },
     startDate:Date,
     endDate:Date,
@@ -30,4 +31,4 @@ const projectSchema = new mongoose.Schema({
     }
 
 },{timestamps:true});
-module.exports = mongoose.model("project",projectSchema)
+module.exports = mongoose.model("Project",projectSchema)

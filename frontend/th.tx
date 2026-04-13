@@ -12,3 +12,1781 @@ API call (axios / fetch)
    ↓
 Backend
 main ,app.jsx ,   approuter.jsx ,,,     pages ,, layout ma bija componetns import karvan like sidebar,navbar bugcard andetc ,,, dashboard name pages ma layout ne import karavanu 
+
+
+
+
+
+
+ADmon Dashboard ui 
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "../api/axios";
+
+const AdminDashboard = () => {
+  const navigate = useNavigate();
+  
+  // --- UI STATES ---
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [activeTab, setActiveTab] = useState("Dashboard Overview");
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showLogoutWarning, setShowLogoutWarning] = useState(false);
+  
+  // --- DATA STATES ---
+  const [bugs, setBugs] = useState([]);
+  const [teamMembers] = useState([
+    { username: "Chirag_Dev", role: "Super Admin", joinedDate: "2024-01-15" },
+    { username: "Aryan_QA", role: "Lead Tester", joinedDate: "2024-03-10" },
+    { username: "Sanya_UI", role: "Designer", joinedDate: "2024-02-20" }
+  ]);
+  const [loading, setLoading] = useState(false);
+
+  const currentUser = JSON.parse(localStorage.getItem("user")) || {
+    name: "Admin",
+    email: "admin@fixify.io",
+    role: "System Admin"
+  };
+
+  useEffect(() => { fetchData(); }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get("/bug/admin/dashboard");
+      setBugs(res.data.bugs || []);
+    } catch (err) { 
+      console.error("Error fetching bugs:", err); 
+    } finally { 
+      setLoading(false); 
+    }
+  };
+
+  // --- LOGIC FUNCTIONS ---
+  const confirmLogout = () => {
+    localStorage.clear();
+    setShowLogoutWarning(false);
+    navigate("/"); 
+  };
+
+  const handleAddAccount = () => {
+    navigate("/login");
+  };
+
+  const toggleTheme = () => setIsDarkMode(!isDarkMode);
+
+  // --- RENDER OVERVIEW (DASHBOARD STATS) ---
+  const renderOverview = () => (
+    <div className="space-y-6 max-w-6xl mx-auto animate-in fade-in duration-500">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="Live Bugs" value={bugs.length} color="indigo" />
+        <StatCard label="Security Alerts" value="09" color="rose" />
+        <StatCard label="System Health" value="98%" color="emerald" />
+        <StatCard label="Uptime" value="24/7" color="slate" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className={`lg:col-span-3 ${isDarkMode ? 'bg-slate-900 border-white/10' : 'bg-white border-slate-200 shadow-sm'} rounded-3xl p-6 border`}>
+           <h2 className={`text-sm font-black uppercase mb-4 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Recent Activity</h2>
+           <div className="space-y-3">
+              {bugs.slice(0, 4).map(bug => (
+                <div key={bug._id} className={`p-3 rounded-2xl flex justify-between items-center ${isDarkMode ? 'bg-white/5' : 'bg-slate-50'}`}>
+                  <span className="text-xs font-bold truncate">{bug.bugTitle}</span>
+                  <span className="text-[9px] font-black px-2 py-1 bg-indigo-500 text-white rounded-lg">NEW</span>
+                </div>
+              ))}
+           </div>
+        </div>
+        <div className="lg:col-span-2 bg-indigo-600 rounded-3xl p-6 text-white relative overflow-hidden">
+           <p className="text-[10px] font-black uppercase opacity-60">Database Status</p>
+           <h3 className="text-2xl font-black italic">ENCRYPTED</h3>
+           <div className="mt-4 w-full h-1 bg-white/20 rounded-full overflow-hidden">
+              <div className="w-3/4 h-full bg-[#39FF14]"></div>
+           </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // --- RENDER MANAGE BUGS (FULL TABLE WITH EVIDENCE) ---
+  const renderManageBugs = () => (
+    <div className={`max-w-5xl mx-auto rounded-[2.5rem] border ${isDarkMode ? 'bg-slate-900 border-white/10' : 'bg-white border-slate-200'} p-8 shadow-2xl animate-in zoom-in-95 duration-300`}>
+       <div className="flex justify-between items-center mb-8">
+          <div>
+            <h2 className="text-2xl font-black italic uppercase tracking-tighter">Bug Registry</h2>
+            <p className="text-[10px] font-bold opacity-40 uppercase">Technical Debt & Incident Logs</p>
+          </div>
+          <div className="flex gap-2">
+            <div className="w-3 h-3 rounded-full bg-rose-500 animate-pulse"></div>
+            <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+            <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+          </div>
+       </div>
+
+       <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+               <tr className="text-[10px] font-black uppercase tracking-widest opacity-40 border-b border-white/5">
+                 <th className="pb-4 px-2">Evidence</th>
+                 <th className="pb-4 px-2">ID</th>
+                 <th className="pb-4 px-2">Title</th>
+                 <th className="pb-4 px-2">Priority</th>
+                 <th className="pb-4 px-2 text-right">Actions</th>
+               </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+               {bugs.map((bug) => (
+                 <tr key={bug._id} className="group hover:bg-indigo-500/5 transition-all">
+                    {/* --- EVIDENCE COLUMN --- */}
+                    <td className="py-4 px-2">
+                      {bug.bugImage ? (
+                        <div className="relative w-14 h-10 group/img">
+                           <img 
+                            src={bug.bugImage} 
+                            alt="Bug" 
+                            className="w-full h-full object-cover rounded-lg border border-indigo-500/20 shadow-md cursor-pointer hover:brightness-75 transition-all"
+                            onClick={() => window.open(bug.bugImage, '_blank')} // <--- CLICK TO VIEW IN NEW TAB
+                           />
+                           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 pointer-events-none">
+                              <span className="text-[8px] font-black text-white bg-black/40 px-1 rounded">VIEW</span>
+                           </div>
+                        </div>
+                      ) : (
+                        <div className="w-14 h-10 bg-slate-200 rounded-lg flex items-center justify-center text-[7px] font-black opacity-30">NO_IMG</div>
+                      )}
+                    </td>
+
+                    <td className="py-4 px-2 font-mono text-[10px] font-bold text-indigo-500">#{bug._id.slice(-4)}</td>
+                    <td className="py-4 px-2">
+                      <p className="text-xs font-black uppercase tracking-tight">{bug.bugTitle}</p>
+                      <p className="text-[9px] opacity-40 truncate max-w-[150px]">{bug.description}</p>
+                    </td>
+
+                    <td className="py-4 px-2">
+                      <span className={`text-[8px] font-black px-2 py-1 rounded-md uppercase ${
+                        bug.severity === 'critical' ? 'bg-rose-600 text-white' : 
+                        bug.severity === 'high' ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-700'
+                      }`}>
+                        {bug.severity}
+                      </span>
+                    </td>
+
+                    <td className="py-4 px-2 text-right">
+                       <button 
+                        onClick={() => window.open(bug.bugImage, '_blank')}
+                        className="text-[9px] font-black uppercase bg-indigo-600/10 text-indigo-500 px-3 py-1.5 rounded-lg hover:bg-indigo-600 hover:text-white transition-all"
+                       >
+                         Open Evidence
+                       </button>
+                    </td>
+                 </tr>
+               ))}
+            </tbody>
+          </table>
+          {bugs.length === 0 && <div className="py-20 text-center text-xs font-black opacity-20 uppercase tracking-[0.3em]">Registry Empty</div>}
+       </div>
+    </div>
+  );
+
+  // --- RENDER SETTINGS ---
+  const renderSettings = () => (
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className={`p-8 rounded-3xl border ${isDarkMode ? 'bg-slate-900 border-white/10' : 'bg-white border-slate-200 shadow-sm'}`}>
+        <h2 className="text-lg font-black italic uppercase mb-6">User Customization</h2>
+        <div className="flex items-center justify-between p-4 bg-slate-500/5 rounded-2xl">
+          <div>
+            <p className="text-xs font-black uppercase">Theme Mode</p>
+            <p className="text-[10px] opacity-60">Switch between dark and light appearance</p>
+          </div>
+          <button onClick={toggleTheme} className={`w-12 h-6 rounded-full relative transition-colors ${isDarkMode ? 'bg-indigo-600' : 'bg-slate-300'}`}>
+            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isDarkMode ? 'left-7' : 'left-1'}`}></div>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className={`flex h-screen transition-colors duration-300 ${isDarkMode ? 'bg-[#0A0F1C] text-white' : 'bg-[#F8FAFC] text-slate-800'}`}>
+      
+      {/* SIDEBAR */}
+      <aside className={`w-64 flex flex-col border-r ${isDarkMode ? 'bg-[#0F172A] border-white/5' : 'bg-white border-slate-200'}`}>
+        <div className="p-8">
+           <div className="flex items-center gap-3 mb-12">
+              <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black italic text-white text-xl">F</div>
+              <span className="font-[1000] italic tracking-tighter text-2xl uppercase">Fixify.</span>
+           </div>
+           <nav className="space-y-3">
+             {["Dashboard Overview", "Manage All Bugs", "Settings"].map((tab) => (
+               <div key={tab} onClick={() => setActiveTab(tab)} className={`px-5 py-3.5 rounded-2xl cursor-pointer text-[11px] font-[900] uppercase transition-all ${activeTab === tab ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/30' : 'opacity-40 hover:opacity-100'}`}>
+                 {tab}
+               </div>
+             ))}
+           </nav>
+        </div>
+
+        <div className="mt-auto p-6 border-t border-white/5">
+           <div onClick={() => setShowProfileMenu(!showProfileMenu)} className="flex items-center gap-4 cursor-pointer p-3 hover:bg-white/5 rounded-2xl transition-all relative">
+              <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${currentUser.name}`} className="w-10 h-10 rounded-xl border border-white/10" alt="avatar" />
+              <div className="overflow-hidden flex-1">
+                 <p className="text-[11px] font-black truncate uppercase tracking-tight">{currentUser.name}</p>
+                 <p className="text-[9px] opacity-40 font-bold uppercase tracking-widest">{currentUser.role}</p>
+              </div>
+
+              {showProfileMenu && (
+                <div className={`absolute bottom-20 left-0 w-56 rounded-2xl border p-3 shadow-2xl animate-in slide-in-from-bottom-4 ${isDarkMode ? 'bg-slate-800 border-white/10' : 'bg-white border-slate-200'}`}>
+                   <button onClick={handleAddAccount} className="w-full flex items-center gap-2 py-2.5 px-4 rounded-xl text-[10px] font-black uppercase hover:bg-indigo-500/10 transition-all text-left">+ Add Account</button>
+                   <button onClick={() => setShowLogoutWarning(true)} className="w-full py-2.5 px-4 bg-rose-500/10 text-rose-500 rounded-xl text-[10px] font-black uppercase hover:bg-rose-500 hover:text-white transition-all text-left mt-1">Sign Out</button>
+                </div>
+              )}
+           </div>
+        </div>
+      </aside>
+
+      {/* MAIN CONTENT AREA */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <header className={`h-20 flex items-center justify-between px-10 border-b ${isDarkMode ? 'border-white/5' : 'border-slate-200'}`}>
+           <h1 className="text-[10px] font-black uppercase italic tracking-[0.3em] opacity-40">{activeTab}</h1>
+           <button onClick={fetchData} className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase shadow-lg shadow-indigo-600/20 active:scale-95 transition-all">Reload Registry</button>
+        </header>
+
+        <main className="flex-1 p-10 overflow-y-auto">
+          {activeTab === "Dashboard Overview" && renderOverview()}
+          {activeTab === "Manage All Bugs" && renderManageBugs()}
+          {activeTab === "Settings" && renderSettings()}
+        </main>
+      </div>
+
+      {/* LOGOUT WARNING MODAL */}
+      {showLogoutWarning && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-md bg-black/60">
+          <div className={`w-full max-w-sm rounded-[3rem] p-10 border text-center animate-in zoom-in-95 ${isDarkMode ? 'bg-slate-900 border-white/10' : 'bg-white border-slate-200'}`}>
+            <div className="w-20 h-20 bg-rose-500/10 text-rose-500 rounded-[2rem] flex items-center justify-center text-3xl mb-6 mx-auto">💀</div>
+            <h3 className="text-2xl font-black italic uppercase tracking-tighter mb-2">Sign Out?</h3>
+            <p className="text-[10px] opacity-60 font-bold mb-10 uppercase tracking-widest">Ending your Fixify. session...</p>
+            <div className="flex gap-4">
+              <button onClick={() => setShowLogoutWarning(false)} className="flex-1 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-slate-100 text-slate-800">No, Wait</button>
+              <button onClick={confirmLogout} className="flex-1 py-4 bg-rose-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-rose-600/30">Yes, Logout</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const StatCard = ({ label, value, color }) => {
+  const themes = {
+    indigo: "border-indigo-500/20 text-indigo-500",
+    rose: "border-rose-500/20 text-rose-500",
+    emerald: "border-emerald-500/20 text-emerald-500",
+    slate: "border-slate-500/20 text-slate-400"
+  };
+  return (
+    <div className={`p-6 rounded-[2rem] border-2 ${themes[color]} bg-white shadow-sm relative overflow-hidden group hover:-translate-y-1 transition-all duration-300`}>
+        <p className="text-[9px] font-black uppercase tracking-widest mb-1 opacity-50">{label}</p>
+        <h2 className="text-3xl font-black italic">{value}</h2>
+        <div className="absolute -right-2 -bottom-2 w-12 h-12 rounded-full bg-current opacity-5 group-hover:scale-[4] transition-transform duration-700"></div>
+    </div>
+  );
+};
+
+export default AdminDashboard; 
+
+
+
+<----developer dashboard  ---->
+import React, { useEffect, useState } from "react";
+import { getBugs } from "../services/bugService";
+
+const DeveloperDashboard = () => {
+  const [bugs, setBugs] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true); // Theme Toggle State
+
+  useEffect(() => { fetchBugs(); }, []);
+
+  const fetchBugs = async () => {
+    try {
+      setLoading(true);
+      const data = await getBugs();
+      setBugs(data.bugs || []);
+    } catch (err) {
+      console.log("Error fetching bugs:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Theme Classes
+  const theme = {
+    bg: isDarkMode ? "bg-[#08090A]" : "bg-[#F3F4F6]",
+    card: isDarkMode ? "bg-[#111214] border-white/5 shadow-2xl" : "bg-white border-slate-200 shadow-xl",
+    text: isDarkMode ? "text-slate-400" : "text-slate-600",
+    heading: isDarkMode ? "text-white" : "text-slate-900",
+    accent: "bg-indigo-600 shadow-indigo-600/20",
+    sidebar: isDarkMode ? "bg-[#0B0C0E] border-white/5" : "bg-white border-slate-200"
+  };
+
+  return (
+    <div className={`flex min-h-screen ${theme.bg} transition-all duration-500 font-sans selection:bg-indigo-500/30`}>
+      
+      {/* --- PREMIUM SIDEBAR --- */}
+      <aside className={`w-20 lg:w-72 ${theme.sidebar} border-r p-8 flex flex-col z-30 transition-all`}>
+        <div className="flex items-center gap-4 mb-14">
+          <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg transform -rotate-6">
+            <span className="text-white font-black italic text-2xl uppercase tracking-tighter">F</span>
+          </div>
+          <h2 className={`hidden lg:block text-2xl font-[1000] italic uppercase tracking-tighter ${theme.heading}`}>Fixify.</h2>
+        </div>
+
+        <nav className="space-y-3 flex-1">
+          <NavItem label="Overview" icon="◈" active isDarkMode={isDarkMode} />
+          <NavItem label="Bug Archive" icon="֎" isDarkMode={isDarkMode} />
+          <NavItem label="Deployment" icon="⚙" isDarkMode={isDarkMode} />
+          <NavItem label="Team Hub" icon="⌘" isDarkMode={isDarkMode} />
+        </nav>
+
+        {/* THEME TOGGLE SWITCH */}
+        <div className={`p-4 rounded-[2rem] ${isDarkMode ? 'bg-white/5' : 'bg-slate-100'} mt-10`}>
+          <div className="flex items-center justify-between">
+            <span className={`text-[10px] font-black uppercase tracking-widest ${theme.text}`}>{isDarkMode ? 'Dark' : 'Light'} Mode</span>
+            <button 
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className={`w-12 h-6 rounded-full relative transition-all ${isDarkMode ? 'bg-indigo-600' : 'bg-slate-300'}`}
+            >
+              <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${isDarkMode ? 'right-1' : 'left-1'}`}></div>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* --- MAIN STAGE --- */}
+      <main className="flex-1 p-6 lg:p-12 overflow-y-auto custom-scrollbar">
+        
+        {/* TOP BAR */}
+        <div className="flex justify-between items-end mb-16">
+          <div>
+            <p className={`text-[10px] font-black uppercase tracking-[0.5em] mb-2 text-indigo-500`}>Master Console v3.0</p>
+            <h1 className={`text-5xl lg:text-7xl font-[1000] italic uppercase tracking-tighter ${theme.heading}`}>
+              The_Workspace<span className="text-indigo-600">.</span>
+            </h1>
+          </div>
+          <div className="hidden md:flex gap-4">
+            <div className={`px-6 py-4 rounded-[1.5rem] border ${theme.card} flex flex-col`}>
+              <span className="text-[9px] font-black uppercase opacity-40">Session Time</span>
+              <span className={`text-sm font-black italic ${theme.heading}`}>04h 12m</span>
+            </div>
+            <button onClick={fetchBugs} className="bg-indigo-600 text-white px-8 py-4 rounded-[1.5rem] font-black text-[11px] uppercase shadow-2xl shadow-indigo-600/40 hover:scale-105 active:scale-95 transition-all">
+              Sync_Cloud
+            </button>
+          </div>
+        </div>
+
+        {/* DASHBOARD GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-12">
+          <MetricCard label="System Load" value={`${bugs.length*8}%`} icon="⚡" isDarkMode={isDarkMode} />
+          <MetricCard label="Active Bugs" value={bugs.length} icon="🪲" isDarkMode={isDarkMode} />
+          <MetricCard label="Global Rank" value="#12" icon="✪" isDarkMode={isDarkMode} />
+          <MetricCard label="Uptime" value="99.9" icon="⏳" isDarkMode={isDarkMode} />
+        </div>
+
+        {/* MAIN DATA TABLE */}
+        <div className={`rounded-[3rem] border ${theme.card} overflow-hidden`}>
+          <div className="p-10 flex justify-between items-center border-b border-white/5">
+             <h3 className={`text-lg font-black italic uppercase tracking-tighter ${theme.heading}`}>Active_Ticket_Registry</h3>
+             <div className="flex gap-2">
+                <span className="w-3 h-3 rounded-full bg-rose-500 shadow-lg shadow-rose-500/50"></span>
+                <span className="w-3 h-3 rounded-full bg-amber-500 shadow-lg shadow-amber-500/50"></span>
+                <span className="w-3 h-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></span>
+             </div>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className={`text-[10px] font-black uppercase tracking-widest opacity-40 border-b border-white/5 ${isDarkMode ? 'bg-white/5' : 'bg-slate-50'}`}>
+                  <th className="p-8">Identification</th>
+                  <th className="p-8">Priority</th>
+                  <th className="p-8">Status</th>
+                  <th className="p-8 text-right">Operation</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.03]">
+                {loading ? (
+                   <tr><td colSpan="4" className="p-32 text-center text-4xl font-[1000] italic opacity-10">BOOTING_DATABASE...</td></tr>
+                ) : (
+                  bugs.map((bug) => (
+                    <tr key={bug._id} className={`group transition-all ${isDarkMode ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50'}`}>
+                      <td className="p-8">
+                        <div className="flex items-center gap-6">
+                           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl italic transition-all ${isDarkMode ? 'bg-white/5 text-white' : 'bg-indigo-100 text-indigo-600'} group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white`}>
+                              {bug.bugTitle?.[0] || 'B'}
+                           </div>
+                           <div>
+                             <p className={`text-sm font-black uppercase tracking-tight ${theme.heading}`}>{bug.bugTitle || bug.title}</p>
+                             <p className="text-[9px] font-bold opacity-30 mt-1 uppercase tracking-widest italic">Hash: {bug._id.slice(-8).toUpperCase()}</p>
+                           </div>
+                        </div>
+                      </td>
+                      <td className="p-8">
+                         <span className={`text-[9px] font-black px-4 py-2 rounded-xl uppercase tracking-[0.2em] border ${
+                           bug.priority === 'high' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20'
+                         }`}>
+                           {bug.priority || 'Normal'}
+                         </span>
+                      </td>
+                      <td className="p-8">
+                        <div className="flex items-center gap-3">
+                           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_12px_#10b981]"></div>
+                           <span className={`text-[10px] font-black uppercase tracking-widest ${theme.text}`}>{bug.status}</span>
+                        </div>
+                      </td>
+                      <td className="p-8 text-right">
+                        <button className={`px-6 py-3 rounded-xl font-black text-[9px] uppercase tracking-tighter border transition-all ${
+                          isDarkMode ? 'border-white/10 hover:bg-white hover:text-black' : 'border-slate-200 hover:bg-slate-900 hover:text-white'
+                        }`}>
+                           Launch_Analysis
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.2); border-radius: 20px; }
+      `}</style>
+    </div>
+  );
+};
+
+// --- ELITE COMPONENTS ---
+
+const NavItem = ({ label, icon, active = false, isDarkMode }) => (
+  <div className={`flex items-center gap-4 px-6 py-4 rounded-2xl cursor-pointer transition-all border ${
+    active 
+    ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/30 border-indigo-500' 
+    : isDarkMode ? 'text-slate-500 hover:text-white border-transparent' : 'text-slate-400 hover:text-slate-900 border-transparent'
+  }`}>
+    <span className="text-xl italic font-black">{icon}</span>
+    <span className="text-[11px] font-black uppercase tracking-widest">{label}</span>
+  </div>
+);
+
+const MetricCard = ({ label, value, icon, isDarkMode }) => (
+  <div className={`p-8 rounded-[2.5rem] border transition-all group hover:-translate-y-2 ${
+    isDarkMode ? 'bg-[#111214] border-white/5 shadow-2xl hover:border-indigo-500/50' : 'bg-white border-slate-200 shadow-xl hover:border-indigo-500/50'
+  }`}>
+    <div className="flex justify-between items-start mb-6">
+      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl ${isDarkMode ? 'bg-white/5 text-white' : 'bg-slate-100 text-slate-800'}`}>
+        {icon}
+      </div>
+      <div className="text-[9px] font-black text-indigo-500 uppercase tracking-widest">Live Updates</div>
+    </div>
+    <h2 className={`text-4xl font-[1000] italic tracking-tighter mb-1 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{value}</h2>
+    <p className={`text-[10px] font-black uppercase tracking-[0.2em] opacity-40 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{label}</p>
+  </div>
+);
+
+export default DeveloperDashboard; 
+
+
+
+
+
+
+
+
+
+<---project manager --->
+import React, { useEffect, useState } from "react";
+import axios from "../api/axios";
+
+const PMDashboard = () => {
+  const [bugs, setBugs] = useState([]);
+  const [developers, setDevelopers] = useState(["Rahul Dev", "Amit JS", "Saurabh React", "Priya Node"]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => { fetchAllData(); }, []);
+
+  const fetchAllData = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get("/bug/admin/dashboard");
+      setBugs(res.data.bugs || []);
+    } catch (err) {
+      console.log("Error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Logic for Delay Tracking (Pro Feature)
+  const isOverdue = (date) => {
+    const createdDate = new Date(date);
+    const diff = (new Date() - createdDate) / (1000 * 60 * 60 * 24);
+    return diff > 2; // Highlight if older than 2 days
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F0F6FF] text-slate-800 font-sans selection:bg-blue-200 pb-20">
+      
+      {/* --- TOP HUD (Navigation & Global Search) --- */}
+      <nav className="bg-white/80 backdrop-blur-md border-b border-blue-100 sticky top-0 z-50 px-8 py-4 shadow-sm flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200 transform rotate-3">
+            <span className="text-white font-black italic text-2xl">PM</span>
+          </div>
+          <div>
+            <h2 className="text-xl font-[1000] italic uppercase tracking-tighter text-blue-900 leading-none">Fixify_HQ.</h2>
+            <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.3em]">Project_Management_Suite</span>
+          </div>
+        </div>
+        
+        <div className="hidden md:flex bg-blue-50/50 border border-blue-100 rounded-2xl px-6 py-2 w-96 items-center gap-3">
+          <span className="opacity-30">🔍</span>
+          <input type="text" placeholder="Search by Bug ID, Dev, or Title..." className="bg-transparent border-none outline-none text-xs font-bold w-full" />
+        </div>
+
+        <button className="bg-blue-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
+          Generate_Report
+        </button>
+      </nav>
+
+      <main className="max-w-[1600px] mx-auto p-6 lg:p-10">
+        
+        {/* --- 📊 SECTION 1: OVERVIEW CARDS --- */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-12">
+          <StatCard label="Total Reports" value={bugs.length} color="blue" sub="Overall" />
+          <StatCard label="Open_Incidents" value={bugs.filter(b => b.status === 'Open').length} color="cyan" sub="Needs Action" />
+          <StatCard label="Critical_Bugs" value={bugs.filter(b => b.severity === 'critical').length} color="rose" sub="High Risk 🔥" />
+          <StatCard label="In_Fixing" value={bugs.filter(b => b.status === 'Fixing').length} color="amber" sub="Development" />
+          <StatCard label="Success_Rate" value="84%" color="emerald" sub="Resolved" />
+        </div>
+
+        {/* --- 🚨 SECTION 2: CRITICAL & DELAY PANEL --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            <div className="lg:col-span-2 bg-white rounded-[3rem] border border-blue-50 p-8 shadow-xl shadow-blue-100/20 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-rose-50 rounded-full blur-3xl -z-0 opacity-50"></div>
+                <h3 className="text-sm font-black uppercase tracking-widest text-rose-500 mb-6 flex items-center gap-2">
+                   <span className="w-2 h-2 bg-rose-500 rounded-full animate-ping"></span> Critical_Priority_Alerts
+                </h3>
+                <div className="space-y-4 relative z-10">
+                    {bugs.filter(b => b.severity === 'critical').slice(0, 3).map(bug => (
+                        <div key={bug._id} className="flex items-center justify-between p-5 bg-rose-50/50 border border-rose-100 rounded-2xl">
+                            <div>
+                                <p className="text-xs font-[900] text-rose-900 uppercase">{bug.bugTitle}</p>
+                                <p className="text-[10px] text-rose-400 font-bold uppercase mt-1">Ref: {bug._id.slice(-6)} // Delayed: {isOverdue(bug.createdAt) ? 'YES' : 'NO'}</p>
+                            </div>
+                            <button className="bg-rose-500 text-white text-[9px] font-black px-4 py-2 rounded-lg uppercase">Escalate</button>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* DEV PERFORMANCE (Game Changer) */}
+            <div className="bg-white rounded-[3rem] border border-blue-50 p-8 shadow-xl shadow-blue-100/20">
+                <h3 className="text-sm font-black uppercase tracking-widest text-blue-900 mb-6 italic underline decoration-blue-500">Dev_Efficiency</h3>
+                <div className="space-y-6">
+                    {developers.map((dev, i) => (
+                        <div key={i}>
+                            <div className="flex justify-between text-[10px] font-black uppercase mb-2">
+                                <span>{dev}</span>
+                                <span className="text-blue-500">75% Load</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-blue-50 rounded-full overflow-hidden">
+                                <div className="h-full bg-blue-500 rounded-full" style={{width: i === 0 ? '90%' : '40%'}}></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+
+        {/* --- 🧾 SECTION 3: CORE MANAGEMENT TABLE --- */}
+        <div className="bg-white rounded-[3rem] border border-blue-50 shadow-2xl shadow-blue-100/40 overflow-hidden">
+          <div className="p-10 border-b border-blue-50 flex flex-col md:flex-row justify-between items-center gap-4">
+             <div>
+                <h3 className="text-xl font-[1000] italic uppercase tracking-tighter text-blue-900">Incident_Control_Registry</h3>
+                <p className="text-[10px] font-black text-blue-300 uppercase tracking-widest mt-1">Filter, Assign & Monitor Live Sessions</p>
+             </div>
+             
+             {/* FILTERS */}
+             <div className="flex gap-3 overflow-x-auto">
+                <FilterBtn label="All_Bugs" active />
+                <FilterBtn label="Open" />
+                <FilterBtn label="Retest" />
+                <FilterBtn label="Severity: High" />
+             </div>
+          </div>
+
+          <div className="overflow-x-auto overflow-y-auto max-h-[600px] custom-scrollbar">
+            <table className="w-full text-left">
+              <thead className="sticky top-0 bg-blue-50/50 backdrop-blur-md z-10">
+                <tr className="text-[10px] font-[1000] uppercase tracking-widest text-blue-400 border-b border-blue-100">
+                  <th className="p-8">ID & Bug_Title</th>
+                  <th className="p-8">Severity / Priority</th>
+                  <th className="p-8">Lifecycle_Progress</th>
+                  <th className="p-8 text-center">Assign_Developer</th>
+                  <th className="p-8 text-right">Age_Alert</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-blue-50">
+                {bugs.map((bug) => (
+                  <tr key={bug._id} className="hover:bg-blue-50/40 transition-all group">
+                    <td className="p-8">
+                       <div className="flex items-center gap-5">
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl italic shadow-inner ${bug.severity === 'critical' ? 'bg-rose-100 text-rose-600' : 'bg-blue-50 text-blue-600'}`}>
+                            {bug.bugTitle?.[0] || 'T'}
+                          </div>
+                          <div>
+                             <p className="text-sm font-black uppercase tracking-tight text-blue-900">{bug.bugTitle}</p>
+                             <p className="text-[9px] font-bold text-blue-300 uppercase mt-1 italic">Reporter: {bug.reportBy} // ID_{bug._id.slice(-6).toUpperCase()}</p>
+                          </div>
+                       </div>
+                    </td>
+                    <td className="p-8">
+                       <div className="flex flex-col gap-2">
+                          <span className={`text-[8px] font-black px-3 py-1.5 rounded-lg uppercase text-center border ${bug.severity === 'critical' ? 'bg-rose-50 border-rose-100 text-rose-500' : 'bg-blue-50 border-blue-100 text-blue-500'}`}>
+                             {bug.severity}
+                          </span>
+                          <select className="text-[9px] font-bold bg-transparent border-none text-blue-400 cursor-pointer outline-none uppercase">
+                             <option>P1_Immediate</option>
+                             <option>P2_High</option>
+                             <option>P3_Medium</option>
+                          </select>
+                       </div>
+                    </td>
+                    <td className="p-8">
+                       <div className="w-32">
+                          <div className="flex justify-between text-[8px] font-black uppercase mb-1">
+                             <span>{bug.status}</span>
+                             <span>60%</span>
+                          </div>
+                          <div className="w-full h-1 bg-blue-50 rounded-full overflow-hidden">
+                             <div className="h-full bg-blue-500" style={{width: bug.status === 'Closed' ? '100%' : '60%'}}></div>
+                          </div>
+                       </div>
+                    </td>
+                    <td className="p-8 text-center">
+                       <select className="bg-blue-50/50 border border-blue-100 text-[10px] font-black px-4 py-2 rounded-xl outline-none text-blue-900 focus:border-blue-500 transition-all">
+                          <option>{bug.assignedDeveloper || "Assign Dev"}</option>
+                          {developers.map(d => <option key={d}>{d}</option>)}
+                       </select>
+                    </td>
+                    <td className="p-8 text-right">
+                       <div className="flex flex-col items-end">
+                          <span className={`text-[10px] font-black px-3 py-1 rounded-lg uppercase ${isOverdue(bug.createdAt) ? 'bg-rose-500 text-white animate-pulse' : 'bg-emerald-50 text-emerald-600'}`}>
+                             {isOverdue(bug.createdAt) ? '🔴 Overdue' : '🟢 On Track'}
+                          </span>
+                          <span className="text-[8px] font-bold text-slate-400 mt-2 uppercase italic">{bug.createdAt.slice(0, 10)}</span>
+                       </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+
+      {/* FOOTER DECO */}
+      <footer className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-xl border border-blue-100 px-10 py-4 rounded-[2rem] shadow-2xl flex items-center gap-10 z-50">
+         <TeamStat label="Active Team" value="8 Members" />
+         <TeamStat label="Resolved Today" value="14 Bugs" />
+         <TeamStat label="System Health" value="Stable" />
+      </footer>
+
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+      `}</style>
+    </div>
+  );
+};
+
+// --- PM SUB-COMPONENTS ---
+
+const StatCard = ({ label, value, color, sub }) => {
+  const styles = {
+    blue: "from-blue-600 to-blue-400 text-white shadow-blue-200",
+    cyan: "bg-white border-blue-50 text-cyan-600 shadow-blue-100",
+    rose: "bg-white border-rose-50 text-rose-500 shadow-rose-100",
+    amber: "bg-white border-blue-50 text-amber-500 shadow-blue-100",
+    emerald: "bg-white border-blue-50 text-emerald-500 shadow-blue-100"
+  };
+  return (
+    <div className={`p-8 rounded-[2.5rem] border shadow-xl transition-all hover:-translate-y-2 group ${styles[color]}`}>
+        <p className={`text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${color === 'blue' ? 'opacity-60' : 'opacity-40'}`}>{label}</p>
+        <h2 className={`text-4xl font-[1000] italic tracking-tighter ${color === 'blue' ? 'text-white' : 'text-slate-800'}`}>{value}</h2>
+        <p className={`text-[8px] font-black uppercase mt-1 ${color === 'blue' ? 'opacity-60' : 'opacity-30'}`}>{sub}</p>
+    </div>
+  );
+};
+
+const FilterBtn = ({ label, active = false }) => (
+  <button className={`px-6 py-3 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all border ${
+    active ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-200' : 'bg-blue-50/50 text-blue-400 border-blue-100 hover:bg-blue-50'
+  }`}>
+    {label}
+  </button>
+);
+
+const TeamStat = ({ label, value }) => (
+  <div className="flex flex-col items-center">
+    <span className="text-[8px] font-black uppercase text-blue-300 tracking-widest">{label}</span>
+    <span className="text-[11px] font-[1000] italic text-blue-900 uppercase tracking-tighter">{value}</span>
+  </div>
+);
+
+export default PMDashboard;
+
+
+
+
+
+
+
+
+
+
+
+
+<---tester dashboard-->
+import React, { useEffect, useState } from "react";
+import axios from "../api/axios";
+import { useNavigate } from "react-router-dom";
+
+const TesterDashboard = () => {
+  const navigate = useNavigate();
+  const [bugs, setBugs] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  useEffect(() => {
+    fetchMyBugs();
+  }, []);
+
+  const fetchMyBugs = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get("/bug/admin/dashboard");
+      const myBugs = res.data.bugs.filter((bug) => bug.reportBy === user.name);
+      setBugs(myBugs);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F0F7FF] text-slate-800 font-sans selection:bg-blue-200">
+      
+      {/* --- PREMIUM LIGHT NAV --- */}
+      <nav className="bg-white/80 backdrop-blur-md border-b border-blue-100 sticky top-0 z-50 px-8 py-4 shadow-sm">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
+              <span className="text-white font-black italic text-xl">F</span>
+            </div>
+            <h2 className="text-xl font-[1000] italic uppercase tracking-tighter text-blue-900">Fixify_QA.</h2>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <div className="h-8 w-[1px] bg-blue-100"></div>
+            <div className="flex items-center gap-3">
+                <div className="text-right hidden sm:block">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-blue-900">{user.name}</p>
+                    <p className="text-[8px] font-bold text-blue-400 uppercase tracking-widest">Quality Assurance</p>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-blue-50 border-2 border-white shadow-sm flex items-center justify-center font-bold text-blue-500">
+                   {user.name[0]}
+                </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* --- MAIN STAGE --- */}
+      <main className="max-w-7xl mx-auto p-6 lg:p-10">
+        
+        {/* HERO SECTION */}
+        <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+                <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-400">Live_Registry_Sync</span>
+            </div>
+            <h1 className="text-5xl lg:text-7xl font-[1000] italic uppercase tracking-tighter text-blue-950">
+              Bug_Hunter<span className="text-blue-500">.</span>
+            </h1>
+          </div>
+
+          <button
+            onClick={() => navigate("/create-bug")}
+            className="px-8 py-4 bg-blue-600 text-white font-black text-[11px] uppercase rounded-2xl transition-all hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-200 active:scale-95 shadow-lg shadow-blue-100"
+          >
+             + Report New Incident
+          </button>
+        </div>
+
+        {/* ICE-BLUE METRICS */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+            <MetricBox label="Reported" value={bugs.length} color="blue" />
+            <MetricBox label="Pending" value={bugs.filter(b => b.status !== "Resolved").length} color="cyan" />
+            <MetricBox label="Resolved" value={bugs.filter(b => b.status === "Resolved").length} color="emerald" />
+            <MetricBox label="Critical" value={bugs.filter(b => b.severity === "critical").length} color="rose" />
+        </div>
+
+        {/* CLEAN WHITE TABLE */}
+        <div className="bg-white rounded-[3rem] border border-blue-50 shadow-2xl shadow-blue-100/50 overflow-hidden">
+          <div className="p-10 border-b border-blue-50 bg-gradient-to-r from-white to-blue-50/30 flex justify-between items-center">
+            <h3 className="text-xs font-black uppercase tracking-[0.3em] text-blue-900 italic">My_Incident_Logs</h3>
+            <span className="text-[9px] font-black bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full uppercase">Syncing...</span>
+          </div>
+
+          <div className="overflow-x-auto">
+            {loading ? (
+              <div className="p-24 text-center">
+                 <div className="w-12 h-12 border-4 border-blue-100 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+                 <p className="text-xs font-black uppercase tracking-widest text-blue-300">Accessing Database</p>
+              </div>
+            ) : bugs.length === 0 ? (
+              <div className="p-24 text-center">
+                 <p className="text-lg font-black italic uppercase text-blue-200 tracking-tighter">No Incidents Documented Yet</p>
+              </div>
+            ) : (
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="text-[10px] font-black uppercase tracking-widest text-blue-300 border-b border-blue-50 bg-blue-50/20">
+                    <th className="p-8">Case_Identification</th>
+                    <th className="p-8">Status</th>
+                    <th className="p-8">Impact_Level</th>
+                    <th className="p-8 text-right">Dev_Assigned</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-blue-50">
+                  {bugs.map((bug) => (
+                    <tr key={bug._id} className="hover:bg-blue-50/50 transition-all group cursor-pointer">
+                      <td className="p-8">
+                        <div className="flex items-center gap-6">
+                           <div className="w-14 h-14 bg-blue-50 rounded-[1.2rem] flex items-center justify-center font-black text-blue-600 italic text-xl group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner">
+                              {bug.bugTitle?.[0] || 'B'}
+                           </div>
+                           <div>
+                             <p className="text-sm font-[900] uppercase tracking-tight text-blue-900 group-hover:text-blue-600 transition-colors">{bug.bugTitle}</p>
+                             <p className="text-[9px] font-bold text-blue-300 uppercase mt-1 tracking-widest italic font-mono">#{bug._id.slice(-6).toUpperCase()}</p>
+                           </div>
+                        </div>
+                      </td>
+                      <td className="p-8">
+                         <div className="flex items-center gap-3">
+                            <span className={`w-2 h-2 rounded-full ${bug.status === 'Resolved' ? 'bg-emerald-500' : 'bg-blue-400 animate-pulse'}`}></span>
+                            <span className="text-[10px] font-black uppercase text-blue-900/60">{bug.status}</span>
+                         </div>
+                      </td>
+                      <td className="p-8">
+                        <span className={`text-[8px] font-black px-4 py-2 rounded-xl uppercase tracking-widest border ${
+                          bug.severity === 'critical' 
+                          ? 'bg-rose-50 border-rose-100 text-rose-500' 
+                          : 'bg-blue-50 border-blue-100 text-blue-500'
+                        }`}>
+                          {bug.severity}
+                        </span>
+                      </td>
+                      <td className="p-8 text-right">
+                         <div className="flex items-center justify-end gap-3">
+                           <span className="text-[10px] font-black uppercase text-blue-900/40">
+                             {bug.assignedDeveloper || "UNASSIGNED"}
+                           </span>
+                           <div className="w-8 h-8 rounded-full bg-white border border-blue-100 flex items-center justify-center text-[10px] font-black text-blue-600 shadow-sm">
+                              {bug.assignedDeveloper?.[0] || '?'}
+                           </div>
+                         </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </main>
+
+      {/* FOOTER DECO */}
+      <footer className="p-10 text-center opacity-20">
+         <p className="text-[10px] font-black uppercase tracking-[1em] text-blue-900">Fixify Protocol // System Clear</p>
+      </footer>
+
+    </div>
+  );
+};
+
+// --- LIGHT THEME MINI COMPONENTS ---
+const MetricBox = ({ label, value, color }) => {
+  const styles = {
+    blue: "from-blue-50 to-white text-blue-600 border-blue-100 shadow-blue-100",
+    cyan: "from-cyan-50 to-white text-cyan-600 border-cyan-100 shadow-cyan-100",
+    emerald: "from-emerald-50 to-white text-emerald-600 border-emerald-100 shadow-emerald-100",
+    rose: "from-rose-50 to-white text-rose-600 border-rose-100 shadow-rose-100"
+  };
+  return (
+    <div className={`bg-gradient-to-br ${styles[color]} border-2 p-8 rounded-[2.5rem] shadow-xl hover:-translate-y-2 transition-all group`}>
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 mb-2">{label}</p>
+        <h2 className="text-5xl font-[1000] italic tracking-tighter text-slate-800">{value}</h2>
+        <div className="w-8 h-1 bg-current opacity-20 mt-4 group-hover:w-16 transition-all rounded-full"></div>
+    </div>
+  );
+};
+
+export default TesterDashboard;
+
+
+
+
+
+
+
+
+
+
+login p######3333age ----->>>
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import API from "../api/axios";
+import bugMascot from "../assets/vite.svg"; 
+
+const Login = () => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!email || !password) return;
+    setLoading(true);
+
+    try {
+      const response = await API.post("/user/login", { email, password });
+      const userData = response.data.data;
+      
+      // Store user data in local storage
+      localStorage.setItem("user", JSON.stringify(userData));
+      
+      setToastMsg(`Login successful! Welcome back, ${userData.name}.`);
+      setShowToast(true);
+
+      // --- ROLE BASED ROUTING LOGIC ---
+      setTimeout(() => {
+        const role = userData.role; // Assuming backend returns role: 'admin', 'developer', etc.
+        
+        switch (role) {
+          case 'admin':
+            navigate("/admin-dashboard");
+            break;
+          case 'developer':
+            navigate("/developer-dashboard");
+            break;
+          case 'tester':
+            navigate("/tester-dashboard");
+            break;
+          case 'project_manager':
+            navigate("/pm-dashboard");
+            break;
+          default:
+            navigate("/"); // Fallback to main dashboard
+        }
+      }, 1000);
+
+    } catch (error) {
+      const errMsg = error.response?.data?.message || "Invalid email or password";
+      setToastMsg(errMsg);
+      setShowToast(true);
+    } finally {
+      setLoading(false);
+      setTimeout(() => setShowToast(false), 3000);
+    }
+  };
+
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        .login-page {
+          min-height: 100vh;
+          background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+          display: flex; align-items: center; justify-content: center;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          position: relative; overflow: hidden; padding: 20px;
+        }
+
+        .floating-bug {
+          position: absolute; font-size: 30px; opacity: 0.2;
+          animation: floatBug 8s infinite ease-in-out;
+          pointer-events: none;
+        }
+
+        @keyframes floatBug {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          50% { transform: translate(30px, -50px) rotate(15deg); }
+        }
+
+        .login-card {
+          position: relative; z-index: 10;
+          background: rgba(255, 255, 255, 0.6);
+          backdrop-filter: blur(20px);
+          border-radius: 2.5rem;
+          border: 1px solid rgba(255, 255, 255, 0.8);
+          box-shadow: 0 40px 100px rgba(79, 70, 229, 0.1);
+          width: 900px; max-width: 100%;
+          display: flex; overflow: hidden;
+          min-height: 550px;
+        }
+
+        .form-section { 
+          flex: 1.2; padding: 60px; 
+          display: flex; flex-direction: column; justify-content: center;
+        }
+
+        .visual-section { 
+          flex: 1; 
+          background: rgba(79, 70, 229, 0.05);
+          display: flex; flex-direction: column; align-items: center; 
+          justify-content: center; text-align: center; padding: 40px;
+          border-left: 1px solid rgba(79, 70, 229, 0.05);
+        }
+
+        .brand-logo {
+          width: 50px; height: 50px; background: #000;
+          border-radius: 15px; display: flex; align-items: center;
+          justify-content: center; margin-bottom: 20px;
+        }
+
+        .card-title { font-size: 32px; font-weight: 800; color: #1a1a1a; letter-spacing: -1px; }
+        .card-title span { color: #4f46e5; }
+        .card-subtitle { font-size: 15px; color: #64748b; margin: 10px 0 30px 0; }
+
+        .input-field {
+          width: 100%; padding: 18px 25px;
+          background: white; border: 1px solid #e2e8f0; border-radius: 1.2rem;
+          font-size: 15px; outline: none; transition: 0.3s;
+          margin-bottom: 15px; color: #1a1a1a;
+        }
+
+        .input-field:focus { border-color: #4f46e5; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
+
+        .btn-login {
+          width: 100%; background: #000; color: #fff; padding: 18px;
+          border: none; border-radius: 1.2rem; font-size: 16px; font-weight: 700;
+          cursor: pointer; margin: 10px 0 25px 0; transition: 0.3s;
+        }
+
+        .btn-login:hover { background: #4f46e5; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2); }
+        .btn-login:disabled { background: #cbd5e1; transform: none; }
+
+        .subtext { font-size: 14px; color: #64748b; text-align: center; }
+        .link-text { color: #4f46e5; font-weight: 700; cursor: pointer; text-decoration: none; }
+
+        .toast {
+          position: fixed; top: 30px; right: 30px;
+          background: white; color: #1a1a1a; padding: 16px 24px;
+          border-radius: 1.2rem; border: 1px solid #e2e8f0;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+          display: flex; align-items: center; gap: 12px;
+          z-index: 1000; transform: translateX(150%);
+          transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+          font-weight: 600;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.error { border-left: 5px solid #ef4444; }
+        .toast.success { border-left: 5px solid #10b981; }
+      `}</style>
+
+      <div className="login-page">
+        <div className="floating-bug" style={{ top: '10%', left: '10%' }}>🪳</div>
+        <div className="floating-bug" style={{ bottom: '15%', right: '15%', animationDelay: '2s' }}>🕷️</div>
+        <div className="floating-bug" style={{ top: '20%', right: '20%', animationDelay: '4s' }}>🐝</div>
+
+        <div className={`toast ${showToast ? 'show' : ''} ${toastMsg.includes('successful') ? 'success' : 'error'}`}>
+          {toastMsg.includes('successful') ? '✅' : '❌'} {toastMsg}
+        </div>
+
+        <div className="login-card">
+          <div className="form-section">
+            <div className="brand-logo" onClick={() => navigate("/")} style={{cursor:'pointer'}}>
+              <img src={bugMascot} className="w-6 h-6 invert" alt="logo" />
+            </div>
+            <h1 className="card-title">Welcome back<span>.</span></h1>
+            <p className="card-subtitle">Please enter your details to sign in.</p>
+            
+            <form onSubmit={handleSubmit}>
+              <input 
+                type="email" className="input-field" placeholder="Email Address" 
+                value={email} onChange={e => setEmail(e.target.value)} required 
+              />
+              <input 
+                type="password" className="input-field" placeholder="Password" 
+                value={password} onChange={e => setPassword(e.target.value)} required 
+              />
+              
+              <button type="submit" className="btn-login" disabled={loading}>
+                {loading ? "Verifying Credentials..." : "Sign in to Dashboard"}
+              </button>
+            </form>
+
+            <p className="subtext">
+              Don't have an account? <span onClick={() => navigate("/register")} className="link-text">Create one for free</span>
+            </p>
+          </div>
+
+          <div className="visual-section">
+            <div className="mb-6 opacity-40">
+               <img src={bugMascot} style={{width: '120px'}} alt="logo large" />
+            </div>
+            <h2 className="text-xl font-bold mb-4 text-slate-800">Secure Access Active</h2>
+            <p className="text-sm text-slate-500 leading-relaxed px-6">
+              "Quality is not an act, it is a habit."
+              <br/><br/>
+              Logging in will redirect you to your personalized engineering environment based on your role.
+            </p>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Login;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+signuoppage#####>>>>>>>>
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import API from "../api/axios";
+import bugMascot from "../assets/vite.svg"; 
+
+const Register = () => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [name, setName] = useState("");
+  const [role, setRole] = useState("developer");
+  const [loading, setLoading] = useState(false);
+  
+  const [showToast, setShowToast] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
+  const [isError, setIsError] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      setToastMsg("Passwords do not match!");
+      setIsError(true);
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await API.post("/user/register", { name, email, password, role });
+      setToastMsg("Welcome to the team! Redirecting...");
+      setIsError(false);
+      setShowToast(true);
+      setTimeout(() => navigate("/login"), 2000);
+    } catch (error) {
+      setToastMsg(error.response?.data?.message || "Registration failed!");
+      setIsError(true);
+      setShowToast(true);
+    } finally {
+      setLoading(false);
+      setTimeout(() => setShowToast(false), 3000);
+    }
+  };
+
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        
+        :root {
+          --primary: #4f46e5;
+          --bg-light: #f4f7ff;
+          --bg-dark: #e0e7ff;
+        }
+
+        .auth-container {
+          min-height: 100vh;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-dark) 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          overflow: hidden;
+          padding: 20px;
+        }
+
+        /* --- DASHBOARD STYLE BUG ANIMATIONS --- */
+        .bug-visual-layer {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        .bug-orb {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 600px;
+          height: 600px;
+          background: radial-gradient(circle, rgba(79,70,229,0.12) 0%, rgba(255,255,255,0) 70%);
+          border-radius: 50%;
+          animation: orbPulse 8s infinite ease-in-out;
+        }
+
+        .mini-bug {
+          position: absolute;
+          font-size: 32px;
+          filter: grayscale(0.4);
+          opacity: 0.4;
+          animation: moveBug 8s infinite linear;
+        }
+
+        @keyframes moveBug {
+          0% { transform: translate(0,0) rotate(0deg); opacity: 0; }
+          20% { opacity: 0.4; }
+          50% { transform: translate(150px, -80px) rotate(90deg); }
+          80% { opacity: 0.4; }
+          100% { transform: translate(-60px, 150px) rotate(180deg); opacity: 0; }
+        }
+
+        @keyframes orbPulse {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+          50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+        }
+
+        /* --- SIGNUP CARD --- */
+        .signup-card {
+          width: 100%;
+          max-width: 900px;
+          background: rgba(255, 255, 255, 0.7);
+          backdrop-filter: blur(25px);
+          border-radius: 2.5rem;
+          border: 1px solid rgba(255, 255, 255, 0.9);
+          box-shadow: 0 25px 50px -12px rgba(79, 70, 229, 0.12);
+          display: grid;
+          grid-template-columns: 1.1fr 0.9fr;
+          overflow: hidden;
+          z-index: 10;
+          animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(40px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-content { padding: 3.5rem; }
+        .info-content { 
+          background: rgba(79, 70, 229, 0.04); 
+          padding: 3.5rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          border-left: 1px solid rgba(79, 70, 229, 0.08);
+        }
+
+        .logo-box {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 2rem;
+          cursor: pointer;
+        }
+
+        .input-field {
+          width: 100%;
+          padding: 1rem 1.2rem;
+          border-radius: 1.1rem;
+          border: 1px solid rgba(0,0,0,0.06);
+          background: white;
+          font-family: inherit;
+          font-size: 0.95rem;
+          transition: all 0.3s;
+          margin-bottom: 1.2rem;
+        }
+
+        .input-field:focus {
+          outline: none;
+          border-color: var(--primary);
+          box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.08);
+        }
+
+        .role-label {
+          font-size: 0.7rem;
+          font-weight: 800;
+          color: var(--primary);
+          margin: 0 0 0.5rem 0.5rem;
+          display: block;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        .btn-register {
+          width: 100%;
+          padding: 1.1rem;
+          background: #000;
+          color: white;
+          border-radius: 1.1rem;
+          font-weight: 700;
+          border: none;
+          cursor: pointer;
+          transition: all 0.3s;
+          margin-top: 1rem;
+          box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .btn-register:hover {
+          background: var(--primary);
+          transform: translateY(-3px);
+          box-shadow: 0 15px 30px rgba(79, 70, 229, 0.25);
+        }
+
+        .security-badge {
+          background: white;
+          padding: 1.5rem;
+          border-radius: 1.5rem;
+          border: 1px solid rgba(79, 70, 229, 0.1);
+          margin-top: 2.5rem;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+
+        /* --- TOAST --- */
+        .toast {
+          position: fixed;
+          top: 30px;
+          right: 30px;
+          padding: 1.2rem 2rem;
+          border-radius: 1.2rem;
+          color: white;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          z-index: 1000;
+          transform: translateX(200%);
+          transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .toast.show { transform: translateX(0); }
+
+        @media (max-width: 850px) {
+          .signup-card { grid-template-columns: 1fr; }
+          .info-content { display: none; }
+        }
+      `}</style>
+
+      <div className="auth-container">
+        {/* --- BACKGROUND BUG ANIMATION LAYER --- */}
+        <div className="bug-visual-layer">
+          <div className="bug-orb"></div>
+          <div className="mini-bug" style={{top: '10%', left: '10%', animationDelay: '0s'}}>🪳</div>
+          <div className="mini-bug" style={{top: '70%', left: '80%', animationDelay: '2s'}}>🕷️</div>
+          <div className="mini-bug" style={{top: '40%', left: '20%', animationDelay: '4s'}}>🐝</div>
+          <div className="mini-bug" style={{top: '80%', left: '15%', animationDelay: '1s'}}>🐞</div>
+        </div>
+        
+        <div className={`toast ${showToast ? 'show' : ''}`} 
+             style={{ background: isError ? '#ef4444' : '#10b981' }}>
+          {isError ? '⚠️' : '🚀'} {toastMsg}
+        </div>
+
+        <div className="signup-card">
+          <div className="form-content">
+            <div className="logo-box" onClick={() => navigate("/")}>
+              <div className="w-9 h-9 bg-black rounded-xl flex items-center justify-center shadow-lg shadow-indigo-100">
+                <img src={bugMascot} className="w-6 h-6 invert" alt="logo" />
+              </div>
+              <span className="font-extrabold tracking-tighter uppercase text-xl">Fixify<span className="text-indigo-600">.</span></span>
+            </div>
+
+            <h1 className="text-4xl font-extrabold mb-2 tracking-tight text-slate-900">Join the Elite.</h1>
+            <p className="text-slate-500 mb-8 text-sm font-medium">Ready to squash some bugs today?</p>
+
+            <form onSubmit={handleSubmit}>
+              <input type="text" className="input-field" placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} required />
+              <input type="email" className="input-field" placeholder="Email Address" value={email} onChange={e => setEmail(e.target.value)} required />
+              
+              <div className="grid grid-cols-2 gap-4">
+                <input type="password" className="input-field" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
+                <input type="password" className="input-field" placeholder="Confirm" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required />
+              </div>
+              
+              <label className="role-label">System Access Level</label>
+              <select className="input-field" value={role} onChange={e => setRole(e.target.value)}>
+                <option value="developer">Developer (Code Access)</option>
+                <option value="tester">QA Engineer (Bug Hunter)</option>
+                <option value="project_manager">Manager (Ops Control)</option>
+                <option value="admin">Admin (System Root)</option>
+              </select>
+
+              <button type="submit" className="btn-register" disabled={loading}>
+                {loading ? "Establishing Connection..." : "Initialize Account"}
+              </button>
+            </form>
+
+            <p className="text-center mt-8 text-sm text-slate-500 font-medium">
+              Already have an account? <span onClick={() => navigate("/login")} className="text-indigo-600 font-bold cursor-pointer hover:underline underline-offset-4 transition-all">Sign In</span>
+            </p>
+          </div>
+
+          <div className="info-content">
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-2xl font-extrabold text-indigo-950 mb-4">Command Center</h3>
+                <p className="text-indigo-800/60 text-sm leading-relaxed">
+                  Registering gives you instant access to our automated bug tracking engine and real-time collaboration tools.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-4 bg-white/50 p-3 rounded-xl border border-indigo-100/50">
+                  <span className="text-xl">🛠️</span>
+                  <span className="text-xs font-bold text-indigo-900">Custom Dev Workflow</span>
+                </div>
+                <div className="flex items-center gap-4 bg-white/50 p-3 rounded-xl border border-indigo-100/50">
+                  <span className="text-xl">📈</span>
+                  <span className="text-xs font-bold text-indigo-900">Advanced Analytics</span>
+                </div>
+              </div>
+
+              <div className="security-badge">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Protocol: Secure</p>
+                </div>
+                <p className="text-[11px] leading-relaxed text-slate-500">
+                  Registration uses **End-to-End Encryption**. Your credentials are never stored in plain text.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Register;
+
+
+
+Dashboard.....>>>>>>
+
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import bugMascot from "../assets/vite.svg"; 
+
+const Dashboard = () => {
+  const navigate = useNavigate();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        
+        :root {
+          --primary: #4f46e5;
+          --bg-light: #f4f7ff;
+          --bg-dark: #e0e7ff;
+        }
+
+        .main-container {
+          margin: 0;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-dark) 100%);
+          color: #1a1a1a;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          position: relative;
+        }
+
+        /* --- NAVIGATION --- */
+        .nav-fixed {
+          position: fixed;
+          top: 0;
+          width: 100%;
+          z-index: 100;
+          padding: ${scrolled ? '0.8rem 6%' : '1.5rem 8%'};
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          background: ${scrolled ? 'rgba(255, 255, 255, 0.8)' : 'transparent'};
+          backdrop-filter: ${scrolled ? 'blur(20px)' : 'none'};
+          border-bottom: ${scrolled ? '1px solid rgba(79, 70, 229, 0.1)' : 'none'};
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          box-sizing: border-box;
+        }
+
+        /* --- HERO & PICKUP LINE --- */
+        .hero-layout {
+          flex: 1;
+          display: grid;
+          grid-template-columns: 1.2fr 0.8fr;
+          align-items: center;
+          padding: 0 10%;
+          padding-top: 100px;
+          z-index: 10;
+        }
+
+        .headline {
+          font-size: clamp(3rem, 7vw, 5.5rem);
+          font-weight: 800;
+          line-height: 0.95;
+          letter-spacing: -0.04em;
+          margin-bottom: 2rem;
+        }
+
+        .accent-text {
+          color: var(--primary);
+          display: inline-block;
+        }
+
+        .pickup-box {
+          background: white;
+          padding: 0.8rem 1.2rem;
+          border-radius: 1rem;
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          box-shadow: 0 10px 30px rgba(79, 70, 229, 0.08);
+          margin-bottom: 2rem;
+          border: 1px solid rgba(255, 255, 255, 1);
+        }
+
+        /* --- BUG ANIMATIONS --- */
+        .bug-container {
+          position: relative;
+          height: 450px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .bug-orb {
+          width: 350px;
+          height: 350px;
+          background: radial-gradient(circle, rgba(79,70,229,0.15) 0%, rgba(255,255,255,0) 70%);
+          border-radius: 50%;
+          position: relative;
+          animation: pulse 4s infinite ease-in-out;
+        }
+
+        .mini-bug {
+          position: absolute;
+          font-size: 28px;
+          filter: grayscale(0.5);
+          opacity: 0.5;
+          animation: moveBug 7s infinite linear;
+        }
+
+        @keyframes moveBug {
+          0% { transform: translate(0,0) rotate(0deg); opacity: 0; }
+          20% { opacity: 0.5; }
+          50% { transform: translate(120px, -60px) rotate(90deg); }
+          80% { opacity: 0.5; }
+          100% { transform: translate(-40px, 120px) rotate(180deg); opacity: 0; }
+        }
+
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); opacity: 0.8; }
+          50% { transform: scale(1.15); opacity: 1; }
+        }
+
+        .btn-main {
+          padding: 1.1rem 2.5rem;
+          border-radius: 1.2rem;
+          font-weight: 700;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          border: none;
+        }
+
+        .btn-filled {
+          background: #000;
+          color: white;
+          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-filled:hover {
+          background: var(--primary);
+          transform: translateY(-4px);
+          box-shadow: 0 20px 40px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-login-hero {
+          background: white;
+          color: #1a1a1a;
+          margin-left: 15px;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .btn-login-hero:hover {
+          background: #f8fafc;
+          border-color: var(--primary);
+          color: var(--primary);
+          transform: translateY(-2px);
+        }
+
+        .how-it-works-link {
+          margin-top: 20px;
+          font-size: 12px;
+          font-weight: 700;
+          color: #94a3b8;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          cursor: pointer;
+          transition: 0.3s;
+          text-decoration: none;
+          display: inline-block;
+        }
+
+        .how-it-works-link:hover {
+          color: var(--primary);
+          letter-spacing: 2.5px;
+        }
+
+        .particle {
+          position: absolute;
+          background: var(--primary);
+          border-radius: 50%;
+          opacity: 0.05;
+          pointer-events: none;
+        }
+      `}</style>
+
+      <div className="main-container">
+        {/* --- NAVIGATION --- */}
+        <nav className="nav-fixed">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
+            <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
+              <img src={bugMascot} className="w-6 h-6 invert" alt="logo" />
+            </div>
+            <span className="text-xl font-extrabold tracking-tighter uppercase">Fixify<span className="text-indigo-600">.</span></span>
+          </div>
+
+          <button 
+            onClick={() => navigate("/register")} 
+            className="bg-black text-white text-sm font-bold px-7 py-3 rounded-xl hover:bg-indigo-600 transition-all shadow-sm active:scale-95"
+          >
+            Sign up
+          </button>
+        </nav>
+
+        {/* --- HERO SECTION --- */}
+        <main className="hero-layout">
+          <div className="relative">
+            <div className="pickup-box">
+              <span className="text-lg">⚡</span>
+              <p className="text-sm font-bold text-slate-600">
+                Built for high-performance engineering teams.
+              </p>
+            </div>
+
+            <h1 className="headline">
+              Stop chasing <br/> 
+              <span className="accent-text italic">shadows.</span>
+            </h1>
+
+            <p className="text-lg md:text-xl text-slate-500 max-w-lg mb-10 leading-relaxed">
+              The issue tracker that actually helps you code. Automate bug reports, 
+              assign tasks instantly, and keep your production clean.
+              <br/>
+              <strong>Fast. Fluid. Fearless.</strong>
+            </p>
+
+            <div className="flex items-center">
+              <button onClick={() => navigate("/register")} className="btn-main btn-filled">
+                Get Started
+              </button>
+              <button onClick={() => navigate("/login")} className="btn-main btn-login-hero">
+                Log in
+              </button>
+            </div>
+          </div>
+
+          {/* --- VISUAL SECTION --- */}
+          <div className="bug-container">
+            <div className="bug-orb"></div>
+            
+            <div className="mini-bug" style={{top: '15%', left: '25%', animationDelay: '0s'}}>🪳</div>
+            <div className="mini-bug" style={{top: '55%', right: '15%', animationDelay: '2s'}}>🕷️</div>
+            <div className="mini-bug" style={{bottom: '15%', left: '35%', animationDelay: '4s'}}>🐝</div>
+            
+            <div className="absolute w-72 h-72 border border-indigo-500/10 rounded-full animate-[ping_3s_linear_infinite]"></div>
+            
+            <div className="absolute flex flex-col items-center">
+               <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-2xl border border-indigo-50 mb-4">
+                  <img src={bugMascot} className="w-9 h-9 opacity-80" alt="logo" />
+               </div>
+               <div className="font-mono text-[10px] text-indigo-500 font-bold uppercase tracking-[0.3em] bg-white/90 px-4 py-1.5 rounded-full border border-indigo-50">
+                  Scanning Repo...
+               </div>
+               <a href="#how-it-works" className="how-it-works-link">
+                 How it works →
+               </a>
+            </div>
+          </div>
+        </main>
+
+        <div className="particle" style={{width: '300px', height: '300px', top: '-100px', right: '-100px', background: 'rgba(79, 70, 229, 0.1)'}}></div>
+        <div className="particle" style={{width: '400px', height: '400px', bottom: '-200px', left: '-100px', background: 'rgba(79, 70, 229, 0.05)'}}></div>
+      </div>
+    </>
+  );
+};
+
+export default Dashboard;

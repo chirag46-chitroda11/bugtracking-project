@@ -31,6 +31,11 @@ app.use("/task",taskRoutes)
 const timelogRoutes = require("./src/routes/timeLogRoutes")
 app.use("/timelog",timelogRoutes)
 
+const sprintRoutes = require("./src/routes/sprintRoutes")
+app.use("/sprint", sprintRoutes)
+
+
+
 const PORT =process.env.PORT
 app.listen(PORT,()=>{
     console.log(`server started on port ${PORT}`)
