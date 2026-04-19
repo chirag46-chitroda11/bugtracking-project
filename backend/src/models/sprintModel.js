@@ -12,6 +12,13 @@ const sprintSchema = new mongoose.Schema(
       ref: "Project",
       required: true
     },
+    sprintGoal: { type: String },
+    capacityHours: { type: Number, default: 0 },
+    priorityFocus: { type: String, enum: ["low", "medium", "high", "critical"], default: "medium" },
+    includedModules: [{ type: mongoose.Schema.Types.ObjectId, ref: "Module" }],
+    assignedDevelopers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    assignedTesters: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    notes: { type: String },
 
     startDate: {
       type: Date

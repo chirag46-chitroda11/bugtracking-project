@@ -49,7 +49,12 @@ const AdminUsers = () => {
           marginBottom: "10px",
           borderRadius: "10px"
         }}>
-          <h3>{user.name}</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
+             <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#4f46e5', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', overflow: 'hidden' }}>
+               {user.profilePicture ? <img src={user.profilePicture} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover'}}/> : user.name.charAt(0).toUpperCase()}
+             </div>
+             <h3 style={{ margin: 0 }}>{user.name}</h3>
+          </div>
 
           <p>Email: {user.email}</p>
           <p>Role: {user.role}</p>

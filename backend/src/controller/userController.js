@@ -2,7 +2,8 @@ const User = require("../models/userModel")
 const uploadToCloudinary = require("../utils/CloudinaryUtil")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const sendEmail = require("../utils/sendEmail"); // ✅ ADDED
+const sendEmail = require("../utils/sendEmail");
+const { createAndEmitNotification } = require("../utils/notificationHelper");
 
 // ================= REGISTER USER =================
 const registerUser = async (req, res) => {
@@ -46,7 +47,7 @@ const registerUser = async (req, res) => {
     })
 
     // ================= 📧 EMAIL FUNCTIONALITY ADDED =================
- const html = `
+    const html = `
   <div style="font-family: Arial, sans-serif; background:#f5f6fa; padding:20px;">
     
     <div style="max-width:500px; margin:auto; background:#fff; padding:20px; border-radius:10px;">
@@ -81,6 +82,15 @@ const registerUser = async (req, res) => {
 `;
     await sendEmail(email, "Welcome to Fixify 🚀", html);
     // ===============================================================
+
+    // Create notification for new user
+    await createAndEmitNotification(req.app, {
+      title: "New User Registered",
+      message: `${name} (${role.replace('_',' ')}) has joined the system`,
+      type: "user_registered",
+      targetRoles: ["admin"],
+      referenceId: user._id
+    });
 
     res.status(201).json({
       message: "User created successfully",
@@ -235,6 +245,41 @@ const getUserById = async (req, res) => {
   }
 };
 
+// ==================== UPDATE USER PROFILE ====================
+const updateUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    user.country = req.body.country !== undefined ? req.body.country : user.country;
+    user.state = req.body.state !== undefined ? req.body.state : user.state;
+    user.city = req.body.city !== undefined ? req.body.city : user.city;
+    if (req.body.profilePicture) {
+      user.profilePicture = req.body.profilePicture;
+    }
+
+    if (req.body.password) {
+      user.password = await bcrypt.hash(req.body.password, 10);
+    }
+
+    const updatedUser = await user.save();
+
+    const { password: _, ...safeUser } = updatedUser.toObject();
+
+    res.json({
+      success: true,
+      data: safeUser
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // ================= EXPORT =================
 module.exports = {
   registerUser,
@@ -242,5 +287,6 @@ module.exports = {
   getAllUsers,
   toggleUserStatus,
   deleteUser,
-  getUserById
+  getUserById,
+  updateUserProfile
 }

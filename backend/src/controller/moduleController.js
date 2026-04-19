@@ -1,11 +1,12 @@
 const Module = require("../models/moduleModel");
+const { createAndEmitNotification } = require("../utils/notificationHelper");
 
 // CREATE
 const createModule = async (req, res) => {
   try {
-    const { moduleName, projectId, description, createdBy } = req.body;
+    const { moduleName, projectId, description, createdBy, priority, dueDate, assignedTo, status } = req.body;
 
-    // ✅ VALIDATION (correct place)
+    // VALIDATION
     if (!moduleName || !projectId || !description) {
       return res.status(400).json({
         success: false,
@@ -17,7 +18,20 @@ const createModule = async (req, res) => {
       moduleName,
       projectId,
       description,
-      createdBy
+      createdBy,
+      priority,
+      dueDate,
+      assignedTo,
+      status
+    });
+
+    // Auto-create notification
+    await createAndEmitNotification(req.app, {
+      title: "Module Created",
+      message: `New module "${moduleName}" has been created`,
+      type: "module_created",
+      targetRoles: ["admin", "project_manager"],
+      referenceId: module._id
     });
 
     res.status(201).json({
@@ -39,12 +53,13 @@ const getAllModule = async (req, res) => {
   try {
     const modules = await Module.find()
       .populate("projectId", "projectName")
-      .populate("createdBy", "name email");
+      .populate("createdBy", "name email")
+      .populate("assignedTo", "name email");
 
     res.status(200).json({
       success: true,
       message: "Modules fetched successfully",
-      data: modules   // ✅ FIX
+      data: modules
     });
 
   } catch (error) {
@@ -60,7 +75,8 @@ const getModuleById = async (req, res) => {
   try {
     const module = await Module.findById(req.params.id)
       .populate("projectId", "projectName")
-      .populate("createdBy", "name email");
+      .populate("createdBy", "name email")
+      .populate("assignedTo", "name email");
 
     res.status(200).json({
       success: true,
@@ -83,6 +99,15 @@ const updateModule = async (req, res) => {
       req.body,
       { new: true }
     );
+
+    // Notification for module update
+    await createAndEmitNotification(req.app, {
+      title: "Module Updated",
+      message: `Module "${module.moduleName}" has been modified`,
+      type: "module_updated",
+      targetRoles: ["admin", "project_manager"],
+      referenceId: module._id
+    });
 
     res.status(200).json({
       success: true,
@@ -116,12 +141,14 @@ const deleteModule = async (req, res) => {
     });
   }
 };
+
 const getModulesByProject = async (req, res) => {
   try {
     const modules = await Module.find({
       projectId: req.params.projectId
     })
-    .populate("createdBy", "name");
+    .populate("createdBy", "name")
+    .populate("assignedTo", "name email");
 
     res.status(200).json({
       success: true,

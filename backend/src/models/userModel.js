@@ -22,9 +22,22 @@ const userSchema = new mongoose.Schema({
     designation:{
         type:String
     },
-    // imagePath:{
-    //     type:String
-    // },
+    profilePicture: {
+        type: String,
+        default: ""
+    },
+    country: {
+        type: String,
+        default: ""
+    },
+    state: {
+        type: String,
+        default: ""
+    },
+    city: {
+        type: String,
+        default: ""
+    },
     status:{
         type:String,
         default:"active",

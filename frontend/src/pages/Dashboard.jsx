@@ -58,7 +58,7 @@ const Dashboard = () => {
           <div className="w-9 h-9 bg-black rounded-lg flex items-center justify-center">
             <img src={bugMascot} className="w-5 h-5 invert" alt="L" />
           </div>
-          FIXIFY<span className="text-indigo-600">.</span>
+          Fixify<span className="text-indigo-600">.</span>
         </div>
         <button onClick={() => navigate("/register")} className="btn-black py-2.5 px-6 rounded-xl text-sm">Sign up</button>
       </nav>

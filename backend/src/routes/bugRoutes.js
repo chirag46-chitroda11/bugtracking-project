@@ -2,23 +2,26 @@ const express = require("express")
 
 const router = express.Router()
 
-const {createBug,getAllBugs,getBugById,updateBugStatus,deleteBug, updateBug, getAdminDashboard, getManagerBugs } =require("../controller/bugController")
-// const { assignBugToDeveloper } = require("../controller/bugController");
+const authMiddleware = require("../middleware/authMiddleware");
 
-router.post("/",createBug) // for bug create
+const { createBug, getAllBugs, getBugById, updateBugStatus, deleteBug, updateBug, addBugComment, getAdminDashboard, getManagerBugs, getOpenBugCount, getTesterBugs } = require("../controller/bugController")
 
-router.get("/",getAllBugs)// get all bugs 
+router.post("/", authMiddleware, createBug)
 
-router.get("/:id",getBugById)//get bug by id 
+router.get("/", getAllBugs)
 
-router.put("/:id/status",updateBugStatus)//for update bug status 
-
-router.put("/:id", updateBug);
-
-router.delete("/:id",deleteBug)
-
-router.get("/admin/dashboard",getAdminDashboard);
-
+// Static routes MUST come before /:id routes
+router.get("/admin/dashboard", getAdminDashboard);
 router.get("/manager/bugs", getManagerBugs);
+router.get("/open-count", getOpenBugCount);
+router.get("/my-bugs", authMiddleware, getTesterBugs);
+
+router.get("/:id", getBugById)
+
+router.put("/:id/status", authMiddleware, updateBugStatus)
+router.put("/:id", authMiddleware, updateBug);
+router.post("/:id/comments", authMiddleware, addBugComment);
+
+router.delete("/:id", authMiddleware, deleteBug)
 
 module.exports = router

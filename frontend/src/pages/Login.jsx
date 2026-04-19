@@ -23,6 +23,9 @@ const Login = () => {
       const user = response.data.data;
       const token = response.data.token;
 
+        // Clear ALL previous user state before storing new user
+        localStorage.clear();
+
         localStorage.setItem(
           "user",
           JSON.stringify({
@@ -57,13 +60,12 @@ const Login = () => {
         @keyframes float { 50% { transform: translateY(-20px) scale(1.05); } }
         .toast-box { position: fixed; top: 20px; right: 20px; padding: 1rem 2rem; border-radius: 12px; color: #fff; font-weight: 700; z-index: 1000; transform: translateX(150%); transition: 0.4s; }
         .toast-box.show { transform: translateX(0); }
-        .auth-card { width: 100%; max-width: 900px; background: rgba(255,255,255,0.7); backdrop-filter: blur(25px); border-radius: 40px; border: 1px solid #fff; display: grid; grid-template-columns: 1.1fr 0.9fr; overflow: hidden; z-index: 10; box-shadow: 0 30px 60px rgba(0,0,0,0.08); }
-        .form-side, .info-side { padding: 3.5rem; display: flex; flex-direction: column; justify-content: center; }
-        .info-side { background: rgba(79,70,229,0.03); border-left: 1px solid rgba(79,70,229,0.05); }
+        .auth-card { width: 100%; max-width: 450px; background: rgba(255,255,255,0.7); backdrop-filter: blur(25px); border-radius: 40px; border: 1px solid #fff; overflow: hidden; z-index: 10; box-shadow: 0 30px 60px rgba(0,0,0,0.08); }
+        .form-side { padding: 3.5rem; display: flex; flex-direction: column; justify-content: center; }
         .field { width: 100%; padding: 0.9rem 1.2rem; border-radius: 15px; border: 1px solid rgba(0,0,0,0.05); background: #fff; margin-bottom: 1.2rem; outline: none; transition: 0.3s; }
         .btn-reg { width: 100%; padding: 1rem; background: #121212; color: #fff; border-radius: 15px; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; }
         .btn-reg:hover:not(:disabled) { background: #4f46e5; transform: translateY(-2px); }
-        @media (max-width: 800px) { .auth-card { grid-template-columns: 1fr; } .info-side { display: none; } }
+        @media (max-width: 800px) { .auth-card { max-width: 90%; } }
       `}</style>
 
       <div className="circle" style={{width: 300, height: 300, top: -100, left: -100}}></div>
@@ -73,7 +75,7 @@ const Login = () => {
         <div className="form-side">
           <div className="flex items-center gap-2 mb-8 cursor-pointer" onClick={() => navigate("/")}>
             <img src={bugMascot} className="w-8 h-8 bg-black p-1.5 rounded-lg invert" alt="L" />
-            <span className="font-extrabold text-xl tracking-tighter uppercase font-sans">FIXIFY<span className="text-indigo-600">.</span></span>
+            <span className="font-extrabold text-xl tracking-tighter uppercase font-sans">Fixify<span className="text-indigo-600">.</span></span>
           </div>
           <h1 className="text-3xl font-extrabold text-slate-900 mb-1">Welcome Back.</h1>
           <p className="text-slate-400 text-sm mb-10 font-medium">Enter credentials to access the console.</p>
@@ -83,14 +85,6 @@ const Login = () => {
             <button type="submit" className="btn-reg" disabled={loading}>{loading ? "Verifying..." : "Login to Console"}</button>
           </form>
           <p className="text-center mt-8 text-sm text-slate-500 font-bold">No account? <span onClick={() => navigate("/register")} className="text-indigo-600 cursor-pointer">Register</span></p>
-        </div>
-        <div className="info-side text-center">
-          <h3 className="text-xl font-extrabold text-indigo-950 mb-4">Security Gateway</h3>
-          <div className="space-y-4">
-            {['Secure Auth-Token', 'Encrypted Sessions', 'Role Protection'].map((item, i) => (
-              <div key={i} className="bg-white/70 p-3 rounded-xl border border-indigo-50 font-bold text-xs text-slate-700">🛡️ {item}</div>
-            ))}
-          </div>
         </div>
       </div>
     </div>

@@ -1,236 +1,168 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Layers, Bug as BugIcon, CheckCircle, FileText, Activity, LogOut, Settings, Menu, Search } from 'lucide-react';
+import NotificationBell from "../components/NotificationBell";
+import { useConfirm } from "../context/ConfirmContext";
+
+// Import Tabs
+import DashboardSummary from "./developer/DashboardSummary";
+import MyTasks from "./developer/MyTasks";
+import MyBugs from "./developer/MyBugs";
+import MyProjects from "./developer/MyProjects";
+import WorkLogs from "./developer/WorkLogs";
+import TaskBoard from "./developer/TaskBoard";
 
 const DeveloperDashboard = () => {
   const navigate = useNavigate();
+  const confirm = useConfirm();
 
-  // ✅ Get user from localStorage
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  // ✅ Safety check (prevents white screen)
-  useEffect(() => {
-    if (!user) {
-      navigate("/login");
-    }
-  }, [user, navigate]);
+  const [loggedInUser, setLoggedInUser] = useState(() => {
+    const saved = localStorage.getItem("user");
+    return saved ? JSON.parse(saved) : null;
+  });
 
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [showLogoutWarning, setShowLogoutWarning] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const [seconds, setSeconds] = useState(0);
-  const [running, setRunning] = useState(false);
-
-  // ✅ Tasks & Bugs Data
-  const [tasks] = useState([
-    { id: 1, title: "JWT Auth Blacklist", status: "In Progress", priority: "High", project: "E-Commerce" },
-    { id: 2, title: "Stripe Webhook Fix", status: "Testing", priority: "Critical", project: "E-Commerce" },
-  ]);
-
-  const [bugs] = useState([
-    { id: "B1", title: "Token not invalidated", severity: "High", status: "Open" },
-    { id: "B2", title: "Double Charge Issue", severity: "Critical", status: "Open" },
-  ]);
-
-  // ⏱ Timer Logic
   useEffect(() => {
-    let interval;
-    if (running) {
-      interval = setInterval(() => setSeconds((s) => s + 1), 1000);
+    if (!loggedInUser || loggedInUser.role !== "developer") {
+      navigate("/login");
     }
-    return () => clearInterval(interval);
-  }, [running]);
+  }, [loggedInUser, navigate]);
 
-  const formatTime = (s) => {
-    const hrs = Math.floor(s / 3600).toString().padStart(2, "0");
-    const mins = Math.floor((s % 3600) / 60).toString().padStart(2, "0");
-    const secs = (s % 60).toString().padStart(2, "0");
-    return `${hrs}:${mins}:${secs}`;
+  const handleLogout = async () => {
+    if (await confirm({ title: "Logout", message: "Are you sure you want to logout?" })) {
+      localStorage.removeItem("user");
+      navigate("/login");
+    }
   };
 
-  // ✅ Logout function
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/login");
+  const renderContent = () => {
+    switch (activeTab) {
+      case "projects":
+        return <MyProjects />;
+      case "worklogs":
+        return <WorkLogs />;
+      case "bugs":
+        return <MyBugs />;
+      case "board":
+        return <TaskBoard onSelectTask={(task) => navigate(`/task-detail/${task._id}`)} />;
+      case "tasks":
+        return <MyTasks onSelectTask={(task) => navigate(`/task-detail/${task._id}`)} />;
+      case "dashboard":
+      default:
+        return <DashboardSummary navigate={navigate} />;
+    }
   };
 
-  if (!user) return <div style={styles.loading}>Redirecting...</div>;
+  if (!loggedInUser) return null;
 
   return (
-    <div style={styles.appContainer}>
+    <div className="admin-wrapper relative min-h-screen text-slate-800 flex overflow-hidden">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        .admin-wrapper { font-family: 'Plus Jakarta Sans', sans-serif; background: #ccd6ff; }
+        .bg-circle { position: absolute; border: 15px solid rgba(79, 70, 229, 0.05); border-radius: 50%; pointer-events: none; z-index: 0; }
+        .c1 { width: 800px; height: 800px; top: -200px; right: -200px; animation: float 20s infinite; }
+        .c2 { width: 500px; height: 500px; bottom: 0px; left: -100px; animation: float 15s infinite reverse; }
+        @keyframes float { 50% { transform: translateY(-30px) scale(1.05); } }
+        
+        .sidebar { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(25px); border-right: 1px solid rgba(255,255,255,0.7); box-shadow: 10px 0 30px rgba(0,0,0,0.03); z-index: 40; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .main-content { z-index: 10; padding: 2rem; overflow-y: auto; height: 100vh; flex: 1; }
+        
+        .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 14px; color: #64748b; font-weight: 700; font-size: 0.95rem; transition: 0.3s; cursor: pointer; border: 1px solid transparent; }
+        .nav-link:hover { background: #f8fafc; color: #4f46e5; }
+        .nav-link.active { background: #fff; color: #4f46e5; border-color: rgba(79,70,229,0.1); box-shadow: 0 4px 15px rgba(79,70,229,0.08); }
+        
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
+        
+        .btn-primary { background: #121212; color: #fff; padding: 0.6rem 1.2rem; border-radius: 12px; font-weight: 700; font-size: 0.9rem; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; white-space: nowrap;}
+        .btn-primary:hover { background: #4f46e5; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25); }
+        .btn-action { background: #fff; color: #1e293b; border: 1px solid #e2e8f0; padding: 0.4rem 0.8rem; border-radius: 10px; font-weight: 700; transition: 0.2s; cursor: pointer; display: inline-flex; align-items: center;}
+        .btn-action:hover { border-color: #4f46e5; color: #4f46e5; background: #f8fafc; }
+        .btn-action.danger:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
+        
+        .custom-select { padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; outline: none; font-weight: 700; color: #334155; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+      `}</style>
+
+      <div className="bg-circle c1"></div>
+      <div className="bg-circle c2"></div>
+
       {/* SIDEBAR */}
-      <aside style={styles.sidebar}>
-        <div style={styles.logo}>BF <span>BugFlow</span></div>
-        <div style={styles.navGroup}>
-          <NavItem active={activeTab === "dashboard"} icon="📊" label="Dashboard" onClick={() => setActiveTab("dashboard")} />
-          <NavItem active={activeTab === "tasks"} icon="✅" label="My Tasks" onClick={() => setActiveTab("tasks")} badge={tasks.length} />
-          <NavItem active={activeTab === "bugs"} icon="🐛" label="My Bugs" onClick={() => setActiveTab("bugs")} badge={bugs.length} badgeColor="#ff4747" />
-        </div>
-        <div style={styles.sidebarFooter}>
-          <div style={styles.userBadge}>
-            <div style={styles.avatar}>{user?.name?.charAt(0) || "D"}</div>
-            <span style={styles.userName}>{user?.name || "Developer"}</span>
-          </div>
-          <button style={styles.btnSignOut} onClick={() => setShowLogoutWarning(true)}>Sign Out</button>
-        </div>
-      </aside>
+      <div className={`sidebar fixed md:relative h-screen w-72 flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} md:translate-x-0`}>
 
-      {/* MAIN CONTENT */}
-      <main style={styles.mainArea}>
-        <header style={styles.header}>
-          <h1 style={{ fontSize: "28px", fontWeight: 800 }}>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1>
-          <p style={{ color: "#888" }}>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
-        </header>
-
-        {/* DASHBOARD VIEW */}
-        {activeTab === "dashboard" && (
-          <div style={styles.dashboardLayout}>
-            <div style={styles.statsRow}>
-              <StatCard title="Active Tasks" value={tasks.length} color="#007bff" />
-              <StatCard title="Open Bugs" value={bugs.length} color="#ff4747" />
-              <StatCard title="Hours Logged" value={(seconds / 3600).toFixed(1) + "h"} color="#28a745" />
+        <div className="p-6 flex items-center justify-between">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
+            <div className="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
+              <BugIcon size={20} strokeWidth={3} />
             </div>
+            <span className="text-2xl font-black text-slate-900 tracking-tighter uppercase italic">Fixify<span className="text-indigo-600">.</span></span>
+          </div>
+          <button className="md:hidden p-2 text-slate-500 bg-slate-100 rounded-lg" onClick={() => setSidebarOpen(false)}>✕</button>
+        </div>
 
-            <div style={styles.timerCard}>
-              <h3 style={styles.cardTitle}>Focus Timer</h3>
-              {!selectedTask ? (
-                <div style={styles.warningBox}>⚠️ Select a task from the "My Tasks" tab to start tracking time</div>
-              ) : (
-                <p style={{ color: "#666", fontSize: "14px" }}>Tracking: <b>{selectedTask.title}</b></p>
-              )}
-              <div style={styles.timerDisplay}>{formatTime(seconds)}</div>
-              <div style={styles.timerControls}>
-                <button 
-                  style={running ? styles.btnPause : styles.btnStart} 
-                  onClick={() => setRunning(!running)}
-                  disabled={!selectedTask}
-                >
-                  {running ? "Pause Session" : "Start Session"}
-                </button>
-                <button style={styles.btnReset} onClick={() => { setSeconds(0); setRunning(false); }}>Reset</button>
-              </div>
+        <div className="px-5 py-4 mb-4">
+          <div className="nav-link bg-indigo-50/50 border-indigo-100/50 cursor-default flex items-center gap-3 p-3 rounded-2xl">
+            <div className="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden bg-white flex items-center justify-center flex-shrink-0">
+              {loggedInUser?.profilePicture ? <img src={loggedInUser.profilePicture} className="w-full h-full object-cover" alt="Profile" /> : <span className="font-bold text-indigo-600">{loggedInUser?.name?.charAt(0) || "D"}</span>}
             </div>
-          </div>
-        )}
-
-        {/* TASKS VIEW */}
-        {activeTab === "tasks" && (
-          <div style={styles.whiteCard}>
-            <h3 style={styles.cardTitle}>Your Assignments</h3>
-            <table style={styles.table}>
-              <thead>
-                <tr style={styles.thRow}><th>Task</th><th>Project</th><th>Status</th><th>Priority</th><th>Action</th></tr>
-              </thead>
-              <tbody>
-                {tasks.map(t => (
-                  <tr key={t.id} style={{...styles.tr, backgroundColor: selectedTask?.id === t.id ? "#f0f7ff" : "transparent"}}>
-                    <td style={{fontWeight: 700}}>{t.title}</td>
-                    <td>{t.project}</td>
-                    <td><span style={styles.badge}>{t.status}</span></td>
-                    <td style={{color: t.priority === "Critical" ? "#ff4747" : "#333", fontWeight: 700}}>{t.priority}</td>
-                    <td>
-                      <button style={styles.btnSelect} onClick={() => { setSelectedTask(t); setActiveTab("dashboard"); }}>Select for Timer</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* BUGS VIEW */}
-        {activeTab === "bugs" && (
-          <div style={styles.whiteCard}>
-            <h3 style={styles.cardTitle}>Assigned Bugs</h3>
-            {bugs.length === 0 ? <p style={{padding: "20px"}}>No Bugs 🎉</p> : (
-              <table style={styles.table}>
-                <thead><tr style={styles.thRow}><th>Bug ID</th><th>Issue</th><th>Severity</th><th>Status</th></tr></thead>
-                <tbody>
-                  {bugs.map(b => (
-                    <tr key={b.id} style={styles.tr}>
-                      <td style={{fontFamily: "Space Mono"}}>{b.id}</td>
-                      <td style={{fontWeight: 600}}>{b.title}</td>
-                      <td><span style={{color: b.severity === "Critical" ? "red" : "orange", fontWeight: 800}}>{b.severity}</span></td>
-                      <td><span style={{...styles.badge, background: "#fff3cd", color: "#856404"}}>{b.status}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        )}
-      </main>
-
-      {/* LOGOUT MODAL */}
-      {showLogoutWarning && (
-        <div style={styles.overlay}>
-          <div style={styles.modalBox}>
-            <h3 style={{marginBottom: "15px"}}>Sign Out</h3>
-            <p style={{color: "#666", marginBottom: "25px"}}>Are you sure you want to log out? Any active timer progress will be lost.</p>
-            <div style={{display: "flex", gap: "10px", justifyContent: "center"}}>
-              <button style={styles.btnConfirmLogout} onClick={handleLogout}>Logout</button>
-              <button style={styles.btnCancel} onClick={() => setShowLogoutWarning(false)}>Cancel</button>
+            <div className="overflow-hidden">
+              <p className="text-sm font-bold text-slate-800 truncate">{loggedInUser?.name || "Developer"}</p>
+              <p className="text-[10px] font-black uppercase tracking-wider text-indigo-500 truncate">{loggedInUser?.role?.replace('_', ' ') || "DEVELOPER"}</p>
             </div>
           </div>
         </div>
-      )}
+
+        <div className="flex-1 overflow-y-auto px-5 space-y-1 custom-scrollbar">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-4 mb-2 mt-2">Workspace</p>
+          <div className={`nav-link ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}><Layers size={18} /> Dashboard</div>
+          <div className={`nav-link ${activeTab === 'board' ? 'active' : ''}`} onClick={() => setActiveTab('board')}><Layers size={18} /> Task Board</div>
+          <div className={`nav-link ${activeTab === 'tasks' ? 'active' : ''}`} onClick={() => setActiveTab('tasks')}><CheckCircle size={18} /> My Tasks</div>
+          <div className={`nav-link ${activeTab === 'bugs' ? 'active' : ''}`} onClick={() => setActiveTab('bugs')}><BugIcon size={18} /> My Bugs</div>
+          <div className={`nav-link ${activeTab === 'projects' ? 'active' : ''}`} onClick={() => setActiveTab('projects')}><FileText size={18} /> My Projects</div>
+          <div className={`nav-link ${activeTab === 'worklogs' ? 'active' : ''}`} onClick={() => setActiveTab('worklogs')}><Activity size={18} /> Work Logs</div>
+        </div>
+
+        <div className="p-5 border-t border-slate-200/60 mt-auto space-y-2">
+          <div className="nav-link hover:text-indigo-600" onClick={() => navigate("/profile")}><Settings size={18} /> Profile Settings</div>
+          <div className="nav-link text-red-500 hover:bg-red-50 hover:text-red-600" onClick={handleLogout}><LogOut size={18} /> Secure Logout</div>
+        </div>
+      </div>
+
+      {/* MAIN CONTENT AREA */}
+      <div className="main-content flex flex-col relative w-full md:w-auto">
+        {/* MOBILE HEADER */}
+        <div className="md:hidden mb-6 flex items-center justify-between gap-4 bg-white/70 p-4 rounded-2xl backdrop-blur-md shadow-sm border border-white">
+          <div className="flex items-center gap-4">
+            <button className="p-2 bg-slate-100 rounded-lg text-slate-600" onClick={() => setSidebarOpen(true)}><Menu size={20} /></button>
+            <h2 className="font-black text-slate-800 uppercase tracking-wider text-xl italic mt-1">Fixify.</h2>
+          </div>
+          <NotificationBell />
+        </div>
+
+        {/* DESKTOP TOP BAR */}
+        <div className="hidden md:flex justify-between items-center mb-6 bg-white/40 p-4 rounded-2xl backdrop-blur-md border border-white/60 shadow-sm">
+          <h2 className="text-lg font-bold text-slate-700">Developer Workspace</h2>
+          <div className="flex items-center gap-4">
+            <NotificationBell />
+            <div className="text-sm font-bold text-slate-500 bg-white/60 px-4 py-2 rounded-xl">
+              {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1">
+          {renderContent()}
+        </div>
+      </div>
+
     </div>
   );
-};
-
-// UI HELPER COMPONENTS
-const NavItem = ({ active, icon, label, onClick, badge, badgeColor }) => (
-  <div style={active ? styles.navActive : styles.navItem} onClick={onClick}>
-    <span style={{marginRight: "12px"}}>{icon}</span> {label}
-    {badge !== undefined && <span style={{...styles.navBadge, backgroundColor: badgeColor || "#d4ff00"}}>{badge}</span>}
-  </div>
-);
-
-const StatCard = ({ title, value, color }) => (
-  <div style={{...styles.statCard, borderTop: `4px solid ${color}`}}>
-    <h3 style={{fontSize: "24px", margin: "0 0 5px 0"}}>{value}</h3>
-    <p style={{fontSize: "12px", color: "#888", fontWeight: 700, textTransform: "uppercase"}}>{title}</p>
-  </div>
-);
-
-// CSS OBJECT
-const styles = {
-  appContainer: { display: "flex", height: "100vh", backgroundColor: "#f8f9fa", fontFamily: "'Syne', sans-serif" },
-  sidebar: { width: "260px", backgroundColor: "#fff", borderRight: "1px solid #eee", display: "flex", flexDirection: "column" },
-  logo: { padding: "30px", fontSize: "22px", fontWeight: 800, letterSpacing: "-1px" },
-  navGroup: { padding: "20px 0", flex: 1 },
-  navItem: { padding: "15px 30px", cursor: "pointer", color: "#888", fontWeight: 600, display: "flex", alignItems: "center", transition: "0.2s" },
-  navActive: { padding: "15px 30px", cursor: "pointer", color: "#000", fontWeight: 700, backgroundColor: "#f0f2f5", borderRight: "4px solid #d4ff00" },
-  navBadge: { marginLeft: "auto", padding: "2px 8px", borderRadius: "10px", fontSize: "11px", fontWeight: 700, color: "#000" },
-  sidebarFooter: { padding: "20px", borderTop: "1px solid #f5f5f5" },
-  userBadge: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "15px" },
-  avatar: { width: "35px", height: "35px", borderRadius: "50%", background: "#d4ff00", color: "#000", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800 },
-  userName: { fontWeight: 700, fontSize: "14px" },
-  btnSignOut: { width: "100%", padding: "10px", border: "1px solid #ff4747", color: "#ff4747", background: "none", borderRadius: "8px", fontWeight: 700, cursor: "pointer" },
-  mainArea: { flex: 1, padding: "40px", overflowY: "auto" },
-  header: { marginBottom: "40px" },
-  dashboardLayout: { display: "flex", flexDirection: "column", gap: "30px" },
-  statsRow: { display: "flex", gap: "20px" },
-  statCard: { flex: 1, background: "#fff", padding: "25px", borderRadius: "15px", border: "1px solid #eee" },
-  timerCard: { background: "#fff", borderRadius: "20px", padding: "50px", textAlign: "center", border: "1px solid #eee" },
-  timerDisplay: { fontSize: "64px", fontWeight: 800, margin: "30px 0", fontFamily: "'Space Mono', monospace" },
-  timerControls: { display: "flex", gap: "15px", justifyContent: "center" },
-  btnStart: { backgroundColor: "#28a745", color: "#fff", border: "none", padding: "15px 30px", borderRadius: "10px", fontWeight: 700, cursor: "pointer" },
-  btnPause: { backgroundColor: "#ffc107", color: "#000", border: "none", padding: "15px 30px", borderRadius: "10px", fontWeight: 700, cursor: "pointer" },
-  btnReset: { backgroundColor: "#f0f2f5", color: "#666", border: "none", padding: "15px 30px", borderRadius: "10px", fontWeight: 700, cursor: "pointer" },
-  whiteCard: { background: "#fff", borderRadius: "15px", border: "1px solid #eee", overflow: "hidden" },
-  cardTitle: { padding: "20px", fontWeight: 800, borderBottom: "1px solid #f5f5f5" },
-  table: { width: "100%", borderCollapse: "collapse" },
-  thRow: { textAlign: "left", background: "#fafafa", color: "#aaa", fontSize: "12px", textTransform: "uppercase" },
-  tr: { borderBottom: "1px solid #f8f8f8", cursor: "pointer" },
-  badge: { padding: "4px 10px", borderRadius: "6px", fontSize: "11px", fontWeight: 700, background: "#e7f3ff", color: "#007bff" },
-  btnSelect: { padding: "6px 12px", background: "#000", color: "#fff", border: "none", borderRadius: "6px", fontSize: "12px", cursor: "pointer" },
-  warningBox: { background: "#fff3cd", color: "#856404", padding: "15px", borderRadius: "10px", margin: "20px 0", fontSize: "14px" },
-  overlay: { position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000, backdropFilter: "blur(4px)" },
-  modalBox: { backgroundColor: "#fff", padding: "40px", borderRadius: "20px", width: "400px", textAlign: "center" },
-  btnConfirmLogout: { backgroundColor: "#ff4747", color: "#fff", border: "none", padding: "12px 25px", borderRadius: "8px", fontWeight: 700, cursor: "pointer" },
-  btnCancel: { background: "#eee", border: "none", padding: "12px 25px", borderRadius: "8px", fontWeight: 700, cursor: "pointer" },
-  loading: { height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: 800 }
 };
 
 export default DeveloperDashboard;

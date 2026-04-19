@@ -2,26 +2,28 @@ const express = require("express")
 
 const router = express.Router()
 
-const{
+const {
     createProject,
     getAllProject,
     getProjectById,
     updateProject,
     deleteProject
 } = require("../controller/projectController")
-router.post("/",createProject)
+const authMiddleware = require("../middleware/authMiddleware");
+
+router.post("/", authMiddleware, createProject)
 // create projects 
 
-router.get("/",getAllProject)
+router.get("/", getAllProject)
 //get all projects 
 
-router.get("/:id",getProjectById)
+router.get("/:id", getProjectById)
 //get project by id 
 
-router.put("/:id" , updateProject)
+router.put("/:id", authMiddleware, updateProject)
 //update project 
 
-router.delete("/:id", deleteProject)
+router.delete("/:id", authMiddleware, deleteProject)
 //delete project 
 
 module.exports = router

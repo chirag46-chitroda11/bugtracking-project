@@ -5,7 +5,13 @@ import bugMascot from "../assets/vite.svg";
 
 const Register = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ name: "", email: "", password: "", confirmPassword: "", role: "developer" });
+  const [formData, setFormData] = useState({ 
+    name: "", 
+    email: "", 
+    password: "", 
+    confirmPassword: "", 
+    role: "developer" 
+  });
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: "", isError: false });
 
@@ -14,12 +20,13 @@ const Register = () => {
     setTimeout(() => setToast({ show: false, msg: "", isError: false }), 3000);
   };
 
-  // Minimal input handler
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) return triggerToast("Passwords do not match!", true);
+    if (formData.password !== formData.confirmPassword) {
+      return triggerToast("Passwords do not match!", true);
+    }
     setLoading(true);
     try {
       await API.post("/user/register", formData);
@@ -27,7 +34,9 @@ const Register = () => {
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
       triggerToast(err.response?.data?.message || "Registration failed!", true);
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -42,14 +51,13 @@ const Register = () => {
         @keyframes float { 50% { transform: translateY(-20px) scale(1.05); } }
         .toast-box { position: fixed; top: 20px; right: 20px; padding: 1rem 2rem; border-radius: 12px; color: #fff; font-weight: 700; z-index: 1000; transform: translateX(150%); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .toast-box.show { transform: translateX(0); }
-        .signup-card { width: 100%; max-width: 900px; background: rgba(255,255,255,0.7); backdrop-filter: blur(25px); border-radius: 40px; border: 1px solid #fff; display: grid; grid-template-columns: 1.1fr 0.9fr; overflow: hidden; z-index: 10; }
-        .form-side, .info-side { padding: 3.5rem; display: flex; flex-direction: column; justify-content: center; }
-        .info-side { background: rgba(79,70,229,0.03); border-left: 1px solid rgba(79,70,229,0.05); }
+        .signup-card { width: 100%; max-width: 500px; background: rgba(255,255,255,0.7); backdrop-filter: blur(25px); border-radius: 40px; border: 1px solid #fff; overflow: hidden; z-index: 10; box-shadow: 0 30px 60px rgba(0,0,0,0.08); }
+        .form-side { padding: 3.5rem; display: flex; flex-direction: column; justify-content: center; }
         .field { width: 100%; padding: 0.9rem 1.2rem; border-radius: 15px; border: 1px solid rgba(0,0,0,0.05); background: #fff; margin-bottom: 1rem; outline: none; transition: 0.3s; box-sizing: border-box; }
         .field:focus { border-color: #4f46e5; box-shadow: 0 0 0 4px rgba(79,70,229,0.1); }
         .btn-reg { width: 100%; padding: 1rem; background: #121212; color: #fff; border-radius: 15px; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; }
         .btn-reg:hover:not(:disabled) { background: #4f46e5; transform: translateY(-2px); }
-        @media (max-width: 800px) { .signup-card { grid-template-columns: 1fr; } .info-side { display: none; } }
+        @media (max-width: 800px) { .signup-card { max-width: 90%; } }
       `}</style>
 
       <div className="circle c1"></div><div className="circle c2"></div><div className="circle c3"></div>
@@ -70,36 +78,32 @@ const Register = () => {
           <form onSubmit={handleSubmit}>
             <input name="name" type="text" placeholder="Full Name" required className="field" onChange={handleChange} />
             <input name="email" type="email" placeholder="Email Address" required className="field" onChange={handleChange} />
+            
             <div className="grid grid-cols-2 gap-3">
               <input name="password" type="password" placeholder="Password" required className="field" onChange={handleChange} />
               <input name="confirmPassword" type="password" placeholder="Confirm" required className="field" onChange={handleChange} />
             </div>
-            <select name="role" className="field font-semibold text-slate-600" onChange={handleChange}>
+
+            {/* Restricted Dropdown: Removed Admin */}
+            <select 
+              name="role" 
+              className="field font-semibold text-slate-600" 
+              onChange={handleChange}
+              value={formData.role}
+            >
               <option value="developer">Developer</option>
               <option value="tester">Tester</option>
               <option value="project_manager">Manager</option>
-              <option value="admin">Admin</option>
             </select>
-            <button type="submit" className="btn-reg" disabled={loading}>{loading ? "Initializing..." : "Initialize Account"}</button>
+
+            <button type="submit" className="btn-reg" disabled={loading}>
+              {loading ? "Initializing..." : "Initialize Account"}
+            </button>
           </form>
+
           <p className="text-center mt-8 text-sm text-slate-500 font-bold">
             Already a member? <span onClick={() => navigate("/login")} className="text-indigo-600 cursor-pointer hover:underline">Sign In</span>
           </p>
-        </div>
-
-        <div className="info-side">
-          <h3 className="text-xl font-extrabold text-indigo-950 mb-4 tracking-tight text-center">Command Center</h3>
-          <div className="space-y-4">
-            {['End-to-End Encryption', 'Real-time Alerts', 'Custom Workflow'].map((item, i) => (
-              <div key={i} className="flex items-center gap-3 bg-white/70 p-3 rounded-xl border border-indigo-50 shadow-sm">
-                <span className="text-indigo-500">✔</span><span className="text-xs font-bold text-slate-700">{item}</span>
-              </div>
-            ))}
-          </div>
-          <div className="mt-10 p-4 bg-white/50 rounded-2xl border border-dashed border-indigo-200">
-             <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest animate-pulse">● System Status: Active</p>
-             <p className="text-[11px] text-slate-500 mt-1">Secured under AES-256 protocol.</p>
-          </div>
         </div>
       </div>
     </div>

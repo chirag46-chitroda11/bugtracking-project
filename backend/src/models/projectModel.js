@@ -22,6 +22,14 @@ const projectSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"User"
     },
+    projectCode: { type: String, unique: true },
+    clientName: { type: String },
+    priority: { type: String, enum: ["low", "medium", "high", "critical"], default: "medium" },
+    budget: { type: Number },
+    techStack: [{ type: String }],
+    riskLevel: { type: String, enum: ["low", "medium", "high"], default: "low" },
+    developers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    testers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     startDate:Date,
     endDate:Date,
     status:{

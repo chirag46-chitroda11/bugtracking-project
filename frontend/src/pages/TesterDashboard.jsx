@@ -1,278 +1,156 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getBugs } from "../services/bugService";
+import { Layers, Bug as BugIcon, Activity, Settings, Menu, LogOut, CheckSquare } from 'lucide-react';
+import NotificationBell from "../components/NotificationBell";
+import { useConfirm } from "../context/ConfirmContext";
+
+import TesterSummary from "./tester/TesterSummary";
+import TesterTasks from "./tester/TesterTasks";
+import TesterBugs from "./tester/TesterBugs";
 
 const TesterDashboard = () => {
   const navigate = useNavigate();
+  const confirm = useConfirm();
 
-  // ✅ Auth & User Context
-  const user = JSON.parse(localStorage.getItem("user"));
-  
-  useEffect(() => {
-    if (!user) {
-      navigate("/login");
-    }
-  }, [user, navigate]);
-
-  // UI State
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const [bugs, setBugs] = useState([]);
-  const [selectedBug, setSelectedBug] = useState(null);
-  const [showLogout, setShowLogout] = useState(false);
-  const [showBugModal, setShowBugModal] = useState(false);
-  
-  // New Bug Form State
-  const [newBug, setNewBug] = useState({ 
-    bugTitle: "", 
-    severity: "Medium", 
-    description: "",
-    module: "" 
+  const [loggedInUser, setLoggedInUser] = useState(() => {
+    const saved = localStorage.getItem("user");
+    return saved ? JSON.parse(saved) : null;
   });
 
-  // 🧪 Tasks for Testing
-  const [tasks] = useState([
-    { id: 1, title: "JWT Authentication", status: "Testing", priority: "High", project: "E-Commerce" },
-    { id: 2, title: "Stripe Webhook Fix", status: "Testing", priority: "Critical", project: "E-Commerce" },
-  ]);
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
-    fetchBugs();
-  }, []);
+    if (!loggedInUser || loggedInUser.role !== "tester") {
+      navigate("/login");
+    }
+  }, [loggedInUser, navigate]);
 
-  const fetchBugs = async () => {
-    try {
-      const res = await getBugs();
-      setBugs(res.data?.data || res.data || []);
-    } catch {
-      setBugs([
-        { _id: "1", bugTitle: "Token not expiring", severity: "High", status: "draft", reportBy: user?.name || "Tester", createdAt: new Date() },
-      ]);
+  const handleLogout = async () => {
+    if (await confirm({ title: "Logout", message: "Are you sure you want to logout?" })) {
+      localStorage.clear();
+      navigate("/login");
     }
   };
 
-  // ✅ Handlers
-  const handleCreateBug = () => {
-    if (!newBug.bugTitle) return alert("Please enter a bug title");
-    
-    const bugToAdd = {
-      _id: Date.now().toString(),
-      ...newBug,
-      status: "draft",
-      reportBy: user.name,
-      createdAt: new Date()
-    };
-
-    setBugs([bugToAdd, ...bugs]);
-    setShowBugModal(false);
-    setNewBug({ bugTitle: "", severity: "Medium", description: "", module: "" });
+  const renderContent = () => {
+    switch (activeTab) {
+      case "tasks":
+        return <TesterTasks key={loggedInUser?._id} />;
+      case "bugs":
+        return <TesterBugs key={loggedInUser?._id} />;
+      case "dashboard":
+      default:
+        return <TesterSummary key={loggedInUser?._id} />;
+    }
   };
 
-  const toggleSubmit = async (id, status) => {
-    if (status === "submitted") return;
-    if (!window.confirm("Submit this report to the manager?")) return;
-    setBugs(bugs.map(b => b._id === id ? { ...b, status: "submitted" } : b));
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
-
-  if (!user) return null;
+  if (!loggedInUser) return null;
 
   return (
-    <div style={styles.appContainer}>
+    <div className="admin-wrapper relative min-h-screen text-slate-800 flex overflow-hidden">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        .admin-wrapper { font-family: 'Plus Jakarta Sans', sans-serif; background: #ccd6ff; }
+        .bg-circle { position: absolute; border: 15px solid rgba(79, 70, 229, 0.05); border-radius: 50%; pointer-events: none; z-index: 0; }
+        .c1 { width: 800px; height: 800px; top: -200px; right: -200px; animation: float 20s infinite; }
+        .c2 { width: 500px; height: 500px; bottom: 0px; left: -100px; animation: float 15s infinite reverse; }
+        @keyframes float { 50% { transform: translateY(-30px) scale(1.05); } }
+        
+        .sidebar { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(25px); border-right: 1px solid rgba(255,255,255,0.7); box-shadow: 10px 0 30px rgba(0,0,0,0.03); z-index: 40; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .main-content { z-index: 10; padding: 2rem; overflow-y: auto; height: 100vh; flex: 1; }
+        
+        .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 14px; color: #64748b; font-weight: 700; font-size: 0.95rem; transition: 0.3s; cursor: pointer; border: 1px solid transparent; }
+        .nav-link:hover { background: #f8fafc; color: #4f46e5; }
+        .nav-link.active { background: #fff; color: #4f46e5; border-color: rgba(79,70,229,0.1); box-shadow: 0 4px 15px rgba(79,70,229,0.08); }
+        
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
+        
+        .btn-primary { background: #121212; color: #fff; padding: 0.6rem 1.2rem; border-radius: 12px; font-weight: 700; font-size: 0.9rem; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; white-space: nowrap;}
+        .btn-primary:hover { background: #4f46e5; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25); }
+        .btn-action { background: #fff; color: #1e293b; border: 1px solid #e2e8f0; padding: 0.4rem 0.8rem; border-radius: 10px; font-weight: 700; transition: 0.2s; cursor: pointer; display: inline-flex; align-items: center;}
+        .btn-action:hover { border-color: #4f46e5; color: #4f46e5; background: #f8fafc; }
+        .btn-action.danger:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
+        
+        .custom-select { padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; outline: none; font-weight: 700; color: #334155; }
+        .custom-input { padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; outline: none; font-weight: 700; color: #334155; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+      `}</style>
+      
+      <div className="bg-circle c1"></div>
+      <div className="bg-circle c2"></div>
+
       {/* SIDEBAR */}
-      <aside style={styles.sidebar}>
-        <div style={styles.logo}>BF <span>Tester Hub</span></div>
-        <div style={styles.navGroup}>
-          <NavItem active={activeTab === "dashboard"} icon="📊" label="Dashboard" onClick={() => setActiveTab("dashboard")} />
-          <NavItem active={activeTab === "tasks"} icon="🧪" label="Tasks to Test" onClick={() => setActiveTab("tasks")} badge={tasks.length} />
-          <NavItem active={activeTab === "bugs"} icon="🐛" label="Bug Reports" onClick={() => setActiveTab("bugs")} badge={bugs.length} badgeColor="#ff4747" />
+      <div className={`sidebar fixed md:relative h-screen w-72 flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} md:translate-x-0`}>
+        
+        <div className="p-6 flex items-center justify-between">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
+            <div className="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
+              <BugIcon size={20} strokeWidth={3}/>
+            </div>
+            <span className="text-2xl font-black text-slate-900 tracking-tighter uppercase italic">Fixify<span className="text-indigo-600">.</span></span>
+          </div>
+          <button className="md:hidden p-2 text-slate-500 bg-slate-100 rounded-lg" onClick={() => setSidebarOpen(false)}>✕</button>
         </div>
-        <div style={styles.sidebarFooter}>
-          <div style={styles.userBadge}>
-            <div style={styles.avatar}>{user.name.charAt(0)}</div>
-            <div style={{ textAlign: "left" }}>
-              <div style={styles.userName}>{user.name}</div>
-              <div style={{ fontSize: "11px", color: "#888" }}>{user.role || "Tester"}</div>
-            </div>
-          </div>
-          <button style={styles.btnSignOut} onClick={() => setShowLogout(true)}>Sign Out</button>
-        </div>
-      </aside>
 
-      {/* MAIN CONTENT */}
-      <main style={styles.mainArea}>
-        <header style={styles.header}>
-          <h1 style={{ fontSize: "28px", fontWeight: 800 }}>{activeTab.toUpperCase()}</h1>
-          {activeTab === "bugs" && (
-            <button style={styles.btnPrimary} onClick={() => setShowBugModal(true)}>+ Report Bug</button>
-          )}
-        </header>
-
-        {/* DASHBOARD */}
-        {activeTab === "dashboard" && (
-          <div style={styles.dashboardLayout}>
-            <div style={styles.statsRow}>
-              <StatCard title="Total Tasks" value={tasks.length} color="#007bff" />
-              <StatCard title="Bugs Found" value={bugs.length} color="#ff4747" />
-              <StatCard title="Drafts" value={bugs.filter(b => b.status === "draft").length} color="#ffc107" />
-            </div>
-            <div style={styles.whiteCard}>
-              <h3 style={styles.cardHeader}>Recent Activity</h3>
-              <div style={{ padding: "20px", color: "#666" }}>
-                Welcome back, {user.name}. Check your assigned tasks for validation.
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* BUG LISTING */}
-        {activeTab === "bugs" && (
-          <div style={styles.bugGrid}>
-            {bugs.length === 0 ? <p style={{gridColumn: '1/-1', textAlign: 'center', padding: '40px'}}>No bugs reported yet.</p> : 
-              bugs.map((bug) => (
-                <div key={bug._id} style={styles.bugCard} onClick={() => setSelectedBug(bug)}>
-                  <div style={styles.bugCardHeader}>
-                    <span style={bug.status === "draft" ? styles.badgeDraft : styles.badgeSubmitted}>{bug.status}</span>
-                    <span style={{ fontSize: "11px", color: "#999" }}>#{bug._id.slice(-5)}</span>
-                  </div>
-                  <h3 style={{ margin: "10px 0", fontWeight: 800 }}>{bug.bugTitle}</h3>
-                  <div style={{ fontSize: "12px", color: "#666" }}>
-                    <p>Severity: <b>{bug.severity}</b></p>
-                  </div>
-                  <button 
-                    style={bug.status === "draft" ? styles.btnSubmitBug : styles.btnDisabled}
-                    disabled={bug.status !== "draft"}
-                    onClick={(e) => { e.stopPropagation(); toggleSubmit(bug._id, bug.status); }}
-                  >
-                    {bug.status === "draft" ? "Submit to Manager" : "Submitted"}
-                  </button>
-                </div>
-              ))
-            }
-          </div>
-        )}
-      </main>
-
-      {/* ✅ REPORT BUG MODAL (In-Page Overlay) */}
-      {showBugModal && (
-        <div style={styles.overlay} onClick={() => setShowBugModal(false)}>
-          <div style={styles.modalBox} onClick={e => e.stopPropagation()}>
-            <h2 style={{ fontWeight: 800, marginBottom: "20px" }}>Report New Bug</h2>
-            
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Bug Title</label>
-              <input 
-                style={styles.input} 
-                placeholder="e.g. Login button not responding"
-                value={newBug.bugTitle}
-                onChange={e => setNewBug({...newBug, bugTitle: e.target.value})}
-              />
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Severity</label>
-              <select 
-                style={styles.input}
-                value={newBug.severity}
-                onChange={e => setNewBug({...newBug, severity: e.target.value})}
-              >
-                <option>Low</option><option>Medium</option><option>High</option><option>Critical</option>
-              </select>
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Description</label>
-              <textarea 
-                style={{...styles.input, height: '80px', resize: 'none'}} 
-                placeholder="Steps to reproduce the issue..."
-                value={newBug.description}
-                onChange={e => setNewBug({...newBug, description: e.target.value})}
-              />
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-              <button style={{...styles.btnPrimary, width: '100%'}} onClick={handleCreateBug}>Create Draft</button>
-              <button style={{...styles.btnCancel, marginTop: 0}} onClick={() => setShowBugModal(false)}>Cancel</button>
-            </div>
+        <div className="px-5 py-4 mb-4">
+          <div className="nav-link bg-indigo-50/50 border-indigo-100/50 cursor-default flex items-center gap-3 p-3 rounded-2xl">
+             <div className="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden bg-white flex items-center justify-center flex-shrink-0">
+               {loggedInUser?.profilePicture ? <img src={loggedInUser.profilePicture} className="w-full h-full object-cover" alt="Profile" /> : <span className="font-bold text-indigo-600">{loggedInUser?.name?.charAt(0) || "T"}</span>}
+             </div>
+             <div className="overflow-hidden">
+               <p className="text-sm font-bold text-slate-800 truncate">{loggedInUser?.name || "Tester"}</p>
+               <p className="text-[10px] font-black uppercase tracking-wider text-indigo-500 truncate">{loggedInUser?.role?.toUpperCase() || "TESTER"}</p>
+             </div>
           </div>
         </div>
-      )}
 
-      {/* LOGOUT CONFIRMATION */}
-      {showLogout && (
-        <div style={styles.overlay}>
-          <div style={styles.modalBox}>
-            <h3 style={{ fontWeight: 800 }}>Confirm Logout</h3>
-            <p style={{ margin: "10px 0", color: "#666" }}>Are you sure you want to sign out?</p>
-            <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
-              <button style={styles.btnDanger} onClick={handleLogout}>Logout</button>
-              <button style={styles.btnCancel} onClick={() => setShowLogout(false)}>Cancel</button>
-            </div>
-          </div>
+        <div className="flex-1 overflow-y-auto px-5 space-y-1 custom-scrollbar">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-4 mb-2 mt-2">QA Workflow</p>
+          <div className={`nav-link ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}><Layers size={18}/> Dashboard</div>
+          <div className={`nav-link ${activeTab === 'tasks' ? 'active' : ''}`} onClick={() => setActiveTab('tasks')}><CheckSquare size={18}/> Tasks for Testing</div>
+          <div className={`nav-link ${activeTab === 'bugs' ? 'active' : ''}`} onClick={() => setActiveTab('bugs')}><BugIcon size={18}/> My Bug Reports</div>
         </div>
-      )}
+
+        <div className="p-5 border-t border-slate-200/60 mt-auto space-y-2">
+          <div className="nav-link hover:text-indigo-600" onClick={() => navigate("/profile")}><Settings size={18}/> Account Settings</div>
+          <div className="nav-link text-red-500 hover:bg-red-50 hover:text-red-600" onClick={handleLogout}><LogOut size={18}/> Secure Logout</div>
+        </div>
+      </div>
+
+      {/* MAIN CONTENT AREA */}
+      <div className="main-content flex flex-col relative w-full md:w-auto">
+        {/* MOBILE HEADER */}
+        <div className="md:hidden mb-6 flex items-center justify-between gap-4 bg-white/70 p-4 rounded-2xl backdrop-blur-md shadow-sm border border-white">
+           <div className="flex items-center gap-4">
+             <button className="p-2 bg-slate-100 rounded-lg text-slate-600" onClick={() => setSidebarOpen(true)}><Menu size={20}/></button>
+             <h2 className="font-black text-slate-800 uppercase tracking-wider text-xl italic mt-1">Fixify.</h2>
+           </div>
+           <NotificationBell />
+        </div>
+
+        {/* DESKTOP TOP BAR */}
+        <div className="hidden md:flex justify-between items-center mb-6 bg-white/40 p-4 rounded-2xl backdrop-blur-md border border-white/60 shadow-sm">
+           <h2 className="text-lg font-bold text-slate-700">QA & Testing Dashboard</h2>
+           <div className="flex items-center gap-4">
+             <NotificationBell />
+             <div className="text-sm font-bold text-slate-500 bg-white/60 px-4 py-2 rounded-xl">
+               {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+             </div>
+           </div>
+        </div>
+        
+        <div className="flex-1">
+          {renderContent()}
+        </div>
+      </div>
+
     </div>
   );
-};
-
-// ... (Sub-components NavItem and StatCard, and styles remain consistent with the high-quality UI previously established)
-
-const NavItem = ({ active, icon, label, onClick, badge, badgeColor }) => (
-  <div style={active ? styles.navActive : styles.navItem} onClick={onClick}>
-    <span style={{ marginRight: "12px" }}>{icon}</span> {label}
-    {badge !== undefined && <span style={{ ...styles.navBadge, backgroundColor: badgeColor || "#d4ff00" }}>{badge}</span>}
-  </div>
-);
-
-const StatCard = ({ title, value, color }) => (
-  <div style={{ ...styles.statCard, borderTop: `4px solid ${color}` }}>
-    <h3 style={{ fontSize: "24px", margin: "0 0 5px 0" }}>{value}</h3>
-    <p style={{ fontSize: "12px", color: "#888", fontWeight: 700, textTransform: "uppercase" }}>{title}</p>
-  </div>
-);
-
-const styles = {
-  appContainer: { display: "flex", height: "100vh", backgroundColor: "#f8f9fa", fontFamily: "'Syne', sans-serif" },
-  sidebar: { width: "260px", backgroundColor: "#fff", borderRight: "1px solid #eee", display: "flex", flexDirection: "column" },
-  logo: { padding: "30px", fontSize: "22px", fontWeight: 800 },
-  navGroup: { padding: "20px 0", flex: 1 },
-  navItem: { padding: "15px 30px", cursor: "pointer", color: "#888", fontWeight: 600, display: "flex", alignItems: "center" },
-  navActive: { padding: "15px 30px", cursor: "pointer", color: "#000", fontWeight: 700, backgroundColor: "#f0f2f5", borderRight: "4px solid #d4ff00" },
-  navBadge: { marginLeft: "auto", padding: "2px 8px", borderRadius: "10px", fontSize: "11px", backgroundColor: "#d4ff00", color: "#000", fontWeight: 700 },
-  sidebarFooter: { padding: "20px", borderTop: "1px solid #f5f5f5" },
-  userBadge: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "15px" },
-  avatar: { width: "35px", height: "35px", borderRadius: "50%", background: "#6366f1", color: "#fff", display: "flex", alignItems: "center", justifyCenter: "center", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "14px" },
-  userName: { fontWeight: 700, fontSize: "14px" },
-  btnSignOut: { width: "100%", padding: "10px", border: "1px solid #ff4747", color: "#ff4747", background: "none", borderRadius: "8px", fontWeight: 700, cursor: "pointer" },
-  mainArea: { flex: 1, padding: "40px", overflowY: "auto" },
-  header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "40px" },
-  dashboardLayout: { display: "flex", flexDirection: "column", gap: "30px" },
-  statsRow: { display: "flex", gap: "20px" },
-  statCard: { flex: 1, background: "#fff", padding: "25px", borderRadius: "15px", border: "1px solid #eee" },
-  whiteCard: { background: "#fff", borderRadius: "15px", border: "1px solid #eee", overflow: "hidden" },
-  cardHeader: { padding: "20px", fontWeight: 800, borderBottom: "1px solid #f5f5f5" },
-  bugGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" },
-  bugCard: { background: "#fff", padding: "20px", borderRadius: "15px", border: "1px solid #eee", cursor: "pointer" },
-  bugCardHeader: { display: "flex", justifyContent: "space-between", alignItems: "center" },
-  badgeDraft: { background: "#fff3cd", color: "#856404", padding: "4px 8px", borderRadius: "5px", fontSize: "11px", fontWeight: 700 },
-  badgeSubmitted: { background: "#d1e7dd", color: "#0f5132", padding: "4px 8px", borderRadius: "5px", fontSize: "11px", fontWeight: 700 },
-  btnSubmitBug: { marginTop: "15px", width: "100%", padding: "10px", background: "#28a745", color: "#fff", border: "none", borderRadius: "8px", fontWeight: 700, cursor: "pointer" },
-  btnDisabled: { marginTop: "15px", width: "100%", padding: "10px", background: "#ccc", color: "#666", border: "none", borderRadius: "8px", fontWeight: 700, cursor: "not-allowed" },
-  btnPrimary: { background: "#6366f1", color: "#fff", border: "none", padding: "10px 20px", borderRadius: "8px", fontWeight: 700, cursor: "pointer" },
-  btnDanger: { background: "#ff4747", color: "#fff", border: "none", padding: "10px 20px", borderRadius: "8px", fontWeight: 700, cursor: "pointer" },
-  btnCancel: { background: "#eee", border: "none", padding: "10px 20px", borderRadius: "8px", fontWeight: 700, cursor: "pointer" },
-  overlay: { position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000, backdropFilter: "blur(4px)" },
-  modalBox: { backgroundColor: "#fff", padding: "30px", borderRadius: "20px", width: "400px" },
-  formGroup: { marginBottom: "15px", textAlign: "left" },
-  label: { display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "5px", color: "#666" },
-  input: { width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd", boxSizing: "border-box" },
-  table: { width: "100%", borderCollapse: "collapse" },
-  thRow: { textAlign: "left", background: "#fafafa", color: "#aaa", fontSize: "12px", textTransform: "uppercase" },
-  tr: { borderBottom: "1px solid #f8f8f8" },
 };
 
 export default TesterDashboard;

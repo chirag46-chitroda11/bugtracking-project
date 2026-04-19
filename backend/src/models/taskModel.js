@@ -3,40 +3,68 @@ const mongoose = require("mongoose");
 require("./userModel");   // 🔥 ADD THIS
 
 const taskSchema = new mongoose.Schema({
-    taskTitle:{
-        type:String,
-        required:true
+    taskTitle: {
+        type: String,
+        required: true
     },
-    description:{
-        type:String
+    description: {
+        type: String
     },
-    projectId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Project"
+    acceptanceCriteria: {
+        type: String
     },
-    moduleId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Module"
+    projectId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Project"
     },
-    assignedDeveloper:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User"   // 🔥 FIXED
+    moduleId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Module"
     },
-    assignBy:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User"   // 🔥 FIXED
+    assignedDeveloper: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"   // 🔥 FIXED
     },
-    status:{
-        type:String,
-        enum:["pending","in progress","testing","completed"],
-        default:"pending"
+    assignedTester: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
     },
-    priority:{
-        type:String,
-        enum:["low","medium","high"]
+    estimatedHours: {
+        type: Number,
+        default: 0
     },
-    startDate:Date,
-    endDate:Date
-},{timestamps:true});
+    sprintId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Sprint"
+    },
+    notes: {
+        type: String,
+        default: ""
+    },
+    linkedBug: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Bug"
+    },
+    assignBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"   // 🔥 FIXED
+    },
+    retestCount: { type: Number, default: 0 },
+    escalatedToPm: { type: Boolean, default: false },
+    escalationReason: { type: String },
+    status: {
+        type: String,
+        enum: ["pending", "in progress", "testing", "completed"],
+        default: "pending"
+    },
+    priority: {
+        type: String,
+        enum: ["low", "medium", "high"]
+    },
+    startDate: Date,
+    endDate: Date,
+    timeSpent: { type: Number, default: 0 },
+    timerStartedAt: { type: Date, default: null }
+}, { timestamps: true });
 
-module.exports = mongoose.model("Task",taskSchema);
+module.exports = mongoose.model("Task", taskSchema);

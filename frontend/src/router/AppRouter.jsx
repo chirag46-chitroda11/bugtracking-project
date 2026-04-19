@@ -21,6 +21,11 @@ import AdminUsers from "../pages/AdminUsers"
 import CreateUser from "../pages/CreateUser"
 import EditUser from "../pages/EditUser"
 import EditBug from "../pages/EditBug"
+import Profile from "../pages/Profile"
+import TaskDetail from "../pages/developer/TaskDetail"
+import BugDetails from "../pages/BugDetails"
+import TesterTaskDetail from "../pages/tester/TesterTaskDetail"
+import PMProjectDetail from "../pages/pm/PMProjectDetail"
 
 const AppRouter = () => {
   return (
@@ -28,11 +33,14 @@ const AppRouter = () => {
       <Route path="/" element={<Dashboard />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/profile" element={<Profile />} />
      
       <Route path="/admin-dashboard" element={<AdminDashboard />} />
       <Route path="/developer-dashboard" element={<DeveloperDashboard />} />
+      <Route path="/task-detail/:id" element={<TaskDetail />} />
       <Route path="/tester-dashboard" element={<TesterDashboard />} />
       <Route path="/pm-dashboard" element={<PMDashboard />} />
+      <Route path="/pm/project/:id" element={<PMProjectDetail />} />
 
       <Route path="/create-bug" element={<CreateBug/>} />
       <Route path="/create-project" element={<CreateProject/>} />
@@ -42,11 +50,14 @@ const AppRouter = () => {
       <Route path="/create-task" element={<CreateTask />} />
       <Route path="/edit-task/:id" element={<EditTask />} />
       <Route path="/sprint" element={<CreateSprint />} />
+      <Route path="/create-sprint" element={<CreateSprint />} />
       <Route path="/edit-sprint/:id" element={<EditSprint />} />
       <Route path="/admin-users" element={<AdminUsers />} />
 
       <Route path="/edit-user/:id" element={<EditUser />} />
       <Route path="/edit-bug/:id" element={<EditBug />} />
+      <Route path="/bug-detail/:id" element={<BugDetails />} />
+      <Route path="/tester-task/:id" element={<TesterTaskDetail />} />
      
     
 
