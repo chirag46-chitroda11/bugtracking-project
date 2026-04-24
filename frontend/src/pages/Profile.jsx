@@ -15,7 +15,10 @@ const Profile = () => {
     country: "",
     state: "",
     city: "",
-    password: "",
+    state: "",
+    city: "",
+    currentPassword: "",
+    newPassword: "",
     confirmPassword: "",
     profilePicture: ""
   });
@@ -45,7 +48,8 @@ const Profile = () => {
           country: userData.country || "",
           state: userData.state || "",
           city: userData.city || "",
-          password: "",
+          currentPassword: "",
+          newPassword: "",
           confirmPassword: "",
           profilePicture: userData.profilePicture || ""
         });
@@ -81,11 +85,6 @@ const Profile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formData.password && formData.password !== formData.confirmPassword) {
-      triggerToast("Passwords do not match!", true);
-      return;
-    }
-
     try {
       const payload = {
         name: formData.name,
@@ -96,10 +95,6 @@ const Profile = () => {
         profilePicture: formData.profilePicture,
       };
 
-      if (formData.password) {
-        payload.password = formData.password;
-      }
-
       const res = await API.put(`/user/users/profile/${user._id}`, payload);
       
       // Update local storage
@@ -107,11 +102,36 @@ const Profile = () => {
       localStorage.setItem("user", JSON.stringify({ ...storedUser, ...res.data.data }));
       
       setUser(res.data.data);
-      setFormData(prev => ({ ...prev, password: "", confirmPassword: "" }));
       triggerToast("Profile updated successfully! 🎉");
       setTimeout(() => navigate(-1), 1500);
     } catch (err) {
       triggerToast(err.response?.data?.message || "Failed to update profile", true);
+    }
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.currentPassword || !formData.newPassword || !formData.confirmPassword) {
+      triggerToast("Please fill in all password fields", true);
+      return;
+    }
+    if (formData.newPassword !== formData.confirmPassword) {
+      triggerToast("New passwords do not match!", true);
+      return;
+    }
+    if (formData.newPassword.length < 6) {
+      triggerToast("New password must be at least 6 characters", true);
+      return;
+    }
+    try {
+      await API.put("/user/change-password", {
+        currentPassword: formData.currentPassword,
+        newPassword: formData.newPassword
+      });
+      triggerToast("Password changed successfully! 🔐");
+      setFormData(prev => ({ ...prev, currentPassword: "", newPassword: "", confirmPassword: "" }));
+    } catch (err) {
+      triggerToast(err.response?.data?.message || "Failed to change password", true);
     }
   };
 
@@ -235,35 +255,52 @@ const Profile = () => {
               </div>
             </div>
 
-            <h3 className="text-xl font-bold text-slate-800 mb-6 mt-10 border-b border-slate-100 pb-4">Security</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* ACCOUNT ACTIONS CARD FOR PROFILE */}
+            <div className="flex justify-end gap-3 mt-8">
+               <button type="button" onClick={() => navigate(-1)} className="btn-secondary">
+                 Cancel
+               </button>
+               <button type="submit" className="btn-primary">
+                 Save Profile Changes
+               </button>
+            </div>
+          </div>
+        </form>
+
+        {/* SECURITY CARD (SEPARATE FORM) */}
+        <form onSubmit={handlePasswordSubmit} className="mt-6">
+          <div className="glass-card p-8">
+            <h3 className="text-xl font-bold text-slate-800 mb-6 border-b border-slate-100 pb-4">Security</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <div>
+                <label className="input-label">Current Password</label>
+                <input type="password" name="currentPassword" value={formData.currentPassword} onChange={handleInputChange} className="custom-input" placeholder="Current password" />
+              </div>
               <div>
                 <label className="input-label">New Password</label>
-                <input type="password" name="password" value={formData.password} onChange={handleInputChange} className="custom-input" placeholder="Leave blank to keep current" />
+                <input type="password" name="newPassword" value={formData.newPassword} onChange={handleInputChange} className="custom-input" placeholder="New password" />
               </div>
               <div>
                 <label className="input-label">Confirm New Password</label>
-                <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleInputChange} className="custom-input" placeholder="Confirm your new password" />
+                <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleInputChange} className="custom-input" placeholder="Confirm new password" />
               </div>
             </div>
+            <div className="flex justify-end">
+              <button type="submit" className="btn-primary">Update Password</button>
+            </div>
           </div>
+        </form>
 
-          {/* ACCOUNT ACTIONS CARD */}
-          <div className="glass-card p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          {/* DANGER ZONE CARD */}
+          <div className="glass-card p-6 flex flex-col md:flex-row items-center justify-between gap-4 mt-6">
+            <div>
+               <h3 className="text-lg font-bold text-slate-800">Danger Zone</h3>
+               <p className="text-sm text-slate-500">Permanently delete your account and all related data.</p>
+            </div>
             <button type="button" onClick={handleDeleteAccount} className="btn-danger w-full md:w-auto">
               Delete Account
             </button>
-            <div className="flex gap-3 w-full md:w-auto">
-               <button type="button" onClick={() => navigate(-1)} className="btn-secondary flex-1 md:flex-none text-center">
-                 Cancel
-               </button>
-               <button type="submit" className="btn-primary flex-1 md:flex-none">
-                 Save Changes
-               </button>
-            </div>
           </div>
-
-        </form>
       </div>
     </div>
   );

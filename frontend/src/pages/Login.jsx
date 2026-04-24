@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../services/authService";
+import API from "../api/axios";
 import bugMascot from "../assets/vite.svg";
 
 const Login = () => {
@@ -8,6 +9,11 @@ const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: "", isError: false });
+  
+  // Forgot Password States
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
 
   const triggerToast = (msg, isError = false) => {
     setToast({ show: true, msg, isError });
@@ -43,11 +49,33 @@ const Login = () => {
     };
 
     setTimeout(() => {
-      navigate(roleRoutes[user.role] || "/dashboard");
+      if (user.status === "pending") {
+        navigate("/waiting");
+      } else {
+        navigate(roleRoutes[user.role] || "/dashboard");
+      }
     }, 1000);
     } catch (err) {
       triggerToast(err.response?.data?.message || "Login failed!", true);
     } finally { setLoading(false); }
+  };
+
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault();
+    if (!forgotEmail) {
+      triggerToast("Please enter your email", true);
+      return;
+    }
+    setForgotLoading(true);
+    try {
+      const res = await API.post("/user/forgot-password", { email: forgotEmail });
+      triggerToast(res.data.message || "Reset link sent!");
+      setTimeout(() => setShowForgot(false), 2000);
+    } catch (err) {
+      triggerToast(err.response?.data?.message || "Something went wrong", true);
+    } finally {
+      setForgotLoading(false);
+    }
   };
 
   return (
@@ -77,14 +105,33 @@ const Login = () => {
             <img src={bugMascot} className="w-8 h-8 bg-black p-1.5 rounded-lg invert" alt="L" />
             <span className="font-extrabold text-xl tracking-tighter uppercase font-sans">Fixify<span className="text-indigo-600">.</span></span>
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-900 mb-1">Welcome Back.</h1>
-          <p className="text-slate-400 text-sm mb-10 font-medium">Enter credentials to access the console.</p>
-          <form onSubmit={handleSubmit}>
-            <input name="email" type="email" placeholder="Email Address" required className="field" onChange={e => setForm({...form, email: e.target.value})} />
-            <input name="password" type="password" placeholder="Password" required className="field" onChange={e => setForm({...form, password: e.target.value})} />
-            <button type="submit" className="btn-reg" disabled={loading}>{loading ? "Verifying..." : "Login to Console"}</button>
-          </form>
-          <p className="text-center mt-8 text-sm text-slate-500 font-bold">No account? <span onClick={() => navigate("/register")} className="text-indigo-600 cursor-pointer">Register</span></p>
+          {!showForgot ? (
+            <>
+              <h1 className="text-3xl font-extrabold text-slate-900 mb-1">Welcome Back.</h1>
+              <p className="text-slate-400 text-sm mb-8 font-medium">Enter credentials to access the console.</p>
+              <form onSubmit={handleSubmit}>
+                <input name="email" type="email" placeholder="Email Address" required className="field mb-4" onChange={e => setForm({...form, email: e.target.value})} />
+                <div className="mb-6">
+                  <input name="password" type="password" placeholder="Password" required className="field !mb-2" onChange={e => setForm({...form, password: e.target.value})} />
+                  <p className="text-right text-xs font-bold">
+                    <span onClick={() => setShowForgot(true)} className="text-indigo-600 cursor-pointer hover:underline">Forgot Password?</span>
+                  </p>
+                </div>
+                <button type="submit" className="btn-reg" disabled={loading}>{loading ? "Verifying..." : "Login to Console"}</button>
+              </form>
+              <p className="text-center mt-8 text-sm text-slate-500 font-bold">No account? <span onClick={() => navigate("/register")} className="text-indigo-600 cursor-pointer hover:underline">Register</span></p>
+            </>
+          ) : (
+            <>
+              <h1 className="text-3xl font-extrabold text-slate-900 mb-1">Reset Password</h1>
+              <p className="text-slate-400 text-sm mb-8 font-medium">Enter your email to receive a reset link.</p>
+              <form onSubmit={handleForgotSubmit}>
+                <input type="email" placeholder="Email Address" required className="field mb-6" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} />
+                <button type="submit" className="btn-reg" disabled={forgotLoading}>{forgotLoading ? "Sending..." : "Send Reset Link"}</button>
+              </form>
+              <p className="text-center mt-8 text-sm text-slate-500 font-bold">Remembered? <span onClick={() => setShowForgot(false)} className="text-indigo-600 cursor-pointer hover:underline">Back to Login</span></p>
+            </>
+          )}
         </div>
       </div>
     </div>

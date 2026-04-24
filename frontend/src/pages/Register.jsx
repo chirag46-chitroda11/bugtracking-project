@@ -9,8 +9,7 @@ const Register = () => {
     name: "", 
     email: "", 
     password: "", 
-    confirmPassword: "", 
-    role: "developer" 
+    confirmPassword: ""
   });
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: "", isError: false });
@@ -84,17 +83,7 @@ const Register = () => {
               <input name="confirmPassword" type="password" placeholder="Confirm" required className="field" onChange={handleChange} />
             </div>
 
-            {/* Restricted Dropdown: Removed Admin */}
-            <select 
-              name="role" 
-              className="field font-semibold text-slate-600" 
-              onChange={handleChange}
-              value={formData.role}
-            >
-              <option value="developer">Developer</option>
-              <option value="tester">Tester</option>
-              <option value="project_manager">Manager</option>
-            </select>
+            {/* Role is automatically set to Tester on backend for public registration */}
 
             <button type="submit" className="btn-reg" disabled={loading}>
               {loading ? "Initializing..." : "Initialize Account"}

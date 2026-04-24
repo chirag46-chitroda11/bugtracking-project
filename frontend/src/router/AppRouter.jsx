@@ -4,6 +4,8 @@ import { Routes, Route } from "react-router-dom"
 import Dashboard from "../pages/Dashboard"
 import Login from "../pages/Login"
 import Register from "../pages/Register"
+import WaitingPage from "../pages/WaitingPage"
+import ResetPassword from "../pages/ResetPassword"
 import AdminDashboard from "../pages/AdminDashboard"
 import DeveloperDashboard from "../pages/DeveloperDashboard"
 import TesterDashboard from "../pages/TesterDashboard"
@@ -33,6 +35,8 @@ const AppRouter = () => {
       <Route path="/" element={<Dashboard />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/waiting" element={<WaitingPage />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/profile" element={<Profile />} />
      
       <Route path="/admin-dashboard" element={<AdminDashboard />} />

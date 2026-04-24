@@ -11,6 +11,8 @@ import PMBugs from "./pm/PMBugs";
 import PMSprints from "./pm/PMSprints";
 import PMWorkload from "./pm/PMWorkload";
 import PMTeam from "./pm/PMTeam";
+import PMUsers from "./pm/PMUsers";
+import API from "../api/axios";
 
 const PMDashboard = () => {
   const navigate = useNavigate();
@@ -27,12 +29,22 @@ const PMDashboard = () => {
     return "dashboard";
   });
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [pendingCount, setPendingCount] = useState(0);
 
   useEffect(() => {
     if (!loggedInUser || loggedInUser.role !== "project_manager") {
       navigate("/login");
+    } else {
+      const fetchUsers = async () => {
+        try {
+          const res = await API.get("/user/users");
+          const pending = res.data.data?.filter(u => u.status === "pending").length || 0;
+          setPendingCount(pending);
+        } catch (err) { }
+      };
+      fetchUsers();
     }
-  }, [loggedInUser, navigate]);
+  }, [loggedInUser, navigate, activeTab]);
 
   // Listen for tab-switch events from child components (e.g., PMTeam)
   useEffect(() => {
@@ -62,6 +74,8 @@ const PMDashboard = () => {
         return <PMWorkload />;
       case "team":
         return <PMTeam />;
+      case "users":
+        return <PMUsers />;
       case "dashboard":
       default:
         return <PMDashboardSummary />;
@@ -105,17 +119,17 @@ const PMDashboard = () => {
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
       `}</style>
-      
+
       <div className="bg-circle c1"></div>
       <div className="bg-circle c2"></div>
 
       {/* SIDEBAR */}
       <div className={`sidebar fixed md:relative h-screen w-72 flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} md:translate-x-0`}>
-        
+
         <div className="p-6 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
             <div className="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
-              <BugIcon size={20} strokeWidth={3}/>
+              <BugIcon size={20} strokeWidth={3} />
             </div>
             <span className="text-2xl font-black text-slate-900 tracking-tighter uppercase italic">Fixify<span className="text-indigo-600">.</span></span>
           </div>
@@ -124,30 +138,36 @@ const PMDashboard = () => {
 
         <div className="px-5 py-4 mb-4">
           <div className="nav-link bg-indigo-50/50 border-indigo-100/50 cursor-default flex items-center gap-3 p-3 rounded-2xl">
-             <div className="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden bg-white flex items-center justify-center flex-shrink-0">
-               {loggedInUser?.profilePicture ? <img src={loggedInUser.profilePicture} className="w-full h-full object-cover" alt="Profile" /> : <span className="font-bold text-indigo-600">{loggedInUser?.name?.charAt(0) || "P"}</span>}
-             </div>
-             <div className="overflow-hidden">
-               <p className="text-sm font-bold text-slate-800 truncate">{loggedInUser?.name || "Project Manager"}</p>
-               <p className="text-[10px] font-black uppercase tracking-wider text-indigo-500 truncate">{loggedInUser?.role?.replace('_', ' ') || "PROJECT MANAGER"}</p>
-             </div>
+            <div className="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden bg-white flex items-center justify-center flex-shrink-0">
+              {loggedInUser?.profilePicture ? <img src={loggedInUser.profilePicture} className="w-full h-full object-cover" alt="Profile" /> : <span className="font-bold text-indigo-600">{loggedInUser?.name?.charAt(0) || "P"}</span>}
+            </div>
+            <div className="overflow-hidden">
+              <p className="text-sm font-bold text-slate-800 truncate">{loggedInUser?.name || "Project Manager"}</p>
+              <p className="text-[10px] font-black uppercase tracking-wider text-indigo-500 truncate">{loggedInUser?.role?.replace('_', ' ') || "PROJECT MANAGER"}</p>
+            </div>
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 space-y-1 custom-scrollbar">
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-4 mb-2 mt-2">Main Navigation</p>
-          <div className={`nav-link ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}><Layers size={18}/> Dashboard</div>
-          <div className={`nav-link ${activeTab === 'projects' ? 'active' : ''}`} onClick={() => setActiveTab('projects')}><FileText size={18}/> My Projects</div>
-          <div className={`nav-link ${activeTab === 'sprints' ? 'active' : ''}`} onClick={() => setActiveTab('sprints')}><Zap size={18}/> Sprints & Goals</div>
-          <div className={`nav-link ${activeTab === 'tasks' ? 'active' : ''}`} onClick={() => setActiveTab('tasks')}><ClipboardList size={18}/> Global Tasks</div>
-          <div className={`nav-link ${activeTab === 'bugs' ? 'active' : ''}`} onClick={() => setActiveTab('bugs')}><BugIcon size={18}/> Bug Reports</div>
-          <div className={`nav-link ${activeTab === 'workload' ? 'active' : ''}`} onClick={() => setActiveTab('workload')}><Layers size={18}/> Global Workload</div>
-          <div className={`nav-link ${activeTab === 'team' ? 'active' : ''}`} onClick={() => setActiveTab('team')}><Users2 size={18}/> Project Teams</div>
+          <div className={`nav-link ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}><Layers size={18} /> Dashboard</div>
+          <div className={`nav-link ${activeTab === 'projects' ? 'active' : ''}`} onClick={() => setActiveTab('projects')}><FileText size={18} /> My Projects</div>
+          <div className={`nav-link ${activeTab === 'sprints' ? 'active' : ''}`} onClick={() => setActiveTab('sprints')}><Zap size={18} /> Sprints & Goals</div>
+          <div className={`nav-link ${activeTab === 'tasks' ? 'active' : ''}`} onClick={() => setActiveTab('tasks')}><ClipboardList size={18} /> Global Tasks</div>
+          <div className={`nav-link ${activeTab === 'bugs' ? 'active' : ''}`} onClick={() => setActiveTab('bugs')}><BugIcon size={18} /> Bug Reports</div>
+          <div className={`nav-link ${activeTab === 'workload' ? 'active' : ''}`} onClick={() => setActiveTab('workload')}><Layers size={18} /> Global Workload</div>
+          <div className={`nav-link ${activeTab === 'team' ? 'active' : ''}`} onClick={() => setActiveTab('team')}><Users2 size={18} /> Project Teams</div>
+          <div className={`nav-link ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-3"><Users2 size={18} /> User Management</div>
+              {pendingCount > 0 && <span className="w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] font-black shadow-md shadow-red-500/40">{pendingCount}</span>}
+            </div>
+          </div>
         </div>
 
         <div className="p-5 border-t border-slate-200/60 mt-auto space-y-2">
-          <div className="nav-link hover:text-indigo-600" onClick={() => navigate("/profile")}><Settings size={18}/> Account Settings</div>
-          <div className="nav-link text-red-500 hover:bg-red-50 hover:text-red-600" onClick={handleLogout}><LogOut size={18}/> Secure Logout</div>
+          <div className="nav-link hover:text-indigo-600" onClick={() => navigate("/profile")}><Settings size={18} /> Account Settings</div>
+          <div className="nav-link text-red-500 hover:bg-red-50 hover:text-red-600" onClick={handleLogout}><LogOut size={18} /> Secure Logout</div>
         </div>
       </div>
 
@@ -155,24 +175,24 @@ const PMDashboard = () => {
       <div className="main-content flex flex-col relative w-full md:w-auto">
         {/* MOBILE HEADER */}
         <div className="md:hidden mb-6 flex items-center justify-between gap-4 bg-white/70 p-4 rounded-2xl backdrop-blur-md shadow-sm border border-white">
-           <div className="flex items-center gap-4">
-             <button className="p-2 bg-slate-100 rounded-lg text-slate-600" onClick={() => setSidebarOpen(true)}><Menu size={20}/></button>
-             <h2 className="font-black text-slate-800 uppercase tracking-wider text-xl italic mt-1">Fixify.</h2>
-           </div>
-           <NotificationBell />
+          <div className="flex items-center gap-4">
+            <button className="p-2 bg-slate-100 rounded-lg text-slate-600" onClick={() => setSidebarOpen(true)}><Menu size={20} /></button>
+            <h2 className="font-black text-slate-800 uppercase tracking-wider text-xl italic mt-1">Fixify.</h2>
+          </div>
+          <NotificationBell />
         </div>
 
         {/* DESKTOP TOP BAR */}
         <div className="hidden md:flex justify-between items-center mb-6 bg-white/40 p-4 rounded-2xl backdrop-blur-md border border-white/60 shadow-sm">
-           <h2 className="text-lg font-bold text-slate-700">Project Manager Dashboard</h2>
-           <div className="flex items-center gap-4">
-             <NotificationBell />
-             <div className="text-sm font-bold text-slate-500 bg-white/60 px-4 py-2 rounded-xl">
-               {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-             </div>
-           </div>
+          <h2 className="text-lg font-bold text-slate-700">Project Manager Dashboard</h2>
+          <div className="flex items-center gap-4">
+            <NotificationBell />
+            <div className="text-sm font-bold text-slate-500 bg-white/60 px-4 py-2 rounded-xl">
+              {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+            </div>
+          </div>
         </div>
-        
+
         <div className="flex-1">
           {renderContent()}
         </div>

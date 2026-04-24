@@ -37,7 +37,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     setSearchTerm("");
   }, [activeTab]);
-  
+
   const [stats, setStats] = useState({});
   const [bugs, setBugs] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -278,42 +278,42 @@ const AdminDashboard = () => {
           <div className="space-y-6 animate-fade-in">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-black text-slate-800">Project Portfolio</h2>
-              <button className="btn-primary" onClick={() => navigate("/create-project")}><PlusCircle size={18}/> New Project</button>
+              <button className="btn-primary" onClick={() => navigate("/create-project")}><PlusCircle size={18} /> New Project</button>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {projects
                 .filter(proj => proj.projectName.toLowerCase().includes(searchTerm.toLowerCase()) || (proj.description && proj.description.toLowerCase().includes(searchTerm.toLowerCase())))
                 .map((proj) => (
-                <div key={proj._id} className="glass-card p-6 border-l-4 border-l-indigo-500 hover:-translate-y-1 transition-transform">
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-xl font-bold text-slate-800">{proj.projectName}</h3>
-                    <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold uppercase">{proj.status}</span>
-                  </div>
-                  <p className="text-sm text-slate-600 mb-4 line-clamp-2">{proj.description}</p>
-                  
-                  <div className="mb-4">
-                    <div className="flex justify-between text-xs font-bold text-slate-700 mb-1">
-                      <span>Progress</span>
-                      <span className="text-indigo-600">{proj.progress}%</span>
+                  <div key={proj._id} className="glass-card p-6 border-l-4 border-l-indigo-500 hover:-translate-y-1 transition-transform">
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="text-xl font-bold text-slate-800">{proj.projectName}</h3>
+                      <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold uppercase">{proj.status}</span>
                     </div>
-                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-indigo-500 rounded-full" style={{width: `${proj.progress}%`}}></div>
-                    </div>
-                  </div>
+                    <p className="text-sm text-slate-600 mb-4 line-clamp-2">{proj.description}</p>
 
-                  <div className="flex justify-between items-center mt-4 pt-4 border-t border-slate-100">
-                    <div className="text-xs text-slate-500 font-semibold space-y-1">
-                      <div>Modules: <span className="text-slate-800 font-bold">{modulesMap[proj._id]?.length || 0}</span></div>
-                      <div>Tasks: <span className="text-slate-800 font-bold">{tasksMap[proj._id]?.length || 0}</span></div>
+                    <div className="mb-4">
+                      <div className="flex justify-between text-xs font-bold text-slate-700 mb-1">
+                        <span>Progress</span>
+                        <span className="text-indigo-600">{proj.progress}%</span>
+                      </div>
+                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${proj.progress}%` }}></div>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => navigate(`/edit-project/${proj._id}`)} className="p-2 text-slate-500 hover:text-indigo-600 bg-slate-50 rounded-lg"><Edit size={16}/></button>
-                      <button onClick={() => handleDelete(proj._id)} className="p-2 text-slate-500 hover:text-red-600 bg-slate-50 rounded-lg"><Trash2 size={16}/></button>
+
+                    <div className="flex justify-between items-center mt-4 pt-4 border-t border-slate-100">
+                      <div className="text-xs text-slate-500 font-semibold space-y-1">
+                        <div>Modules: <span className="text-slate-800 font-bold">{modulesMap[proj._id]?.length || 0}</span></div>
+                        <div>Tasks: <span className="text-slate-800 font-bold">{tasksMap[proj._id]?.length || 0}</span></div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => navigate(`/edit-project/${proj._id}`)} className="p-2 text-slate-500 hover:text-indigo-600 bg-slate-50 rounded-lg"><Edit size={16} /></button>
+                        <button onClick={() => handleDelete(proj._id)} className="p-2 text-slate-500 hover:text-red-600 bg-slate-50 rounded-lg"><Trash2 size={16} /></button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         );
@@ -323,9 +323,9 @@ const AdminDashboard = () => {
           <div className="space-y-6 animate-fade-in">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-black text-slate-800">System Bugs</h2>
-              <button className="btn-primary" onClick={() => navigate("/create-bug")}><PlusCircle size={18}/> Report Bug</button>
+              <button className="btn-primary" onClick={() => navigate("/create-bug")}><PlusCircle size={18} /> Report Bug</button>
             </div>
-            
+
             <div className="glass-card overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
@@ -342,35 +342,35 @@ const AdminDashboard = () => {
                     {bugs
                       .filter(bug => bug.bugTitle.toLowerCase().includes(searchTerm.toLowerCase()) || bug.status.toLowerCase().includes(searchTerm.toLowerCase()) || bug.severity.toLowerCase().includes(searchTerm.toLowerCase()))
                       .map((bug) => (
-                      <tr key={bug._id} className="border-b border-slate-100 hover:bg-indigo-50/50 transition cursor-pointer" onClick={(e) => {
+                        <tr key={bug._id} className="border-b border-slate-100 hover:bg-indigo-50/50 transition cursor-pointer" onClick={(e) => {
                           if (!e.target.closest('button')) {
                             navigate('/bug-detail/' + bug._id);
                           }
-                      }}>
-                        <td className="p-4 font-bold text-slate-800">{bug.bugTitle}</td>
-                        <td className="p-4">
-                          <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${bug.severity === 'critical' ? 'bg-red-100 text-red-700' : bug.severity === 'high' ? 'bg-orange-100 text-orange-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                            {bug.severity}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <span className={`flex items-center gap-2 font-semibold ${['open','submitted','draft'].includes(bug.status?.toLowerCase()) ? 'text-red-500' : bug.status === 'closed' || bug.status === 'resolved' ? 'text-emerald-500' : 'text-amber-500'}`}>
-                            <div className={`w-2 h-2 rounded-full ${['open','submitted','draft'].includes(bug.status?.toLowerCase()) ? 'bg-red-500' : bug.status === 'closed' || bug.status === 'resolved' ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
-                            {bug.status}
-                          </span>
-                        </td>
-                        <td className="p-4 text-slate-600 font-medium">{bug.reportBy}</td>
-                        <td className="p-4 text-right space-x-2">
-                          <button onClick={() => navigate(`/edit-bug/${bug._id}`)} className="px-3 py-1.5 bg-slate-100 hover:bg-indigo-50 text-indigo-600 rounded text-xs font-bold">Edit</button>
-                          <button onClick={async () => {
-                            if(await confirm({ title: "Delete Bug", message: "Delete this bug? This action cannot be undone." })) {
-                              await API.delete(`/bug/${bug._id}`);
-                              setBugs(bugs.filter(b => b._id !== bug._id));
-                            }
-                          }} className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded text-xs font-bold">Delete</button>
-                        </td>
-                      </tr>
-                    ))}
+                        }}>
+                          <td className="p-4 font-bold text-slate-800">{bug.bugTitle}</td>
+                          <td className="p-4">
+                            <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${bug.severity === 'critical' ? 'bg-red-100 text-red-700' : bug.severity === 'high' ? 'bg-orange-100 text-orange-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                              {bug.severity}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <span className={`flex items-center gap-2 font-semibold ${['open', 'submitted', 'draft'].includes(bug.status?.toLowerCase()) ? 'text-red-500' : bug.status === 'closed' || bug.status === 'resolved' ? 'text-emerald-500' : 'text-amber-500'}`}>
+                              <div className={`w-2 h-2 rounded-full ${['open', 'submitted', 'draft'].includes(bug.status?.toLowerCase()) ? 'bg-red-500' : bug.status === 'closed' || bug.status === 'resolved' ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
+                              {bug.status}
+                            </span>
+                          </td>
+                          <td className="p-4 text-slate-600 font-medium">{bug.reportBy}</td>
+                          <td className="p-4 text-right space-x-2">
+                            <button onClick={() => navigate(`/edit-bug/${bug._id}`)} className="px-3 py-1.5 bg-slate-100 hover:bg-indigo-50 text-indigo-600 rounded text-xs font-bold">Edit</button>
+                            <button onClick={async () => {
+                              if (await confirm({ title: "Delete Bug", message: "Delete this bug? This action cannot be undone." })) {
+                                await API.delete(`/bug/${bug._id}`);
+                                setBugs(bugs.filter(b => b._id !== bug._id));
+                              }
+                            }} className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded text-xs font-bold">Delete</button>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -380,44 +380,91 @@ const AdminDashboard = () => {
 
       case "users":
         return (
-          <div className="space-y-6 animate-fade-in">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-black text-slate-800">User Management</h2>
-              <button className="btn-primary" onClick={() => navigate("/create-user")}><PlusCircle size={18}/> Invite User</button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {users
-                .filter(u => u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.email.toLowerCase().includes(searchTerm.toLowerCase()) || u.role.toLowerCase().includes(searchTerm.toLowerCase()))
-                .map(u => (
-                <div key={u._id} className="glass-card p-5 text-center flex flex-col items-center group">
-                  <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center text-xl font-bold text-indigo-600 mb-3 border-4 border-white shadow-sm overflow-hidden group-hover:scale-110 transition-transform">
-                    {u.profilePicture ? <img src={u.profilePicture} alt={u.name} className="w-full h-full object-cover"/> : u.name.charAt(0).toUpperCase()}
-                  </div>
-                  <h3 className="font-bold text-slate-800 truncate w-full">{u.name}</h3>
-                  <p className="text-xs text-slate-500 font-semibold mb-3 truncate w-full">{u.email}</p>
-                  <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-black uppercase mb-4">{u.role.replace('_',' ')}</span>
-                  
-                  <div className="w-full flex gap-2 border-t border-slate-100 pt-4 mt-auto">
-                    <button onClick={() => navigate(`/edit-user/${u._id}`)} className="btn-action flex-1 justify-center py-1.5 text-xs"><Edit size={14} className="mr-1"/> Edit</button>
-                    <button className="btn-action danger flex-1 justify-center py-1.5 text-xs" onClick={async () => {
-                      if (!(await confirm({ title: "Delete User", message: "Are you sure you want to remove this user from the system?" }))) return;
-                      await API.delete(`/user/users/${u._id}`);
-                      setUsers(users.filter(usr => usr._id !== u._id));
-                    }}><Trash2 size={14}/></button>
-                  </div>
+          <div className="space-y-8 animate-fade-in">
+            {/* Pending Requests Section */}
+            {users.filter(u => u.status === "pending").length > 0 && (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                  <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-amber-500"></span> Pending Requests
+                  </h3>
                 </div>
-              ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {users.filter(u => u.status === "pending").map(u => (
+                    <div key={u._id} className="glass-card p-5 text-center flex flex-col items-center group border-amber-200">
+                      <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center text-xl font-bold text-amber-600 mb-3 border-4 border-white shadow-sm overflow-hidden">
+                        {u.name.charAt(0).toUpperCase()}
+                      </div>
+                      <h3 className="font-bold text-slate-800 truncate w-full">{u.name}</h3>
+                      <p className="text-xs text-slate-500 font-semibold mb-3 truncate w-full">{u.email}</p>
+                      <p className="text-[10px] text-slate-400 font-bold mb-4">Reg: {new Date(u.createdAt).toLocaleDateString()}</p>
+                      <div className="w-full flex gap-2 pt-4 mt-auto">
+                        <button className="btn-action flex-1 justify-center py-1.5 text-xs text-emerald-600 border-emerald-200 hover:bg-emerald-50" onClick={async () => {
+                          if (await confirm({ title: "Approve User", message: "Approve this tester request?" })) {
+                            try {
+                              await API.put(`/user/users/approve/${u._id}`);
+                              setUsers(users.map(usr => usr._id === u._id ? { ...usr, status: "approved" } : usr));
+                              toast.success("User Approved!");
+                            } catch (e) { toast.error("Failed to approve"); }
+                          }
+                        }}>Approve</button>
+                        <button className="btn-action danger flex-1 justify-center py-1.5 text-xs" onClick={async () => {
+                          if (await confirm({ title: "Reject User", message: "Reject this tester request?" })) {
+                            try {
+                              await API.put(`/user/users/reject/${u._id}`);
+                              setUsers(users.map(usr => usr._id === u._id ? { ...usr, status: "rejected" } : usr));
+                              toast.success("User Rejected!");
+                            } catch (e) { toast.error("Failed to reject"); }
+                          }
+                        }}>Reject</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* All Users Section */}
+            <div className="space-y-4">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
+                  <Users size={20} className="text-indigo-600" /> All Users
+                </h3>
+                <button className="btn-primary" onClick={() => navigate("/create-user")}><PlusCircle size={18} /> Invite User</button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {users
+                  .filter(u => u.status !== "pending")
+                  .filter(u => u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.email.toLowerCase().includes(searchTerm.toLowerCase()) || u.role.toLowerCase().includes(searchTerm.toLowerCase()))
+                  .map(u => (
+                    <div key={u._id} className="glass-card p-5 text-center flex flex-col items-center group">
+                      <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center text-xl font-bold text-indigo-600 mb-3 border-4 border-white shadow-sm overflow-hidden group-hover:scale-110 transition-transform">
+                        {u.profilePicture ? <img src={u.profilePicture} alt={u.name} className="w-full h-full object-cover" /> : u.name.charAt(0).toUpperCase()}
+                      </div>
+                      <h3 className="font-bold text-slate-800 truncate w-full">{u.name}</h3>
+                      <p className="text-xs text-slate-500 font-semibold mb-3 truncate w-full">{u.email}</p>
+                      <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-black uppercase mb-4">{u.role.replace('_', ' ')}</span>
+                      <div className="w-full flex gap-2 border-t border-slate-100 pt-4 mt-auto">
+                        <button onClick={() => navigate(`/edit-user/${u._id}`)} className="btn-action flex-1 justify-center py-1.5 text-xs"><Edit size={14} className="mr-1" /> Edit</button>
+                        <button className="btn-action danger flex-1 justify-center py-1.5 text-xs" onClick={async () => {
+                          if (!(await confirm({ title: "Delete User", message: "Are you sure you want to remove this user from the system?" }))) return;
+                          await API.delete(`/user/users/${u._id}`);
+                          setUsers(users.filter(usr => usr._id !== u._id));
+                        }}><Trash2 size={14} /></button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
             </div>
           </div>
         );
-      
+
       case "tasks_sprints":
-         return (
+        return (
           <div className="space-y-6 animate-fade-in">
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
-               <button className="btn-primary flex-1" onClick={() => navigate("/create-task")}><PlusCircle size={18}/> New Task</button>
-               <button className="btn-primary flex-1" style={{ background: '#334155' }} onClick={() => navigate("/sprint")}><PlusCircle size={18}/> New Sprint</button>
+              <button className="btn-primary flex-1" onClick={() => navigate("/create-task")}><PlusCircle size={18} /> New Task</button>
+              <button className="btn-primary flex-1" style={{ background: '#334155' }} onClick={() => navigate("/sprint")}><PlusCircle size={18} /> New Sprint</button>
             </div>
 
             {/* Sprint Stats Bar */}
@@ -441,95 +488,95 @@ const AdminDashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-               <div className="glass-card p-6">
-                 <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2 flex items-center gap-2"><Activity size={18} className="text-indigo-600"/> Sprints ({sprints.length})</h3>
-                 <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                   {sprints.length === 0 ? (
-                     <div className="text-center py-8 text-slate-400 font-semibold">No sprints created yet</div>
-                   ) : sprints
-                      .filter(s => s.sprintName.toLowerCase().includes(searchTerm.toLowerCase()))
-                      .map(s => (
-                     <div key={s._id} className="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-indigo-200 transition-all">
-                       <div className="flex justify-between items-start mb-2">
-                         <div>
-                           <h4 className="font-bold text-slate-800">{s.sprintName}</h4>
-                           <p className="text-xs text-slate-500 font-semibold mt-1">{s.projectId?.projectName || "No Project"}</p>
-                         </div>
-                         <span className={`px-2.5 py-1 text-xs font-bold rounded-lg uppercase ${s.status === 'active' ? 'bg-emerald-100 text-emerald-700' : s.status === 'completed' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>{s.status}</span>
-                       </div>
-                       <div className="flex items-center gap-3 text-xs text-slate-500 font-semibold mb-3">
-                         <span>Tasks: <strong className="text-slate-700">{s.tasks?.length || 0}</strong></span>
-                         {s.startDate && <span>Start: {new Date(s.startDate).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</span>}
-                         {s.endDate && <span>End: {new Date(s.endDate).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</span>}
-                       </div>
-                       <div className="flex gap-2 pt-2 border-t border-slate-100">
-                         <button onClick={() => navigate(`/edit-sprint/${s._id}`)} className="btn-action py-1.5 text-xs flex-1 justify-center"><Edit size={13} className="mr-1"/> Edit</button>
-                         <button onClick={async () => {
-                           if(!await confirm({ title: "Delete Sprint", message: "Are you sure you want to delete this sprint?" })) return;
-                           try { await deleteSprint(s._id); setSprints(sprints.filter(sp => sp._id !== s._id)); toast.success("Sprint deleted"); } catch(e) { toast.error("Delete failed"); }
-                         }} className="btn-action danger py-1.5 text-xs justify-center" style={{minWidth:'36px'}}><Trash2 size={13}/></button>
-                       </div>
-                     </div>
-                   ))}
-                 </div>
-               </div>
+              <div className="glass-card p-6">
+                <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2 flex items-center gap-2"><Activity size={18} className="text-indigo-600" /> Sprints ({sprints.length})</h3>
+                <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                  {sprints.length === 0 ? (
+                    <div className="text-center py-8 text-slate-400 font-semibold">No sprints created yet</div>
+                  ) : sprints
+                    .filter(s => s.sprintName.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .map(s => (
+                      <div key={s._id} className="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-indigo-200 transition-all">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h4 className="font-bold text-slate-800">{s.sprintName}</h4>
+                            <p className="text-xs text-slate-500 font-semibold mt-1">{s.projectId?.projectName || "No Project"}</p>
+                          </div>
+                          <span className={`px-2.5 py-1 text-xs font-bold rounded-lg uppercase ${s.status === 'active' ? 'bg-emerald-100 text-emerald-700' : s.status === 'completed' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>{s.status}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-xs text-slate-500 font-semibold mb-3">
+                          <span>Tasks: <strong className="text-slate-700">{s.tasks?.length || 0}</strong></span>
+                          {s.startDate && <span>Start: {new Date(s.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+                          {s.endDate && <span>End: {new Date(s.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+                        </div>
+                        <div className="flex gap-2 pt-2 border-t border-slate-100">
+                          <button onClick={() => navigate(`/edit-sprint/${s._id}`)} className="btn-action py-1.5 text-xs flex-1 justify-center"><Edit size={13} className="mr-1" /> Edit</button>
+                          <button onClick={async () => {
+                            if (!await confirm({ title: "Delete Sprint", message: "Are you sure you want to delete this sprint?" })) return;
+                            try { await deleteSprint(s._id); setSprints(sprints.filter(sp => sp._id !== s._id)); toast.success("Sprint deleted"); } catch (e) { toast.error("Delete failed"); }
+                          }} className="btn-action danger py-1.5 text-xs justify-center" style={{ minWidth: '36px' }}><Trash2 size={13} /></button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
 
-               <div className="glass-card p-6">
-                 <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2 flex items-center gap-2"><CheckCircle size={18} className="text-indigo-600"/> Task Assignments ({allTasks.length})</h3>
-                 <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                   {allTasks.length === 0 ? (
-                     <div className="text-center py-8 text-slate-400 font-semibold">No tasks created yet</div>
-                   ) : allTasks
-                      .filter(t => t.taskTitle.toLowerCase().includes(searchTerm.toLowerCase()))
-                      .map(t => (
-                     <div key={t._id} className="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-indigo-200 transition-all">
-                       <div className="flex justify-between items-start mb-2">
-                         <div className="min-w-0 flex-1">
-                           <h4 className="font-bold text-slate-800 flex items-center gap-2 text-sm">
-                             <span className={`w-2 h-2 rounded-full flex-shrink-0 ${t.status === 'completed' ? 'bg-emerald-500' : t.status === 'in progress' ? 'bg-amber-500' : t.status === 'testing' ? 'bg-blue-500' : 'bg-slate-400'}`}></span>
-                             <span className="truncate">{t.taskTitle}</span>
-                           </h4>
-                           <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                             <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-bold uppercase">{t.status || 'pending'}</span>
-                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${t.priority === 'high' ? 'bg-orange-100 text-orange-700' : t.priority === 'low' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'}`}>{t.priority || 'medium'}</span>
-                             {t.assignedDeveloper?.name && <span className="text-[10px] text-indigo-600 font-bold">👤 {t.assignedDeveloper.name}</span>}
-                             {t.moduleId?.moduleName && <span className="text-[10px] text-cyan-600 font-bold">📦 {t.moduleId.moduleName}</span>}
-                           </div>
-                         </div>
-                       </div>
-                       
-                       {/* Sprint Assignment Row */}
-                       <div className="flex flex-wrap items-center gap-2 pt-3 mt-3 border-t border-slate-100">
-                         <select 
-                           className="custom-select py-1.5 px-3 text-xs flex-1 min-w-[140px]" 
-                           value={taskSprintMap[t._id] || ""} 
-                           onChange={e => setTaskSprintMap({...taskSprintMap, [t._id]: e.target.value})}
-                           style={{ borderRadius: '10px', background: '#fff', border: '1px solid #e2e8f0' }}
-                         >
-                           <option value="">Assign to sprint...</option>
-                           {sprints.map(s => <option key={s._id} value={s._id}>{s.sprintName}</option>)}
-                         </select>
-                         <button onClick={async () => {
-                           if(!taskSprintMap[t._id]) return toast.error("Select a sprint first");
-                           try {
-                             await assignTaskToSprint({ sprintId: taskSprintMap[t._id], taskId: t._id });
-                             toast.success("Task assigned to sprint! ✅");
-                             setTaskSprintMap(prev => ({...prev, [t._id]: ""}));
-                           } catch(e) { toast.error("Assignment failed"); }
-                         }} className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1" title="Assign to Sprint">
-                           <PlusCircle size={13}/> Assign
-                         </button>
-                         <button onClick={() => navigate(`/task-detail/${t._id}`)} className="btn-action py-1.5 text-xs text-indigo-600 border-indigo-200" title="Review Task">Review</button>
-                         <button onClick={() => navigate(`/edit-task/${t._id}`)} className="btn-action py-1.5 text-xs" title="Edit Task"><Edit size={13}/></button>
-                         <button onClick={() => handleDeleteTask(t._id)} className="btn-action danger py-1.5 text-xs" title="Delete Task"><Trash2 size={13}/></button>
-                       </div>
-                     </div>
-                   ))}
-                 </div>
-               </div>
+              <div className="glass-card p-6">
+                <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2 flex items-center gap-2"><CheckCircle size={18} className="text-indigo-600" /> Task Assignments ({allTasks.length})</h3>
+                <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                  {allTasks.length === 0 ? (
+                    <div className="text-center py-8 text-slate-400 font-semibold">No tasks created yet</div>
+                  ) : allTasks
+                    .filter(t => t.taskTitle.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .map(t => (
+                      <div key={t._id} className="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-indigo-200 transition-all">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="min-w-0 flex-1">
+                            <h4 className="font-bold text-slate-800 flex items-center gap-2 text-sm">
+                              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${t.status === 'completed' ? 'bg-emerald-500' : t.status === 'in progress' ? 'bg-amber-500' : t.status === 'testing' ? 'bg-blue-500' : 'bg-slate-400'}`}></span>
+                              <span className="truncate">{t.taskTitle}</span>
+                            </h4>
+                            <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                              <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-bold uppercase">{t.status || 'pending'}</span>
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${t.priority === 'high' ? 'bg-orange-100 text-orange-700' : t.priority === 'low' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'}`}>{t.priority || 'medium'}</span>
+                              {t.assignedDeveloper?.name && <span className="text-[10px] text-indigo-600 font-bold">👤 {t.assignedDeveloper.name}</span>}
+                              {t.moduleId?.moduleName && <span className="text-[10px] text-cyan-600 font-bold">📦 {t.moduleId.moduleName}</span>}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Sprint Assignment Row */}
+                        <div className="flex flex-wrap items-center gap-2 pt-3 mt-3 border-t border-slate-100">
+                          <select
+                            className="custom-select py-1.5 px-3 text-xs flex-1 min-w-[140px]"
+                            value={taskSprintMap[t._id] || ""}
+                            onChange={e => setTaskSprintMap({ ...taskSprintMap, [t._id]: e.target.value })}
+                            style={{ borderRadius: '10px', background: '#fff', border: '1px solid #e2e8f0' }}
+                          >
+                            <option value="">Assign to sprint...</option>
+                            {sprints.map(s => <option key={s._id} value={s._id}>{s.sprintName}</option>)}
+                          </select>
+                          <button onClick={async () => {
+                            if (!taskSprintMap[t._id]) return toast.error("Select a sprint first");
+                            try {
+                              await assignTaskToSprint({ sprintId: taskSprintMap[t._id], taskId: t._id });
+                              toast.success("Task assigned to sprint! ✅");
+                              setTaskSprintMap(prev => ({ ...prev, [t._id]: "" }));
+                            } catch (e) { toast.error("Assignment failed"); }
+                          }} className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1" title="Assign to Sprint">
+                            <PlusCircle size={13} /> Assign
+                          </button>
+                          <button onClick={() => navigate(`/task-detail/${t._id}`)} className="btn-action py-1.5 text-xs text-indigo-600 border-indigo-200" title="Review Task">Review</button>
+                          <button onClick={() => navigate(`/edit-task/${t._id}`)} className="btn-action py-1.5 text-xs" title="Edit Task"><Edit size={13} /></button>
+                          <button onClick={() => handleDeleteTask(t._id)} className="btn-action danger py-1.5 text-xs" title="Delete Task"><Trash2 size={13} /></button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
             </div>
           </div>
-         )
+        )
 
       case "manage_modules":
         return (
@@ -546,7 +593,7 @@ const AdminDashboard = () => {
                 <p className="text-sm text-slate-500 font-semibold mt-1 ml-[52px]">{filteredModules.length} modules across {projects.length} projects</p>
               </div>
               <button className="btn-primary" onClick={() => { setEditingModule(null); setShowModuleForm(true); }}>
-                <PlusCircle size={18}/> Add Module
+                <PlusCircle size={18} /> Add Module
               </button>
             </div>
 
@@ -639,19 +686,19 @@ const AdminDashboard = () => {
                         {mod.createdAt ? new Date(mod.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : "N/A"}
                       </div>
                       <div className="flex gap-1.5">
-                        <button 
+                        <button
                           onClick={() => { setEditingModule(mod); setShowModuleForm(true); }}
                           className="p-2 text-slate-400 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50 rounded-lg transition-all"
                           title="Edit Module"
                         >
-                          <Edit size={14}/>
+                          <Edit size={14} />
                         </button>
-                        <button 
+                        <button
                           onClick={() => confirmDeleteModule(mod._id)}
                           className="p-2 text-slate-400 hover:text-red-600 bg-slate-50 hover:bg-red-50 rounded-lg transition-all"
                           title="Delete Module"
                         >
-                          <Trash2 size={14}/>
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </div>
@@ -679,7 +726,7 @@ const AdminDashboard = () => {
               </div>
               <div className="glass-card p-5 !rounded-2xl border-l-4 border-l-red-500 cursor-pointer hover:-translate-y-1 transition-transform" onClick={() => setActiveTab('bug_tracking')}>
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Open Bugs</p>
-                <h3 className="text-3xl font-black text-red-600">{bugs.filter(b => ["open","submitted","draft"].includes(b.status?.toLowerCase())).length}</h3>
+                <h3 className="text-3xl font-black text-red-600">{bugs.filter(b => ["open", "submitted", "draft"].includes(b.status?.toLowerCase())).length}</h3>
               </div>
               <div className="glass-card p-5 !rounded-2xl border-l-4 border-l-emerald-500">
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Active Sprints</p>
@@ -693,13 +740,13 @@ const AdminDashboard = () => {
                 <h3 className="font-bold text-slate-800 mb-4">Task Completion Matrix</h3>
                 <div className="flex-1 w-full" style={{ height: '250px', minHeight: '250px' }}>
                   <ResponsiveContainer width="100%" height="100%" debounce={100}>
-                    <BarChart data={taskStatusData} margin={{top: 10, right: 10, bottom: 20, left: -20}}>
-                      <XAxis dataKey="name" tick={{fontSize: 12, fontWeight: 600, fill: '#64748b'}} axisLine={false} tickLine={false}/>
-                      <YAxis tick={{fontSize: 12, fontWeight: 600, fill: '#64748b'}} axisLine={false} tickLine={false}/>
-                      <Tooltip cursor={{fill: '#f1f5f9'}} contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', fontWeight: 'bold'}}/>
+                    <BarChart data={taskStatusData} margin={{ top: 10, right: 10, bottom: 20, left: -20 }}>
+                      <XAxis dataKey="name" tick={{ fontSize: 12, fontWeight: 600, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 12, fontWeight: 600, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                      <Tooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', fontWeight: 'bold' }} />
                       <Bar dataKey="Count" radius={[6, 6, 0, 0]} barSize={40}>
                         {taskStatusData.map((entry, index) => (
-                           <Cell key={`cell-${index}`} fill={entry.color} />
+                          <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Bar>
                     </BarChart>
@@ -718,8 +765,8 @@ const AdminDashboard = () => {
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
-                        <Tooltip contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', fontWeight: 'bold'}}/>
-                        <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{fontSize: "12px", fontWeight:"bold"}}/>
+                        <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', fontWeight: 'bold' }} />
+                        <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: "12px", fontWeight: "bold" }} />
                       </PieChart>
                     </ResponsiveContainer>
                   ) : <p className="text-slate-400 font-bold">No buggy severity data</p>}
@@ -729,7 +776,7 @@ const AdminDashboard = () => {
 
             {/* ACTIVITY FEED */}
             <div className="glass-card p-6">
-              <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2"><Activity size={20} className="text-indigo-600"/> Live System Activity Feed</h3>
+              <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2"><Activity size={20} className="text-indigo-600" /> Live System Activity Feed</h3>
               <div className="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
                 {activityFeed.length === 0 ? <p className="text-slate-400 italic font-medium p-4 border-2 border-dashed border-slate-200 rounded-xl text-center">No recent activity detected.</p> : activityFeed.map((log) => (
                   <div key={log._id} className="flex items-start gap-4">
@@ -743,11 +790,11 @@ const AdminDashboard = () => {
                     <div className="bg-white/80 p-3 rounded-xl border border-white shadow-sm hover:shadow-md transition-shadow flex-1 group relative">
                       <div className="flex justify-between items-start mb-1 gap-2">
                         <div className="flex flex-col">
-                           <span className="text-sm font-black text-slate-800"><span className="text-indigo-600">{log.userId?.name || "System"}</span> {log.description}</span>
-                           <span className="text-xs font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded uppercase self-start mt-1">Entity: {log.entityType}</span>
+                          <span className="text-sm font-black text-slate-800"><span className="text-indigo-600">{log.userId?.name || "System"}</span> {log.description}</span>
+                          <span className="text-xs font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded uppercase self-start mt-1">Entity: {log.entityType}</span>
                         </div>
                         <span className="text-[10px] font-bold text-slate-400 uppercase whitespace-nowrap bg-slate-50 p-1 rounded border border-slate-100 shrink-0">
-                          {new Date(log.createdAt).toLocaleDateString()} {new Date(log.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                          {new Date(log.createdAt).toLocaleDateString()} {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                     </div>
@@ -815,17 +862,17 @@ const AdminDashboard = () => {
         }
         @keyframes modalPop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
       `}</style>
-      
+
       <div className="bg-circle c1"></div>
       <div className="bg-circle c2"></div>
 
       {/* SIDEBAR */}
       <div className={`sidebar fixed md:relative h-screen w-72 flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} md:translate-x-0`}>
-        
+
         <div className="p-6 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
             <div className="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
-              <BugIcon size={20} strokeWidth={3}/>
+              <BugIcon size={20} strokeWidth={3} />
             </div>
             <span className="text-2xl font-black text-slate-900 tracking-tighter uppercase italic">Fixify<span className="text-indigo-600">.</span></span>
           </div>
@@ -834,66 +881,73 @@ const AdminDashboard = () => {
 
         <div className="px-5 py-4 mb-4">
           <div className="nav-link bg-indigo-50/50 border-indigo-100/50 cursor-default flex items-center gap-3 p-3 rounded-2xl">
-             <div className="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden bg-white flex items-center justify-center flex-shrink-0">
-               {loggedInUser?.profilePicture ? <img src={loggedInUser.profilePicture} className="w-full h-full object-cover"/> : <span className="font-bold text-indigo-600">{loggedInUser?.name?.charAt(0) || "A"}</span>}
-             </div>
-             <div className="overflow-hidden">
-               <p className="text-sm font-bold text-slate-800 truncate">{loggedInUser?.name || "Admin"}</p>
-               <p className="text-[10px] font-black uppercase tracking-wider text-indigo-500 truncate">{loggedInUser?.role?.replace('_', ' ') || "ADMINISTRATOR"}</p>
-             </div>
+            <div className="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden bg-white flex items-center justify-center flex-shrink-0">
+              {loggedInUser?.profilePicture ? <img src={loggedInUser.profilePicture} className="w-full h-full object-cover" /> : <span className="font-bold text-indigo-600">{loggedInUser?.name?.charAt(0) || "A"}</span>}
+            </div>
+            <div className="overflow-hidden">
+              <p className="text-sm font-bold text-slate-800 truncate">{loggedInUser?.name || "Admin"}</p>
+              <p className="text-[10px] font-black uppercase tracking-wider text-indigo-500 truncate">{loggedInUser?.role?.replace('_', ' ') || "ADMINISTRATOR"}</p>
+            </div>
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 space-y-1 custom-scrollbar">
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-4 mb-2 mt-2">Main Menu</p>
-          <div className={`nav-link ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}><Layers size={18}/> Dashboard Overview</div>
-          <div className={`nav-link ${activeTab === 'projects' ? 'active' : ''}`} onClick={() => setActiveTab('projects')}><FileText size={18}/> Projects Portfolio</div>
-          <div className={`nav-link ${activeTab === 'manage_modules' ? 'active' : ''}`} onClick={() => setActiveTab('manage_modules')}><Package size={18}/> Manage Modules</div>
-          <div className={`nav-link ${activeTab === 'tasks_sprints' ? 'active' : ''}`} onClick={() => setActiveTab('tasks_sprints')}><CheckCircle size={18}/> Tasks & Sprints</div>
-          <div className={`nav-link ${activeTab === 'bug_tracking' ? 'active' : ''}`} onClick={() => setActiveTab('bug_tracking')}><BugIcon size={18}/> System Bugs</div>
-          <div className={`nav-link ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}><Users size={18}/> User Management</div>
-          
+          <div className={`nav-link ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}><Layers size={18} /> Dashboard Overview</div>
+          <div className={`nav-link ${activeTab === 'projects' ? 'active' : ''}`} onClick={() => setActiveTab('projects')}><FileText size={18} /> Projects Portfolio</div>
+          <div className={`nav-link ${activeTab === 'manage_modules' ? 'active' : ''}`} onClick={() => setActiveTab('manage_modules')}><Package size={18} /> Manage Modules</div>
+          <div className={`nav-link ${activeTab === 'tasks_sprints' ? 'active' : ''}`} onClick={() => setActiveTab('tasks_sprints')}><CheckCircle size={18} /> Tasks & Sprints</div>
+          <div className={`nav-link ${activeTab === 'bug_tracking' ? 'active' : ''}`} onClick={() => setActiveTab('bug_tracking')}><BugIcon size={18} /> System Bugs</div>
+          <div className={`nav-link ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-3"><Users size={18} /> User Management</div>
+              {users.filter(u => u.status === 'pending').length > 0 && (
+                <span className="w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] font-black shadow-md shadow-red-500/40">{users.filter(u => u.status === 'pending').length}</span>
+              )}
+            </div>
+          </div>
+
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-4 mb-2 mt-8">Quick Actions</p>
-          <div className="nav-link hover:text-indigo-600" onClick={() => { setEditingModule(null); setShowModuleForm(true); }}><PlusCircle size={18}/> Add Module</div>
+          <div className="nav-link hover:text-indigo-600" onClick={() => { setEditingModule(null); setShowModuleForm(true); }}><PlusCircle size={18} /> Add Module</div>
         </div>
 
         <div className="p-5 border-t border-slate-200/60 mt-auto space-y-2">
-          <div className="nav-link hover:text-indigo-600" onClick={() => navigate("/profile")}><Settings size={18}/> Account Settings</div>
-          <div className="nav-link text-red-500 hover:bg-red-50 hover:text-red-600" onClick={handleLogout}><LogOut size={18}/> Secure Logout</div>
+          <div className="nav-link hover:text-indigo-600" onClick={() => navigate("/profile")}><Settings size={18} /> Account Settings</div>
+          <div className="nav-link text-red-500 hover:bg-red-50 hover:text-red-600" onClick={handleLogout}><LogOut size={18} /> Secure Logout</div>
         </div>
       </div>
 
       {/* MAIN CONTENT AREA */}
       <div className="main-content flex flex-col relative w-full md:w-auto">
-        
+
         {/* MOBILE HEADER */}
         <div className="md:hidden mb-6 flex items-center justify-between gap-4 bg-white/70 p-4 rounded-2xl backdrop-blur-md shadow-sm border border-white">
           <div className="flex items-center gap-4">
-             <button className="p-2 bg-slate-100 rounded-lg text-slate-600" onClick={() => setSidebarOpen(true)}><Menu size={20}/></button>
-             <h2 className="font-black text-slate-800 uppercase tracking-wider text-xl italic mt-1">Fixify.</h2>
+            <button className="p-2 bg-slate-100 rounded-lg text-slate-600" onClick={() => setSidebarOpen(true)}><Menu size={20} /></button>
+            <h2 className="font-black text-slate-800 uppercase tracking-wider text-xl italic mt-1">Fixify.</h2>
           </div>
           <div className="flex items-center gap-3">
             <NotificationBell />
             <div className="relative w-32 sm:w-48">
-               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-               <input type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-white/60 border-none outline-none font-semibold text-slate-700 text-xs"/>
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <input type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-white/60 border-none outline-none font-semibold text-slate-700 text-xs" />
             </div>
           </div>
         </div>
-        
+
         {/* DESKTOP TOP BAR */}
         <div className="hidden md:flex justify-between items-center mb-6 bg-white/40 p-4 rounded-2xl backdrop-blur-md border border-white/60 shadow-sm">
-           <div className="relative w-full max-w-md">
-             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-             <input type="text" placeholder={`Search in ${activeTab.replace('_', ' ')}...`} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 rounded-xl bg-white/60 border-none focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none transition-all font-semibold text-slate-700 placeholder-slate-400 text-sm"/>
-           </div>
-           
-           <div className="flex items-center gap-4">
-             <NotificationBell />
-             <div className="text-sm font-bold text-slate-500 bg-white/60 px-4 py-2 rounded-xl">
-               {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-             </div>
-           </div>
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input type="text" placeholder={`Search in ${activeTab.replace('_', ' ')}...`} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 rounded-xl bg-white/60 border-none focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none transition-all font-semibold text-slate-700 placeholder-slate-400 text-sm" />
+          </div>
+
+          <div className="flex items-center gap-4">
+            <NotificationBell />
+            <div className="text-sm font-bold text-slate-500 bg-white/60 px-4 py-2 rounded-xl">
+              {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+            </div>
+          </div>
         </div>
 
         <div className="flex-1">
@@ -915,3 +969,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

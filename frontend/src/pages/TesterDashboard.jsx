@@ -23,6 +23,8 @@ const TesterDashboard = () => {
   useEffect(() => {
     if (!loggedInUser || loggedInUser.role !== "tester") {
       navigate("/login");
+    } else if (loggedInUser.status === "pending") {
+      navigate("/waiting");
     }
   }, [loggedInUser, navigate]);
 
