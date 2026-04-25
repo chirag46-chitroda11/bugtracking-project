@@ -8,7 +8,7 @@ const Profile = () => {
   const confirm = useConfirm();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -96,11 +96,11 @@ const Profile = () => {
       };
 
       const res = await API.put(`/user/users/profile/${user._id}`, payload);
-      
+
       // Update local storage
       const storedUser = JSON.parse(localStorage.getItem("user"));
       localStorage.setItem("user", JSON.stringify({ ...storedUser, ...res.data.data }));
-      
+
       setUser(res.data.data);
       triggerToast("Profile updated successfully! 🎉");
       setTimeout(() => navigate(-1), 1500);
@@ -177,7 +177,7 @@ const Profile = () => {
         .toast-box { position: fixed; top: 20px; right: 20px; padding: 1rem 2rem; border-radius: 12px; color: #fff; font-weight: 700; z-index: 1000; transform: translateX(150%); transition: 0.4s; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
         .toast-box.show { transform: translateX(0); }
       `}</style>
-      
+
       <div className="bg-circle c1"></div>
       <div className="bg-circle c2"></div>
 
@@ -186,10 +186,10 @@ const Profile = () => {
       </div>
 
       <div className="max-w-4xl mx-auto relative z-10">
-        
+
         <div className="flex items-center gap-4 mb-8">
           <button onClick={() => navigate(-1)} className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:shadow-md transition">
-             ←
+            ←
           </button>
           <div>
             <h1 className="text-3xl font-extrabold text-indigo-950 tracking-tight">Account Settings</h1>
@@ -198,7 +198,7 @@ const Profile = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          
+
           {/* PROFILE HEADER CARD */}
           <div className="glass-panel p-8 flex flex-col md:flex-row items-center gap-8">
             <div className="relative group">
@@ -214,7 +214,7 @@ const Profile = () => {
                 <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
               </label>
             </div>
-            
+
             <div className="text-center md:text-left flex-1">
               <h2 className="text-3xl font-black text-slate-800">{user.name}</h2>
               <div className="mt-2 inline-block px-4 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full text-sm font-bold tracking-wide capitalize">
@@ -228,7 +228,7 @@ const Profile = () => {
           <div className="glass-card p-8">
             <h3 className="text-xl font-bold text-slate-800 mb-6 border-b border-slate-100 pb-4">Personal Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
+
               <div>
                 <label className="input-label">Full Name</label>
                 <input type="text" name="name" value={formData.name} onChange={handleInputChange} required className="custom-input" placeholder="Your full name" />
@@ -257,12 +257,12 @@ const Profile = () => {
 
             {/* ACCOUNT ACTIONS CARD FOR PROFILE */}
             <div className="flex justify-end gap-3 mt-8">
-               <button type="button" onClick={() => navigate(-1)} className="btn-secondary">
-                 Cancel
-               </button>
-               <button type="submit" className="btn-primary">
-                 Save Profile Changes
-               </button>
+              <button type="button" onClick={() => navigate(-1)} className="btn-secondary">
+                Cancel
+              </button>
+              <button type="submit" className="btn-primary">
+                Save Profile Changes
+              </button>
             </div>
           </div>
         </form>
@@ -291,16 +291,16 @@ const Profile = () => {
           </div>
         </form>
 
-          {/* DANGER ZONE CARD */}
-          <div className="glass-card p-6 flex flex-col md:flex-row items-center justify-between gap-4 mt-6">
-            <div>
-               <h3 className="text-lg font-bold text-slate-800">Danger Zone</h3>
-               <p className="text-sm text-slate-500">Permanently delete your account and all related data.</p>
-            </div>
-            <button type="button" onClick={handleDeleteAccount} className="btn-danger w-full md:w-auto">
-              Delete Account
-            </button>
+        {/* DANGER ZONE CARD */}
+        <div className="glass-card p-6 flex flex-col md:flex-row items-center justify-between gap-4 mt-6">
+          <div>
+            <h3 className="text-lg font-bold text-slate-800">Danger Zone</h3>
+            <p className="text-sm text-slate-500">Permanently delete your account and all related data.</p>
           </div>
+          <button type="button" onClick={handleDeleteAccount} className="btn-danger w-full md:w-auto">
+            Delete Account
+          </button>
+        </div>
       </div>
     </div>
   );

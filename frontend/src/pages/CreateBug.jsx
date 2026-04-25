@@ -9,7 +9,7 @@ const CreateBug = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user")) || { name: "Tester" };
   const role = user?.role;
-  
+
   const queryParams = new URLSearchParams(window.location.search);
   const initialTask = queryParams.get("task") || "";
 
@@ -41,7 +41,7 @@ const CreateBug = () => {
     if (!file) return;
     setPrev(URL.createObjectURL(file));
     setLoad({ ...load, up: true });
-    
+
     const d = new FormData();
     d.append("file", file);
     d.append("upload_preset", "my_preset_123");
@@ -50,11 +50,11 @@ const CreateBug = () => {
       const res = await axios.post(`https://api.cloudinary.com/v1_1/deez3ri1o/image/upload`, d);
       setForm({ ...form, bugImage: res.data.secure_url });
       toast.success("Evidence Secured");
-    } catch { 
-      toast.error("Upload Failed"); 
-      setPrev(null); 
-    } finally { 
-      setLoad({ ...load, up: false }); 
+    } catch {
+      toast.error("Upload Failed");
+      setPrev(null);
+    } finally {
+      setLoad({ ...load, up: false });
     }
   };
 
@@ -62,7 +62,7 @@ const CreateBug = () => {
     e.preventDefault();
     if (!form.bugImage) return toast.error("Upload evidence first");
     if (!form.assignedDeveloper) return toast.error("Assign to a developer first");
-    
+
     setLoad({ ...load, sub: true });
     try {
       await createBug({ ...form, status: "OPEN", reportById: user._id || user.id });
@@ -73,16 +73,16 @@ const CreateBug = () => {
         else if (role === "developer") navigate("/developer-dashboard");
         else navigate("/");
       }, 1500);
-    } catch { 
-      toast.error("Sync Failed"); 
-    } finally { 
-      setLoad({ ...load, sub: false }); 
+    } catch {
+      toast.error("Sync Failed");
+    } finally {
+      setLoad({ ...load, sub: false });
     }
   };
 
   return (
     <div className="layout-wrapper relative min-h-screen flex items-center justify-center p-6 text-slate-800">
-      <Toaster position="top-right"/>
+      <Toaster position="top-right" />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         .layout-wrapper { font-family: 'Plus Jakarta Sans', sans-serif; background: #ccd6ff; overflow: hidden; }
@@ -104,7 +104,7 @@ const CreateBug = () => {
         
         .up-box { border: 2px dashed #6366f1; padding: 18px; border-radius: 12px; background: rgba(255,255,255,0.5); margin-bottom: 20px; text-align: center; }
       `}</style>
-      
+
       <div className="bg-circle c1"></div>
       <div className="bg-circle c2"></div>
 
@@ -123,73 +123,73 @@ const CreateBug = () => {
             <input className="custom-input read-only" value={form.reportBy} readOnly />
           </div>
 
-          <input className="custom-input" placeholder="Incident Title" required value={form.bugTitle} onChange={e => setForm({...form, bugTitle: e.target.value})} />
-          
-          <textarea className="custom-input h-20 resize-none" placeholder="General Description..." required value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
-          
-          <textarea className="custom-input h-20 resize-none" placeholder="Steps to Reproduce..." required value={form.stepsToReproduce} onChange={e => setForm({...form, stepsToReproduce: e.target.value})} />
-          
+          <input className="custom-input" placeholder="Incident Title" required value={form.bugTitle} onChange={e => setForm({ ...form, bugTitle: e.target.value })} />
+
+          <textarea className="custom-input h-20 resize-none" placeholder="General Description..." required value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+
+          <textarea className="custom-input h-20 resize-none" placeholder="Steps to Reproduce..." required value={form.stepsToReproduce} onChange={e => setForm({ ...form, stepsToReproduce: e.target.value })} />
+
           <div className="grid grid-cols-2 gap-4">
-             <textarea className="custom-input h-20 resize-none" placeholder="Expected Result..." required value={form.expectedResult} onChange={e => setForm({...form, expectedResult: e.target.value})} />
-             <textarea className="custom-input h-20 resize-none" placeholder="Actual Result..." required value={form.actualResult} onChange={e => setForm({...form, actualResult: e.target.value})} />
+            <textarea className="custom-input h-20 resize-none" placeholder="Expected Result..." required value={form.expectedResult} onChange={e => setForm({ ...form, expectedResult: e.target.value })} />
+            <textarea className="custom-input h-20 resize-none" placeholder="Actual Result..." required value={form.actualResult} onChange={e => setForm({ ...form, actualResult: e.target.value })} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="text-left">
               <label className="input-label">Select Module</label>
-              <select className="custom-input cursor-pointer" required value={form.moduleId} onChange={e => setForm({...form, moduleId: e.target.value})}>
+              <select className="custom-input cursor-pointer" required value={form.moduleId} onChange={e => setForm({ ...form, moduleId: e.target.value })}>
                 <option value="">Select Module..</option>
                 {modules.map(m => <option key={m._id} value={m._id}>{m.moduleName}</option>)}
               </select>
             </div>
             <div className="text-left">
               <label className="input-label">Environment</label>
-              <input className="custom-input" placeholder="e.g. Chrome 120, Windows 11" required value={form.environment} onChange={e => setForm({...form, environment: e.target.value})} />
+              <input className="custom-input" placeholder="e.g. Chrome 120, Windows 11" required value={form.environment} onChange={e => setForm({ ...form, environment: e.target.value })} />
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div className="text-left">
               <label className="input-label">Severity Level</label>
-              <select className="custom-input cursor-pointer !mb-0" value={form.severity} onChange={e => setForm({...form, severity: e.target.value})}>
+              <select className="custom-input cursor-pointer !mb-0" value={form.severity} onChange={e => setForm({ ...form, severity: e.target.value })}>
                 <option value="low">Low Impact</option>
                 <option value="medium">Medium Impact</option>
                 <option value="high">High Impact</option>
                 <option value="critical">Critical Impact</option>
               </select>
             </div>
-            
+
             <div className="text-left">
               <label className="input-label">Priority Level</label>
-              <select className="custom-input cursor-pointer !mb-0" value={form.priority} onChange={e => setForm({...form, priority: e.target.value})}>
+              <select className="custom-input cursor-pointer !mb-0" value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value })}>
                 <option value="low">Low Priority</option>
                 <option value="medium">Medium Priority</option>
                 <option value="high">High Priority</option>
               </select>
             </div>
-            
+
             <div className="text-left mt-2 col-span-2 md:col-span-1">
               <label className="input-label">Linked Task (Optional)</label>
-              <select className="custom-input cursor-pointer !mb-0" value={form.taskId} onChange={e => setForm({...form, taskId: e.target.value})}>
+              <select className="custom-input cursor-pointer !mb-0" value={form.taskId} onChange={e => setForm({ ...form, taskId: e.target.value })}>
                 <option value="">No Direct Task Linked</option>
                 {tasks.map(t => <option key={t._id} value={t._id}>{t.taskTitle}</option>)}
               </select>
             </div>
-            
+
             <div className="col-span-2 md:col-span-1 text-left mt-2">
               <label className="input-label">Assign To Developer (Optional)</label>
-              <select className="custom-input cursor-pointer !mb-0" value={form.assignedDeveloper} onChange={e => setForm({...form, assignedDeveloper: e.target.value})}>
+              <select className="custom-input cursor-pointer !mb-0" value={form.assignedDeveloper} onChange={e => setForm({ ...form, assignedDeveloper: e.target.value })}>
                 <option value="">Leave Unassigned / PM Will Assign</option>
                 {devs.map(d => <option key={d._id} value={d._id}>{d.name}</option>)}
               </select>
             </div>
           </div>
-          <br/>
+          <br />
 
           <div className="up-box">
             {!prev ? (
               <label className="text-xs font-black text-indigo-600 cursor-pointer uppercase tracking-widest flex items-center justify-center gap-2">
-                📸 Attach Evidence 
+                📸 Attach Evidence
                 <input type="file" className="hidden" onChange={handleUp} />
               </label>
             ) : (
@@ -197,7 +197,7 @@ const CreateBug = () => {
                 <img src={prev} className="w-14 h-14 rounded-lg object-cover border-2 border-white shadow-sm" alt="preview" />
                 <div className="flex flex-col text-left">
                   <span className={`text-xs font-black ${load.up ? 'text-indigo-500 animate-pulse' : 'text-emerald-500'}`}>{load.up ? "UPLOADING..." : "SYNCED ✔️"}</span>
-                  {!load.up && <button type="button" onClick={() => {setPrev(null); setForm({...form, bugImage:""})}} className="text-rose-500 text-[10px] font-bold uppercase mt-1">Remove</button>}
+                  {!load.up && <button type="button" onClick={() => { setPrev(null); setForm({ ...form, bugImage: "" }) }} className="text-rose-500 text-[10px] font-bold uppercase mt-1">Remove</button>}
                 </div>
               </div>
             )}
