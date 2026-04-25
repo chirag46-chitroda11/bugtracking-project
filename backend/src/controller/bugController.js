@@ -65,15 +65,15 @@ const createBug = async (req, res) => {
     const ActivityLog = require("../models/activityLogModel");
     const currentUserId = req.user?.id || req.user?._id || reportById;
     if (currentUserId) {
-       await ActivityLog.create({
-         userId: currentUserId,
-         action: "bug_edited",
-         entityType: "bug",
-         entityId: bug._id,
-         title: bug.bugTitle,
-         description: `Reported new bug`,
-         metadata: { severity }
-       });
+      await ActivityLog.create({
+        userId: currentUserId,
+        action: "bug_edited",
+        entityType: "bug",
+        entityId: bug._id,
+        title: bug.bugTitle,
+        description: `Reported new bug`,
+        metadata: { severity }
+      });
     }
 
     res.status(201).json({
@@ -148,7 +148,7 @@ const updateBugStatus = async (req, res) => {
 
     const bug = await Bug.findByIdAndUpdate(
       req.params.id,
-      { 
+      {
         status: req.body.status,
         $push: { activityLogs: { message: `Status changed to ${req.body.status}`, action: "status_update", userName: req.user?.name || "System", date: new Date() } }
       },
@@ -158,15 +158,15 @@ const updateBugStatus = async (req, res) => {
     const ActivityLog = require("../models/activityLogModel");
     const currentUserId = req.user?.id || req.user?._id;
     if (currentUserId && oldStatus !== req.body.status) {
-       await ActivityLog.create({
-         userId: currentUserId,
-         action: "status_changed",
-         entityType: "bug",
-         entityId: bug._id,
-         title: bug.bugTitle,
-         description: `Changed bug status to ${req.body.status}`,
-         metadata: { oldStatus, newStatus: req.body.status }
-       });
+      await ActivityLog.create({
+        userId: currentUserId,
+        action: "status_changed",
+        entityType: "bug",
+        entityId: bug._id,
+        title: bug.bugTitle,
+        description: `Changed bug status to ${req.body.status}`,
+        metadata: { oldStatus, newStatus: req.body.status }
+      });
     }
 
     // Create notification for status change
@@ -309,15 +309,15 @@ const updateBug = async (req, res) => {
     const ActivityLog = require("../models/activityLogModel");
     const currentUserId = req.user?.id || req.user?._id;
     if (currentUserId && Object.keys(fieldsToSet).length > 0) {
-       await ActivityLog.create({
-         userId: currentUserId,
-         action: fieldsToSet.status ? "status_changed" : "bug_edited",
-         entityType: "bug",
-         entityId: bug._id,
-         title: bug.bugTitle,
-         description: fieldsToSet.status ? `Changed bug status to ${fieldsToSet.status}` : `Updated bug details`,
-         metadata: fieldsToSet.status ? { newStatus: fieldsToSet.status } : {}
-       });
+      await ActivityLog.create({
+        userId: currentUserId,
+        action: fieldsToSet.status ? "status_changed" : "bug_edited",
+        entityType: "bug",
+        entityId: bug._id,
+        title: bug.bugTitle,
+        description: fieldsToSet.status ? `Changed bug status to ${fieldsToSet.status}` : `Updated bug details`,
+        metadata: fieldsToSet.status ? { newStatus: fieldsToSet.status } : {}
+      });
     }
 
     // Notify on status change
@@ -512,15 +512,15 @@ const addBugComment = async (req, res) => {
 
     const bug = await Bug.findByIdAndUpdate(
       req.params.id,
-      { 
-        $push: { 
-          reviewComments: { 
-            authorId: authorId || req.user?.id || req.user?._id, 
-            authorRole: authorRole || req.user?.role, 
+      {
+        $push: {
+          reviewComments: {
+            authorId: authorId || req.user?.id || req.user?._id,
+            authorRole: authorRole || req.user?.role,
             authorName: commenter || req.user?.name,
-            commenter: commenter || "Tester", 
-            comment, 
-            date: new Date() 
+            commenter: commenter || "Tester",
+            comment,
+            date: new Date()
           },
           activityLogs: {
             message: "Added a review comment",
@@ -529,7 +529,7 @@ const addBugComment = async (req, res) => {
             userRole: authorRole || req.user?.role,
             date: new Date()
           }
-        } 
+        }
       },
       { new: true }
     )

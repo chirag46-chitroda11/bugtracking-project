@@ -40,9 +40,20 @@ const userSchema = new mongoose.Schema({
     },
     status:{
         type:String,
-        default:"active",
-        enum:["blocked","active","inactive","deleted"]
-    }
+        default:"pending",
+        enum:["pending","approved","rejected","blocked","active","inactive","deleted"]
+    },
+    approvedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null
+    },
+    approvedAt: {
+        type: Date,
+        default: null
+    },
+    resetPasswordToken: String,
+    resetPasswordExpire: Date
 },{timestamps:true});
 
 module.exports = mongoose.model("User",userSchema)

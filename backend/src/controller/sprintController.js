@@ -36,15 +36,15 @@ const createSprint = async (req, res) => {
     const ActivityLog = require("../models/activityLogModel");
     const currentUserId = req.user?.id || req.user?._id;
     if (currentUserId) {
-       await ActivityLog.create({
-         userId: currentUserId,
-         action: "status_changed", 
-         entityType: "sprint",
-         entityId: sprint._id,
-         title: sprint.sprintName,
-         description: `Began iteration sequence "${sprintName}"`,
-         metadata: { status: sprint.status }
-       });
+      await ActivityLog.create({
+        userId: currentUserId,
+        action: "status_changed",
+        entityType: "sprint",
+        entityId: sprint._id,
+        title: sprint.sprintName,
+        description: `Began iteration sequence "${sprintName}"`,
+        metadata: { status: sprint.status }
+      });
     }
 
     res.status(201).json({

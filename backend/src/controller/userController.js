@@ -4,34 +4,47 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../utils/sendEmail");
 const { createAndEmitNotification } = require("../utils/notificationHelper");
+const crypto = require("crypto");
 
 // ================= REGISTER USER =================
 const registerUser = async (req, res) => {
-  console.log(req.body)
   try {
-    console.log("BODY:", req.body)
+    let { name, email, password, role, designation } = req.body;
 
-    const { name, email, password, role, designation } = req.body
+    let isPublic = true;
+    if (req.headers.authorization) {
+      try {
+        const token = req.headers.authorization.split(" ")[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded.role === "admin") {
+          isPublic = false;
+        }
+      } catch (err) { }
+    }
+
+    if (isPublic) {
+      role = "tester";
+    }
 
     if (!name || !email || !password || !role) {
       return res.status(400).json({
         message: "All required fields missing"
-      })
+      });
     }
 
-    const existingUser = await User.findOne({ email })
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       return res.status(400).json({
         message: "User already exists"
-      })
+      });
     }
 
-    let imageUrl = ""
+    let imageUrl = "";
 
     if (req.file) {
-      const cloudinaryResponse = await uploadToCloudinary(req.file.path)
-      imageUrl = cloudinaryResponse.secure_url
+      const cloudinaryResponse = await uploadToCloudinary(req.file.path);
+      imageUrl = cloudinaryResponse.secure_url;
     }
 
     // ✅ HASH PASSWORD
@@ -43,8 +56,9 @@ const registerUser = async (req, res) => {
       password: hashedPassword,
       role,
       designation,
+      status: isPublic ? "pending" : "active"
       // imagePath: imageUrl
-    })
+    });
 
     // ================= 📧 EMAIL FUNCTIONALITY ADDED =================
     const html = `
@@ -86,9 +100,9 @@ const registerUser = async (req, res) => {
     // Create notification for new user
     await createAndEmitNotification(req.app, {
       title: "New User Registered",
-      message: `${name} (${role.replace('_',' ')}) has joined the system`,
+      message: `${name} (${role.replace('_', ' ')}) has joined the system`,
       type: "user_registered",
-      targetRoles: ["admin"],
+      targetRoles: ["admin", "project_manager"],
       referenceId: user._id
     });
 
@@ -145,7 +159,7 @@ const loginUser = async (req, res) => {
 
     // ✅ JWT TOKEN (ENV BASED)
     const token = jwt.sign(
-      { id: user._id, email: user.email, role: user.role },
+      { id: user._id, email: user.email, role: user.role, status: user.status },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -263,10 +277,6 @@ const updateUserProfile = async (req, res) => {
       user.profilePicture = req.body.profilePicture;
     }
 
-    if (req.body.password) {
-      user.password = await bcrypt.hash(req.body.password, 10);
-    }
-
     const updatedUser = await user.save();
 
     const { password: _, ...safeUser } = updatedUser.toObject();
@@ -280,6 +290,160 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
+// ==================== APPROVE USER (ADMIN / PM ONLY) ====================
+const approveUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.status = "approved";
+    user.approvedBy = req.user.id;
+    user.approvedAt = new Date();
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "User approved successfully",
+      data: user
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ==================== REJECT USER (ADMIN / PM ONLY) ====================
+const rejectUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.status = "rejected";
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "User rejected",
+      data: user
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ==================== FORGOT PASSWORD ====================
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(200).json({ message: "If account exists, reset link sent" });
+    }
+
+    const resetToken = crypto.randomBytes(20).toString("hex");
+    user.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+    await user.save();
+
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; background:#f5f6fa; padding:20px;">
+        <div style="max-width:500px; margin:auto; background:#fff; padding:20px; border-radius:10px;">
+          <h2 style="color:#4cafef; text-align:center;">🚀 Fixify</h2>
+          <h3 style="text-align:center;">Password Reset Request</h3>
+          <p>Hello <b>${user.name}</b>,</p>
+          <p>You requested a password reset. Click the button below to reset your password. This link is valid for 15 minutes.</p>
+          <div style="text-align:center; margin: 25px 0;">
+            <a href="${resetUrl}" style="background:#4f46e5; color:#fff; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold;">Reset Password</a>
+          </div>
+          <p>If you did not request this, please ignore this email.</p>
+          <hr />
+          <p style="font-size:12px; color:gray; text-align:center;">© Fixify - Bug Tracking System</p>
+        </div>
+      </div>
+    `;
+
+    try {
+      await sendEmail(user.email, "Password Reset Request - Fixify", html);
+      res.status(200).json({ success: true, message: "If account exists, reset link sent" });
+    } catch (err) {
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+      await user.save();
+      return res.status(500).json({ message: "Email could not be sent" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ==================== RESET PASSWORD ====================
+const resetPassword = async (req, res) => {
+  try {
+    const resetPasswordToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
+
+    const user = await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired reset token" });
+    }
+
+    if (!req.body.password || req.body.password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
+
+    user.password = await bcrypt.hash(req.body.password, 10);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    res.status(200).json({ success: true, message: "Password reset successfully. Please login." });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ==================== CHANGE PASSWORD ====================
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Please provide both current and new passwords" });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "New password must be at least 6 characters" });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect current password" });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.status(200).json({ success: true, message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // ================= EXPORT =================
 module.exports = {
   registerUser,
@@ -288,5 +452,10 @@ module.exports = {
   toggleUserStatus,
   deleteUser,
   getUserById,
-  updateUserProfile
+  updateUserProfile,
+  approveUser,
+  rejectUser,
+  forgotPassword,
+  resetPassword,
+  changePassword
 }

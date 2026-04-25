@@ -18,7 +18,7 @@ const getAnnouncements = async (req, res) => {
 const createAnnouncement = async (req, res) => {
   try {
     const { title, message, priority } = req.body;
-    
+
     // Only Admin and PM can create announcements
     if (req.user.role !== "admin" && req.user.role !== "pm") {
       return res.status(403).json({ success: false, message: "Unauthorized to create announcements" });
@@ -38,15 +38,15 @@ const createAnnouncement = async (req, res) => {
     // Log Activity
     const currentUserId = req.user.id || req.user._id;
     if (currentUserId) {
-        await ActivityLog.create({
-            userId: currentUserId,
-            action: "announcement_added",
-            entityType: "comment", // using comment enum for global texts
-            entityId: announcement._id,
-            title: announcement.title,
-            description: `Published a global announcement: ${announcement.title}`,
-            metadata: { priority: announcement.priority }
-        });
+      await ActivityLog.create({
+        userId: currentUserId,
+        action: "announcement_added",
+        entityType: "comment", // using comment enum for global texts
+        entityId: announcement._id,
+        title: announcement.title,
+        description: `Published a global announcement: ${announcement.title}`,
+        metadata: { priority: announcement.priority }
+      });
     }
 
     res.status(201).json({ success: true, data: populated });

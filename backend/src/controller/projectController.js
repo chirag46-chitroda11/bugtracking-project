@@ -42,15 +42,15 @@ const createProject = async (req, res) => {
     const ActivityLog = require("../models/activityLogModel");
     const currentUserId = req.user?.id || req.user?._id || createdBy;
     if (currentUserId) {
-       await ActivityLog.create({
-         userId: currentUserId,
-         action: "status_changed", // or custom action name
-         entityType: "project",
-         entityId: project._id,
-         title: project.projectName,
-         description: `Initialized project sequence ${projectCode}`,
-         metadata: { projectCode }
-       });
+      await ActivityLog.create({
+        userId: currentUserId,
+        action: "status_changed", // or custom action name
+        entityType: "project",
+        entityId: project._id,
+        title: project.projectName,
+        description: `Initialized project sequence ${projectCode}`,
+        metadata: { projectCode }
+      });
     }
 
     res.status(201).json({
@@ -154,15 +154,15 @@ const updateProject = async (req, res) => {
     const ActivityLog = require("../models/activityLogModel");
     const currentUserId = req.user?.id || req.user?._id;
     if (currentUserId && project) {
-       await ActivityLog.create({
-         userId: currentUserId,
-         action: "comment_added", // or just generalized to 'edit' or 'update'
-         entityType: "project",
-         entityId: project._id,
-         title: project.projectName,
-         description: `Modified project parameters`,
-         metadata: {}
-       });
+      await ActivityLog.create({
+        userId: currentUserId,
+        action: "comment_added", // or just generalized to 'edit' or 'update'
+        entityType: "project",
+        entityId: project._id,
+        title: project.projectName,
+        description: `Modified project parameters`,
+        metadata: {}
+      });
     }
 
     res.status(200).json({

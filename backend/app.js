@@ -26,7 +26,7 @@ global.io = io;
 
 io.on("connection", (socket) => {
   // console.log("Socket connected:", socket.id); // Disabled noisy logs
-  
+
   socket.on("join_role", (role) => {
     socket.join(`role_${role}`);
   });
