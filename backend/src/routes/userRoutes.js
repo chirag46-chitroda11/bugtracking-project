@@ -7,11 +7,11 @@ const authMiddleware = require("../middleware/authMiddleware")
 router.post("/register", registerUser)
 router.post("/login", loginUser)
 
-router.get("/users", getAllUsers);
-router.get("/users/:id", getUserById);
-router.put("/users/profile/:id", updateUserProfile);
-router.put("/users/toggle/:id", toggleUserStatus);
-router.delete("/users/:id", deleteUser);
+router.get("/users", authMiddleware, getAllUsers);
+router.get("/users/:id", authMiddleware, getUserById);
+router.put("/users/profile/:id", authMiddleware, updateUserProfile);
+router.put("/users/toggle/:id", authMiddleware, toggleUserStatus);
+router.delete("/users/:id", authMiddleware, deleteUser);
 
 // New Approval Routes
 router.put("/users/approve/:id", authMiddleware, approveUser);

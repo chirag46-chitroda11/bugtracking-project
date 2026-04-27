@@ -38,7 +38,7 @@ const AppRouter = () => {
       <Route path="/waiting" element={<WaitingPage />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/profile" element={<Profile />} />
-     
+
       <Route path="/admin-dashboard" element={<AdminDashboard />} />
       <Route path="/developer-dashboard" element={<DeveloperDashboard />} />
       <Route path="/task-detail/:id" element={<TaskDetail />} />
@@ -46,10 +46,10 @@ const AppRouter = () => {
       <Route path="/pm-dashboard" element={<PMDashboard />} />
       <Route path="/pm/project/:id" element={<PMProjectDetail />} />
 
-      <Route path="/create-bug" element={<CreateBug/>} />
-      <Route path="/create-project" element={<CreateProject/>} />
-      <Route path="/edit-project/:id" element={<EditProject/>} />  
-      <Route path="/create-module" element={<CreateModule/>} />  
+      <Route path="/create-bug" element={<CreateBug />} />
+      <Route path="/create-project" element={<CreateProject />} />
+      <Route path="/edit-project/:id" element={<EditProject />} />
+      <Route path="/create-module" element={<CreateModule />} />
       <Route path="/edit-module/:id" element={<EditModule />} />
       <Route path="/create-task" element={<CreateTask />} />
       <Route path="/edit-task/:id" element={<EditTask />} />
@@ -62,8 +62,8 @@ const AppRouter = () => {
       <Route path="/edit-bug/:id" element={<EditBug />} />
       <Route path="/bug-detail/:id" element={<BugDetails />} />
       <Route path="/tester-task/:id" element={<TesterTaskDetail />} />
-     
-    
+
+
 
       <Route path="/create-user" element={<CreateUser />} />
     </Routes>

@@ -149,19 +149,39 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getAdminDashboard();
+        const [
+          dataRes,
+          projDataRes,
+          taskDataRes,
+          sprintDataRes,
+          userRes,
+          allModRes,
+          reviewRes,
+          activityRes
+        ] = await Promise.all([
+          getAdminDashboard().catch(() => ({ stats: {}, bugs: [] })),
+          getProjects().catch(() => ({ data: [] })),
+          getTasks().catch(() => ({ data: [] })),
+          getSprints().catch(() => ({ data: [] })),
+          API.get("/user/users").catch(() => ({ data: { data: [] } })),
+          getModules().catch(() => ({ data: [] })),
+          getAllReviews().catch(() => ({ data: { data: [] } })),
+          API.get("/activity/recent?limit=25").catch(() => ({ data: { data: [] } }))
+        ]);
+
+        const data = dataRes;
+        const projData = projDataRes;
+        const taskData = taskDataRes;
+        const sprintData = sprintDataRes;
+
         setStats(data.stats || {});
         setBugs(data.bugs || []);
-
-        const projData = await getProjects();
         setProjects(projData.data || []);
-
-        const taskData = await getTasks();
-        const sprintData = await getSprints();
         setSprints(sprintData.data || []);
-
-        const userRes = await API.get("/user/users");
-        setUsers(userRes.data.data || []);
+        setUsers(userRes.data?.data || []);
+        setAllModules(allModRes.data || []);
+        setAllReviews(reviewRes.data?.data || []);
+        setActivityFeed(activityRes.data?.data || []);
 
         let taskTemp = {};
         for (let task of (taskData.data || [])) {
@@ -173,34 +193,21 @@ const AdminDashboard = () => {
         setTasksMap(taskTemp);
 
         let temp = {};
+        for (let mod of (allModRes.data || [])) {
+          const projId = (mod.projectId?._id || mod.projectId)?.toString();
+          if (!projId) continue;
+          if (!temp[projId]) temp[projId] = [];
+          temp[projId].push(mod);
+        }
+        
+        // Ensure every project at least has an empty array
         for (let proj of (projData.data || [])) {
-          const res = await getModulesByProject(proj._id);
-          temp[proj._id] = res.data;
+          if (!temp[proj._id]) temp[proj._id] = [];
         }
         setModulesMap(temp);
 
-        // Fetch all modules
-        const allModRes = await getModules();
-        setAllModules(allModRes.data || []);
-
-        // Fetch all reviews for moderation
-        try {
-          const reviewRes = await getAllReviews();
-          setAllReviews(reviewRes.data.data || []);
-        } catch (err) {
-          console.log("Reviews fetch skipped:", err);
-        }
-
-        // Real Activity Feed Map
-        try {
-          const activityRes = await API.get("/activity/recent?limit=25");
-          setActivityFeed(activityRes.data.data || []);
-        } catch (err) {
-          console.error("Activity logic failed", err);
-        }
-
       } catch (error) {
-        console.log("Dashboard error:", error);
+        console.error("Dashboard data load failed", error);
       }
     };
     fetchData();
@@ -1133,4 +1140,5 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
 

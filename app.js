@@ -3,7 +3,8 @@ const http = require("http")
 const { Server } = require("socket.io")
 const cors = require("cors")
 
-require("dotenv").config()
+const path = require("path")
+require("dotenv").config({ path: path.join(__dirname, "backend", ".env") })
 
 const app = express()
 const server = http.createServer(app)
@@ -44,7 +45,8 @@ io.on("connection", (socket) => {
   })
 })
 
-app.use(express.json())
+app.use(express.json({ limit: "50mb" }))
+app.use(express.urlencoded({ limit: "50mb", extended: true }))
 app.use(cors())
 
 // Try backend/src first, fallback to src for DB connection
@@ -82,6 +84,15 @@ app.use("/timelog", timelogRoutes)
 
 const activityRoutes = require("./backend/src/routes/activityRoutes")
 app.use("/activity", activityRoutes)
+
+const announcementRoutes = require("./backend/src/routes/announcementRoutes")
+app.use("/announcement", announcementRoutes)
+
+const developerRoutes = require("./backend/src/routes/developerRoutes")
+app.use("/developer", developerRoutes)
+
+const reviewRoutes = require("./backend/src/routes/reviewRoutes")
+app.use("/review", reviewRoutes)
 
 const PORT = process.env.PORT || 5000
 server.listen(PORT, () => {

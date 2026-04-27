@@ -6,6 +6,10 @@ const sendEmail = require("../utils/sendEmail");
 const { createAndEmitNotification } = require("../utils/notificationHelper");
 const crypto = require("crypto");
 
+// ================= ROLE HIERARCHY =================
+const ROLE_HIERARCHY = { admin: 4, project_manager: 3, developer: 2, tester: 1 };
+const getRoleLevel = (role) => ROLE_HIERARCHY[role] || 0;
+
 // ================= REGISTER USER =================
 const registerUser = async (req, res) => {
   try {
@@ -209,6 +213,11 @@ const toggleUserStatus = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // 🔒 Role hierarchy check — cannot toggle users with same or higher role
+    if (req.user && getRoleLevel(user.role) >= getRoleLevel(req.user.role)) {
+      return res.status(403).json({ message: "You cannot modify a user with equal or higher role" });
+    }
+
     // 🔥 toggle logic
     const newStatus = user.status === "blocked" ? "active" : "blocked";
 
@@ -229,6 +238,16 @@ const toggleUserStatus = async (req, res) => {
 //================= SOFT DELETE USER (ADMIN ONLY )======
 const deleteUser = async (req, res) => {
   try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // 🔒 Role hierarchy check — cannot delete users with same or higher role
+    if (req.user && getRoleLevel(user.role) >= getRoleLevel(req.user.role)) {
+      return res.status(403).json({ message: "You cannot delete a user with equal or higher role" });
+    }
+
     await User.findByIdAndDelete(req.params.id);
 
     res.json({
@@ -266,6 +285,11 @@ const updateUserProfile = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
+    }
+
+    // 🔒 Role hierarchy check — cannot edit users with same or higher role (unless editing self)
+    if (req.user && req.user.id !== req.params.id && getRoleLevel(user.role) >= getRoleLevel(req.user.role)) {
+      return res.status(403).json({ message: "You cannot edit a user with equal or higher role" });
     }
 
     user.name = req.body.name || user.name;

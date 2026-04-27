@@ -4,7 +4,7 @@ import { Bell, X, Check, CheckCheck, Bug, Layers, Users, Activity, FileText, Ale
 import { getNotifications, markAsRead, markAllAsRead, deleteNotification } from "../services/notificationService";
 import { getSocket } from "../services/socketService";
 
-const SOCKET_URL = "http://localhost:5000";
+const SOCKET_URL = import.meta.env.PROD ? "https://fixify-backend-1wfo.onrender.com" : "http://localhost:5000";
 
 const typeIcons = {
   bug_reported: <Bug size={16} style={{ color: "#ef4444" }} />,

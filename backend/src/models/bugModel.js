@@ -18,7 +18,7 @@ const bugSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     },
-   
+
     assignedDeveloper: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"

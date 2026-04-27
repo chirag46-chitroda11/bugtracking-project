@@ -4,7 +4,14 @@ let socket = null;
 
 export const getSocket = () => {
     if (!socket) {
-        socket = io("http://localhost:5000", { transports: ["websocket", "polling"] });
+        const socketUrl = import.meta.env.PROD 
+            ? "https://fixify-backend-1wfo.onrender.com" 
+            : "http://localhost:5000";
+            
+        socket = io(socketUrl, { 
+            transports: ["websocket", "polling"],
+            withCredentials: true 
+        });
     }
     return socket;
 };
