@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../api/axios";
 import { updateBug } from "../services/bugService";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import axios from "axios";
 
 const EditBug = () => {
@@ -120,7 +120,6 @@ const EditBug = () => {
 
   return (
     <div className="layout-wrapper relative min-h-screen flex items-center justify-center py-10 px-4 text-slate-800">
-      <Toaster position="top-right" />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         .layout-wrapper { font-family: 'Plus Jakarta Sans', sans-serif; background: #ccd6ff; overflow-x: hidden; }

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { createModule } from "../services/moduleService";
 import { getProjects } from "../services/projectService";
 import { useNavigate } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 const CreateModule = () => {
   const navigate = useNavigate();
@@ -36,7 +36,6 @@ const CreateModule = () => {
 
   return (
     <div className="layout-wrapper relative min-h-screen flex items-center justify-center p-6 text-slate-800">
-      <Toaster position="top-right"/>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         .layout-wrapper { font-family: 'Plus Jakarta Sans', sans-serif; background: #ccd6ff; overflow: hidden; }

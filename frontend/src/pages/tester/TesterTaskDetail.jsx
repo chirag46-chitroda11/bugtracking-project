@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, MessageSquare, CheckCircle, XCircle, Bug as BugIcon, Clock, User } from "lucide-react";
 import API from "../../api/axios";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 const TesterTaskDetail = () => {
     const { id } = useParams();
@@ -86,7 +86,6 @@ const TesterTaskDetail = () => {
 
     return (
         <div className="min-h-screen bg-[#ccd6ff] p-4 md:p-8 text-slate-800 relative overflow-x-hidden">
-            <Toaster position="top-right" />
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
                 body, * { font-family: 'Plus Jakarta Sans', sans-serif; }

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import API from "../../api/axios";
 import { createModule, deleteModule } from "../../services/moduleService";
 import { Activity, Edit, Users, Trash2, Package, PlusCircle, CheckCircle, Clock, ArrowLeft } from 'lucide-react';
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 const PersonCard = ({ person, label, subLabel }) => {
   if (!person) return (
@@ -132,7 +132,6 @@ const PMProjectDetail = () => {
 
   return (
     <div className="min-h-screen bg-[#ccd6ff] p-4 md:p-8 text-slate-800 relative overflow-x-hidden">
-      <Toaster position="top-right" toastOptions={{ style: { fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 } }} />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
         * { font-family: 'Plus Jakarta Sans', sans-serif; }

@@ -4,7 +4,7 @@ import { getProjects } from "../services/projectService";
 import { getModules } from "../services/moduleService";
 import API from "../api/axios";
 import { useNavigate, useParams } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 const EditTask = () => {
   const { id } = useParams();
@@ -112,7 +112,6 @@ const EditTask = () => {
 
   return (
     <div className="layout-wrapper relative min-h-screen flex items-center justify-center p-6 text-slate-800">
-      <Toaster position="top-right"/>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         .layout-wrapper { font-family: 'Plus Jakarta Sans', sans-serif; background: #ccd6ff; overflow-y: auto; }

@@ -6,19 +6,33 @@ function App() {
   return (
     <ConfirmProvider>
       <Toaster 
-        position="top-right" 
+        position="top-right"
+        containerStyle={{ zIndex: 99999 }}
         toastOptions={{
+          duration: 3000,
           style: {
-            background: 'rgba(255, 255, 255, 0.9)',
-            backdropFilter: 'blur(10px)',
-            color: '#1e293b',
-            fontWeight: 'bold',
-            borderRadius: '16px',
-            border: '1px solid rgba(255,255,255,0.5)',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.08)'
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(16px)',
+            color: '#0f172a',
+            fontWeight: 700,
+            fontSize: '14px',
+            borderRadius: '14px',
+            border: '1px solid rgba(255,255,255,0.8)',
+            boxShadow: '0 12px 35px rgba(0,0,0,0.08)',
+            padding: '12px 16px',
+            maxWidth: '380px',
           },
-          success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
-          error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } }
+          success: {
+            duration: 3000,
+            iconTheme: { primary: '#10b981', secondary: '#fff' },
+            style: { borderLeft: '4px solid #10b981' },
+          },
+          error: {
+            duration: 4000,
+            iconTheme: { primary: '#ef4444', secondary: '#fff' },
+            style: { borderLeft: '4px solid #ef4444' },
+          },
         }} 
       />
       <AppRouter />

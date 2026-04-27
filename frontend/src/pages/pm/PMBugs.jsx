@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import API from "../../api/axios";
 import { useNavigate } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { Trash2, ExternalLink, Search, Bug as BugIcon } from "lucide-react";
 import { useConfirm } from "../../context/ConfirmContext";
 
@@ -75,7 +75,6 @@ const PMBugs = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <Toaster position="top-right" />
 
 
       {/* Header */}

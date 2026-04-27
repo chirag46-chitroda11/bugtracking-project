@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getSprintById, updateSprint } from "../services/sprintService";
 import API from "../api/axios";
 import { useNavigate, useParams } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 const EditSprint = () => {
   const { id } = useParams();
@@ -100,7 +100,6 @@ const EditSprint = () => {
 
   return (
     <div className="layout-wrapper relative min-h-screen flex items-center justify-center p-6 text-slate-800">
-      <Toaster position="top-right"/>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         .layout-wrapper { font-family: 'Plus Jakarta Sans', sans-serif; background: #ccd6ff; overflow: hidden; }

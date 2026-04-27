@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { createProject } from "../services/projectService";
 import API from "../api/axios";
 import { useNavigate } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 const CreateProject = () => {
   const navigate = useNavigate();
@@ -76,7 +76,6 @@ const CreateProject = () => {
 
   return (
     <div className="layout-wrapper relative min-h-screen p-6 md:p-10 text-slate-800">
-      <Toaster position="top-right"/>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         .layout-wrapper { font-family: 'Plus Jakarta Sans', sans-serif; background: #ccd6ff; overflow-y: auto; overflow-x: hidden; }

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../api/axios";
 import { deleteSprint } from "../../services/sprintService";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { Trash2, Edit2, Calendar, Target, CheckCircle } from "lucide-react";
 
 const PMSprints = () => {
@@ -64,7 +64,6 @@ const PMSprints = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <Toaster position="top-right" />
 
       {/* Delete Confirm Modal */}
       {deleteModal.open && (

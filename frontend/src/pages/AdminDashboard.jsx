@@ -6,8 +6,9 @@ import { useNavigate } from "react-router-dom";
 import { getModulesByProject, getModules, deleteModule } from "../services/moduleService";
 import { getTasks, deleteTask } from "../services/taskService";
 import { getSprints, assignTaskToSprint, deleteSprint } from "../services/sprintService";
+import { getAllReviews, approveReview, rejectReview, deleteReview as deleteReviewApi } from "../services/reviewService";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { Layers, CheckCircle, Bug as BugIcon, Users, Settings, Activity, FileText, ChevronRight, Menu, LogOut, PlusCircle, Trash2, Edit, Search, Package, Filter, Calendar, Flag, AlertTriangle, X } from 'lucide-react';
+import { Layers, CheckCircle, Bug as BugIcon, Users, Settings, Activity, FileText, ChevronRight, Menu, LogOut, PlusCircle, Trash2, Edit, Search, Package, Filter, Calendar, Flag, AlertTriangle, X, Star, MessageSquare, ShieldCheck } from 'lucide-react';
 import NotificationBell from "../components/NotificationBell";
 import ModuleFormModal from "../components/ModuleFormModal";
 import AnnouncementBanner from "../components/AnnouncementBanner";
@@ -56,6 +57,9 @@ const AdminDashboard = () => {
   const [editingModule, setEditingModule] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingModuleId, setDeletingModuleId] = useState(null);
+
+  // Review Moderation state
+  const [allReviews, setAllReviews] = useState([]);
 
   const allTasks = Object.values(tasksMap).flat();
 
@@ -178,6 +182,14 @@ const AdminDashboard = () => {
         // Fetch all modules
         const allModRes = await getModules();
         setAllModules(allModRes.data || []);
+
+        // Fetch all reviews for moderation
+        try {
+          const reviewRes = await getAllReviews();
+          setAllReviews(reviewRes.data.data || []);
+        } catch (err) {
+          console.log("Reviews fetch skipped:", err);
+        }
 
         // Real Activity Feed Map
         try {
@@ -433,27 +445,43 @@ const AdminDashboard = () => {
                 <button className="btn-primary" onClick={() => navigate("/create-user")}><PlusCircle size={18} /> Invite User</button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {users
-                  .filter(u => u.status !== "pending")
-                  .filter(u => u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.email.toLowerCase().includes(searchTerm.toLowerCase()) || u.role.toLowerCase().includes(searchTerm.toLowerCase()))
-                  .map(u => (
-                    <div key={u._id} className="glass-card p-5 text-center flex flex-col items-center group">
-                      <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center text-xl font-bold text-indigo-600 mb-3 border-4 border-white shadow-sm overflow-hidden group-hover:scale-110 transition-transform">
-                        {u.profilePicture ? <img src={u.profilePicture} alt={u.name} className="w-full h-full object-cover" /> : u.name.charAt(0).toUpperCase()}
-                      </div>
-                      <h3 className="font-bold text-slate-800 truncate w-full">{u.name}</h3>
-                      <p className="text-xs text-slate-500 font-semibold mb-3 truncate w-full">{u.email}</p>
-                      <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-black uppercase mb-4">{u.role.replace('_', ' ')}</span>
-                      <div className="w-full flex gap-2 border-t border-slate-100 pt-4 mt-auto">
-                        <button onClick={() => navigate(`/edit-user/${u._id}`)} className="btn-action flex-1 justify-center py-1.5 text-xs"><Edit size={14} className="mr-1" /> Edit</button>
-                        <button className="btn-action danger flex-1 justify-center py-1.5 text-xs" onClick={async () => {
-                          if (!(await confirm({ title: "Delete User", message: "Are you sure you want to remove this user from the system?" }))) return;
-                          await API.delete(`/user/users/${u._id}`);
-                          setUsers(users.filter(usr => usr._id !== u._id));
-                        }}><Trash2 size={14} /></button>
-                      </div>
-                    </div>
-                  ))}
+                {(() => {
+                  const ROLE_LEVELS = { admin: 4, project_manager: 3, developer: 2, tester: 1 };
+                  const myLevel = ROLE_LEVELS[loggedInUser?.role] || 0;
+                  return users
+                    .filter(u => u.status !== "pending")
+                    .filter(u => u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.email.toLowerCase().includes(searchTerm.toLowerCase()) || u.role.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .map(u => {
+                      const targetLevel = ROLE_LEVELS[u.role] || 0;
+                      const canModify = myLevel > targetLevel;
+                      return (
+                        <div key={u._id} className="glass-card p-5 text-center flex flex-col items-center group">
+                          <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center text-xl font-bold text-indigo-600 mb-3 border-4 border-white shadow-sm overflow-hidden group-hover:scale-110 transition-transform">
+                            {u.profilePicture ? <img src={u.profilePicture} alt={u.name} className="w-full h-full object-cover" /> : u.name.charAt(0).toUpperCase()}
+                          </div>
+                          <h3 className="font-bold text-slate-800 truncate w-full">{u.name}</h3>
+                          <p className="text-xs text-slate-500 font-semibold mb-3 truncate w-full">{u.email}</p>
+                          <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-black uppercase mb-4">{u.role.replace('_', ' ')}</span>
+                          {canModify ? (
+                            <div className="w-full flex gap-2 border-t border-slate-100 pt-4 mt-auto">
+                              <button onClick={() => navigate(`/edit-user/${u._id}`)} className="btn-action flex-1 justify-center py-1.5 text-xs"><Edit size={14} className="mr-1" /> Edit</button>
+                              <button className="btn-action danger flex-1 justify-center py-1.5 text-xs" onClick={async () => {
+                                if (!(await confirm({ title: "Delete User", message: "Are you sure you want to remove this user from the system?" }))) return;
+                                await API.delete(`/user/users/${u._id}`);
+                                setUsers(users.filter(usr => usr._id !== u._id));
+                              }}><Trash2 size={14} /></button>
+                            </div>
+                          ) : (
+                            <div className="w-full border-t border-slate-100 pt-4 mt-auto">
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-500 rounded-lg text-[10px] font-black uppercase tracking-wider">
+                                <ShieldCheck size={12} /> Higher Role
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    });
+                })()}
               </div>
             </div>
           </div>
@@ -804,6 +832,134 @@ const AdminDashboard = () => {
             </div>
           </div>
         );
+
+      case "reviews":
+        const pendingReviews = allReviews.filter(r => !r.isApproved).filter(r => r.name?.toLowerCase().includes(searchTerm.toLowerCase()) || r.message?.toLowerCase().includes(searchTerm.toLowerCase()));
+        const approvedReviews = allReviews.filter(r => r.isApproved).filter(r => r.name?.toLowerCase().includes(searchTerm.toLowerCase()) || r.message?.toLowerCase().includes(searchTerm.toLowerCase()));
+        return (
+          <div className="space-y-6 animate-fade-in">
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="glass-card p-5 !rounded-2xl border-l-4 border-l-amber-500">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Pending</p>
+                <h3 className="text-3xl font-black text-amber-600">{allReviews.filter(r => !r.isApproved).length}</h3>
+              </div>
+              <div className="glass-card p-5 !rounded-2xl border-l-4 border-l-emerald-500">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Approved</p>
+                <h3 className="text-3xl font-black text-emerald-600">{allReviews.filter(r => r.isApproved).length}</h3>
+              </div>
+              <div className="glass-card p-5 !rounded-2xl border-l-4 border-l-indigo-500">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total</p>
+                <h3 className="text-3xl font-black text-slate-800">{allReviews.length}</h3>
+              </div>
+              <div className="glass-card p-5 !rounded-2xl border-l-4 border-l-purple-500">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Avg Rating</p>
+                <h3 className="text-3xl font-black text-purple-600">
+                  {allReviews.filter(r => r.isApproved).length > 0 ? (allReviews.filter(r => r.isApproved).reduce((sum, r) => sum + r.rating, 0) / allReviews.filter(r => r.isApproved).length).toFixed(1) : "—"}
+                </h3>
+              </div>
+            </div>
+
+            {/* Pending Reviews */}
+            {pendingReviews.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4 border-b border-slate-200 pb-2">
+                  <span className="w-3 h-3 rounded-full bg-amber-500"></span>
+                  <h3 className="text-xl font-black text-slate-800">Pending Reviews ({pendingReviews.length})</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {pendingReviews.map((r) => (
+                    <div key={r._id} className="glass-card p-5 border-l-4 border-l-amber-400">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-sm font-bold text-amber-600">
+                            {r.name?.charAt(0)?.toUpperCase()}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-slate-800 text-sm">{r.name}</h4>
+                            <p className="text-[11px] text-slate-500 font-semibold">{r.role}{r.company ? `, ${r.company}` : ""}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} size={12} fill={i < r.rating ? "#f59e0b" : "none"} color={i < r.rating ? "#f59e0b" : "#e2e8f0"} />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-sm text-slate-600 mb-4 leading-relaxed italic">"{r.message}"</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-slate-400 font-bold">{new Date(r.createdAt).toLocaleDateString()}</span>
+                        <div className="flex gap-2">
+                          <button className="btn-action py-1.5 text-xs text-emerald-600 border-emerald-200 hover:bg-emerald-50" onClick={async () => {
+                            if (await confirm({ title: "Approve Review", message: "Approve this review? It will be visible on the landing page." })) {
+                              try { await approveReview(r._id); setAllReviews(allReviews.map(rv => rv._id === r._id ? { ...rv, isApproved: true } : rv)); toast.success("Review approved! ✅"); } catch (e) { toast.error("Failed to approve"); }
+                            }
+                          }}>Approve</button>
+                          <button className="btn-action py-1.5 text-xs text-red-500 border-red-200 hover:bg-red-50" onClick={async () => {
+                            if (await confirm({ title: "Reject Review", message: "Reject this review?" })) {
+                              try { await rejectReview(r._id); toast.success("Review rejected"); } catch (e) { toast.error("Failed"); }
+                            }
+                          }}>Reject</button>
+                          <button className="btn-action danger py-1.5 text-xs" onClick={async () => {
+                            if (await confirm({ title: "Delete Review", message: "Permanently delete this review?" })) {
+                              try { await deleteReviewApi(r._id); setAllReviews(allReviews.filter(rv => rv._id !== r._id)); toast.success("Review deleted 🗑️"); } catch (e) { toast.error("Failed"); }
+                            }
+                          }}><Trash2 size={13} /></button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Approved Reviews */}
+            <div>
+              <div className="flex items-center gap-2 mb-4 border-b border-slate-200 pb-2">
+                <CheckCircle size={18} className="text-emerald-500" />
+                <h3 className="text-xl font-black text-slate-800">Approved Reviews ({approvedReviews.length})</h3>
+              </div>
+              {approvedReviews.length === 0 ? (
+                <div className="glass-card p-8 text-center">
+                  <MessageSquare size={36} className="text-slate-300 mx-auto mb-2" />
+                  <p className="text-slate-400 font-semibold">No approved reviews yet</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {approvedReviews.map((r) => (
+                    <div key={r._id} className="glass-card p-5 border-l-4 border-l-emerald-400">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-sm font-bold text-emerald-600">
+                            {r.name?.charAt(0)?.toUpperCase()}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-slate-800 text-sm">{r.name}</h4>
+                            <p className="text-[11px] text-slate-500 font-semibold">{r.role}{r.company ? `, ${r.company}` : ""}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} size={12} fill={i < r.rating ? "#f59e0b" : "none"} color={i < r.rating ? "#f59e0b" : "#e2e8f0"} />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-sm text-slate-600 mb-4 leading-relaxed italic">"{r.message}"</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-slate-400 font-bold">{new Date(r.createdAt).toLocaleDateString()}</span>
+                        <button className="btn-action danger py-1.5 text-xs" onClick={async () => {
+                          if (await confirm({ title: "Delete Review", message: "Permanently delete this approved review?" })) {
+                            try { await deleteReviewApi(r._id); setAllReviews(allReviews.filter(rv => rv._id !== r._id)); toast.success("Review deleted 🗑️"); } catch (e) { toast.error("Failed"); }
+                          }
+                        }}><Trash2 size={13} /> Delete</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        );
     }
   };
 
@@ -903,6 +1059,14 @@ const AdminDashboard = () => {
               <div className="flex items-center gap-3"><Users size={18} /> User Management</div>
               {users.filter(u => u.status === 'pending').length > 0 && (
                 <span className="w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] font-black shadow-md shadow-red-500/40">{users.filter(u => u.status === 'pending').length}</span>
+              )}
+            </div>
+          </div>
+          <div className={`nav-link ${activeTab === 'reviews' ? 'active' : ''}`} onClick={() => setActiveTab('reviews')}>
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-3"><MessageSquare size={18} /> Reviews</div>
+              {allReviews.filter(r => !r.isApproved).length > 0 && (
+                <span className="w-5 h-5 bg-amber-500 text-white rounded-full flex items-center justify-center text-[10px] font-black shadow-md shadow-amber-500/40">{allReviews.filter(r => !r.isApproved).length}</span>
               )}
             </div>
           </div>

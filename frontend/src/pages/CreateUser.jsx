@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api/axios";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 const CreateUser = () => {
   const navigate = useNavigate();
@@ -22,7 +22,6 @@ const CreateUser = () => {
 
   return (
     <div className="layout-wrapper relative min-h-screen flex items-center justify-center p-6 text-slate-800">
-      <Toaster position="top-right"/>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         .layout-wrapper { font-family: 'Plus Jakarta Sans', sans-serif; background: #ccd6ff; overflow: hidden; }

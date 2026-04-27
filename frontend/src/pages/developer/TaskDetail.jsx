@@ -5,7 +5,7 @@ import {
   ArrowLeft, MessageSquare, Clock, Play, Square, Activity,
   Send, CheckCircle, AlertTriangle, User, Bug as BugIcon, Plus
 } from "lucide-react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const statusMeta = {
@@ -237,7 +237,6 @@ const TaskDetail = () => {
 
   return (
     <div className="min-h-screen bg-[#ccd6ff] p-4 md:p-8 text-slate-800 relative overflow-x-hidden">
-      <Toaster position="top-right" toastOptions={{ style: { fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 } }} />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
         * { font-family: 'Plus Jakarta Sans', sans-serif; }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import API from "../../api/axios";
 import { PlusCircle, Search, Edit2, Trash2, Copy, FileText, Calendar, Clock, ChevronLeft, ChevronRight } from "lucide-react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useConfirm } from "../../context/ConfirmContext";
 
 const WorkLogs = () => {
@@ -134,7 +134,6 @@ const WorkLogs = () => {
 
     return (
         <div className="space-y-6 animate-fade-in relative min-h-screen pb-10">
-            <Toaster position="top-right" />
             
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-slate-200 pb-6">
                 <div>
