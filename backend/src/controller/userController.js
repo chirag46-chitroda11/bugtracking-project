@@ -390,17 +390,17 @@ const forgotPassword = async (req, res) => {
       <h2 style="color:#eab308; text-align:center; margin-bottom: 24px; font-size: 24px;">
         Password Reset Request 🔐
       </h2>
-      <p style="color:#f8fafc; font-size: 16px;">Hello <b>${user.name}</b>,</p>
-      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">You requested a password reset for your Fixify account.</p>
-      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">Click the button below to set a new password. This link is securely encrypted and will expire in 15 minutes.</p>
+      <p style="color:#f8fafc; font-size: 16px;">We received a request to reset your password.</p>
+      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">Click below to create a new password:</p>
       
       <div style="text-align: center; margin: 32px 0;">
-        <a href="${resetUrl}" style="background:#eab308; color:#0f172a; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold; display:inline-block;">Reset My Password</a>
+        <a href="${resetUrl}" style="background:#eab308; color:#0f172a; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold; display:inline-block;">Reset Password</a>
       </div>
 
-      <p style="color:#94a3b8; font-size: 14px;">If you did not request this, please ignore this email. Your account remains secure.</p>
+      <p style="color:#94a3b8; font-size: 14px;">This link expires soon.</p>
+      <p style="color:#94a3b8; font-size: 14px;">If you didn’t request this, ignore this email.</p>
       <hr style="border:none; border-top: 1px solid #334155; margin: 24px 0;" />
-      <p style="color:#64748b; font-size: 12px; text-align:center;">Regards,<br/>The Fixify Security Team</p>
+      <p style="color:#64748b; font-size: 12px; text-align:center;">Team Fixify</p>
     </div>
   </div>
 `;
