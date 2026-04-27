@@ -7,27 +7,12 @@ const cors = require("cors")
 
 require("dotenv").config()
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5000",
-  "https://fixify46.vercel.app",
-  "https://fixify-six.vercel.app"
-];
-
 app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(new Error("CORS blocked: " + origin));
-  },
-  credentials: true,
-  methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
-  allowedHeaders: ["Content-Type","Authorization"]
+  origin: process.env.CLIENT_URL,
+  credentials: true
 }));
 
-app.options("*", cors());
+app.options("/*", cors());
 
 app.use(express.json({ limit: "50mb" }))
 
