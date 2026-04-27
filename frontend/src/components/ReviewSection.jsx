@@ -87,7 +87,7 @@ const ReviewFormModal = ({ isOpen, onClose }) => {
           style={{
             background: "rgba(255,255,255,0.95)", backdropFilter: "blur(20px)",
             borderRadius: 24, padding: "36px 32px",
-            width: "100%", maxWidth: 480,
+            width: "100%", maxWidth: 480, maxHeight: "90vh", overflowY: "auto",
             border: "1px solid rgba(255,255,255,0.8)",
             boxShadow: "0 25px 60px rgba(0,0,0,0.12)"
           }}
@@ -262,7 +262,8 @@ const ReviewSection = () => {
         <div style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(min(320px, 100%), 1fr))",
-          gap: 24, maxWidth: 1200, margin: "0 auto"
+          gap: 24, maxWidth: 1200, margin: "0 auto",
+          maxHeight: "500px", overflowY: "auto", paddingRight: "10px"
         }}>
           {reviews.map((review, i) => (
             <motion.div
