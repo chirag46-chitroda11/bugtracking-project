@@ -109,7 +109,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   return (
-    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#ccd6ff", minHeight: "100vh", overflowX: "clip", position: "relative" }}>
+    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)", minHeight: "100vh", overflowX: "clip", position: "relative" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
         .landing-glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.8); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.04); transition: all 0.3s ease; }

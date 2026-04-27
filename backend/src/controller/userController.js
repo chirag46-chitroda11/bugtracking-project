@@ -67,7 +67,7 @@ const registerUser = async (req, res) => {
     // ================= 📧 EMAIL FUNCTIONALITY ADDED =================
     const FRONTEND_URL = process.env.FRONTEND_URL || "https://fixify46.vercel.app";
     const html = `
-  <div style="font-family: 'Inter', Arial, sans-serif; background:#f4f7ff; padding:40px 20px;">
+  <div style="font-family: 'Inter', Arial, sans-serif; background:#f8fafc; padding:40px 20px;">
     <div style="max-width:500px; margin:auto; background:#ffffff; padding:30px; border-radius:16px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
       <h2 style="color:#4f46e5; text-align:center; margin-bottom: 24px; font-size: 28px; font-weight: 800;">
         Fixify
@@ -316,7 +316,7 @@ const approveUser = async (req, res) => {
     // Send Approval Email
     const FRONTEND_URL = process.env.FRONTEND_URL || "https://fixify46.vercel.app";
     const html = `
-  <div style="font-family: 'Inter', Arial, sans-serif; background:#f4f7ff; padding:40px 20px;">
+  <div style="font-family: 'Inter', Arial, sans-serif; background:#f8fafc; padding:40px 20px;">
     <div style="max-width:500px; margin:auto; background:#ffffff; padding:30px; border-radius:16px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
       <h2 style="color:#10b981; text-align:center; margin-bottom: 24px; font-size: 24px; font-weight: 800;">
         Account Approved ✅
@@ -385,7 +385,7 @@ const forgotPassword = async (req, res) => {
     const resetUrl = `${FRONTEND_URL}/reset-password/${resetToken}`;
 
     const html = `
-  <div style="font-family: 'Inter', Arial, sans-serif; background:#f4f7ff; padding:40px 20px;">
+  <div style="font-family: 'Inter', Arial, sans-serif; background:#f8fafc; padding:40px 20px;">
     <div style="max-width:500px; margin:auto; background:#ffffff; padding:30px; border-radius:16px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
       <h2 style="color:#4f46e5; text-align:center; margin-bottom: 24px; font-size: 24px; font-weight: 800;">
         Password Reset Request 🔐

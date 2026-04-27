@@ -42,7 +42,7 @@ const Register = () => {
     <div className="auth-wrapper">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        .auth-wrapper { font-family: 'Plus Jakarta Sans'; background: #ccd6ff; min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 20px; }
+        .auth-wrapper { font-family: 'Plus Jakarta Sans'; background: linear-gradient(to bottom right, #f8fafc, #f1f5f9); min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 20px; }
         .circle { position: absolute; border: 15px solid rgba(79, 70, 229, 0.08); border-radius: 50%; animation: float 10s infinite ease-in-out; }
         .c1 { width: 300px; height: 300px; top: -100px; left: -100px; }
         .c2 { width: 150px; height: 150px; bottom: -50px; right: -50px; animation-delay: 3s; }
