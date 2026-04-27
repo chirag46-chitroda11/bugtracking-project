@@ -65,40 +65,26 @@ const registerUser = async (req, res) => {
     });
 
     // ================= 📧 EMAIL FUNCTIONALITY ADDED =================
+    const FRONTEND_URL = process.env.FRONTEND_URL || "https://fixify46.vercel.app";
     const html = `
-  <div style="font-family: Arial, sans-serif; background:#f5f6fa; padding:20px;">
-    
-    <div style="max-width:500px; margin:auto; background:#fff; padding:20px; border-radius:10px;">
-      
-      <h2 style="color:#4cafef; text-align:center;">
-        🚀 Fixify
+  <div style="font-family: 'Inter', Arial, sans-serif; background:#0f172a; padding:40px 20px;">
+    <div style="max-width:500px; margin:auto; background:#1e293b; padding:30px; border-radius:16px; border: 1px solid #334155;">
+      <h2 style="color:#38bdf8; text-align:center; margin-bottom: 24px; font-size: 28px;">
+        Fixify
       </h2>
-
-      <h3 style="text-align:center;">Welcome to Fixify</h3>
-
-      <p>Hello <b>${name}</b>,</p>
-
-      <p>Your account has been successfully created.</p>
-
-      <div style="background:#f1f1f1; padding:10px; border-radius:8px;">
-        <p><b>Email:</b> ${email}</p>
-        <p><b>Password:</b> (your entered password)</p>
+      <p style="color:#f8fafc; font-size: 16px;">Hello <b>${name}</b>,</p>
+      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">Your Fixify account is ready.</p>
+      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">A faster, smarter way to manage bugs, teams, and productivity starts now.</p>
+      
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${FRONTEND_URL}/login" style="background:#38bdf8; color:#0f172a; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold; display:inline-block;">Access Workspace</a>
       </div>
 
-      <p style="margin-top:15px;">
-        Please login and start managing your tasks.
-      </p>
-
-      <hr />
-
-      <p style="font-size:12px; color:gray; text-align:center;">
-        © Fixify - Bug Tracking System
-      </p>
-
+      <p style="color:#94a3b8; font-size: 14px;">Regards,<br/>The Fixify Team</p>
     </div>
   </div>
 `;
-    await sendEmail(email, "Welcome to Fixify 🚀", html);
+    await sendEmail(email, "Welcome to the Future of Bug Tracking — Fixify 🔥", html);
     // ===============================================================
 
     // Create notification for new user
@@ -327,6 +313,28 @@ const approveUser = async (req, res) => {
     user.approvedAt = new Date();
     await user.save();
 
+    // Send Approval Email
+    const FRONTEND_URL = process.env.FRONTEND_URL || "https://fixify46.vercel.app";
+    const html = `
+  <div style="font-family: 'Inter', Arial, sans-serif; background:#0f172a; padding:40px 20px;">
+    <div style="max-width:500px; margin:auto; background:#1e293b; padding:30px; border-radius:16px; border: 1px solid #334155;">
+      <h2 style="color:#22c55e; text-align:center; margin-bottom: 24px; font-size: 24px;">
+        Account Approved ✅
+      </h2>
+      <p style="color:#f8fafc; font-size: 16px;">Hello <b>${user.name}</b>,</p>
+      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">Congratulations! Your Fixify account has been approved.</p>
+      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">You can now access your dashboard and start working.</p>
+      
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${FRONTEND_URL}/login" style="background:#22c55e; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold; display:inline-block;">Go to Dashboard</a>
+      </div>
+
+      <p style="color:#94a3b8; font-size: 14px;">Regards,<br/>The Fixify Team</p>
+    </div>
+  </div>
+`;
+    await sendEmail(user.email, "Your Fixify Account is Approved 🎉", html);
+
     res.json({
       success: true,
       message: "User approved successfully",
@@ -373,8 +381,8 @@ const forgotPassword = async (req, res) => {
     user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
     await user.save();
 
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
+    const FRONTEND_URL = process.env.FRONTEND_URL || "https://fixify46.vercel.app";
+    const resetUrl = `${FRONTEND_URL}/reset-password/${resetToken}`;
 
     const html = `
       <div style="font-family: Arial, sans-serif; background:#f5f6fa; padding:20px;">
