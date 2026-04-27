@@ -385,21 +385,25 @@ const forgotPassword = async (req, res) => {
     const resetUrl = `${FRONTEND_URL}/reset-password/${resetToken}`;
 
     const html = `
-      <div style="font-family: Arial, sans-serif; background:#f5f6fa; padding:20px;">
-        <div style="max-width:500px; margin:auto; background:#fff; padding:20px; border-radius:10px;">
-          <h2 style="color:#4cafef; text-align:center;">🚀 Fixify</h2>
-          <h3 style="text-align:center;">Password Reset Request</h3>
-          <p>Hello <b>${user.name}</b>,</p>
-          <p>You requested a password reset. Click the button below to reset your password. This link is valid for 15 minutes.</p>
-          <div style="text-align:center; margin: 25px 0;">
-            <a href="${resetUrl}" style="background:#4f46e5; color:#fff; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold;">Reset Password</a>
-          </div>
-          <p>If you did not request this, please ignore this email.</p>
-          <hr />
-          <p style="font-size:12px; color:gray; text-align:center;">© Fixify - Bug Tracking System</p>
-        </div>
+  <div style="font-family: 'Inter', Arial, sans-serif; background:#0f172a; padding:40px 20px;">
+    <div style="max-width:500px; margin:auto; background:#1e293b; padding:30px; border-radius:16px; border: 1px solid #334155;">
+      <h2 style="color:#eab308; text-align:center; margin-bottom: 24px; font-size: 24px;">
+        Password Reset Request 🔐
+      </h2>
+      <p style="color:#f8fafc; font-size: 16px;">Hello <b>${user.name}</b>,</p>
+      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">You requested a password reset for your Fixify account.</p>
+      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">Click the button below to set a new password. This link is securely encrypted and will expire in 15 minutes.</p>
+      
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${resetUrl}" style="background:#eab308; color:#0f172a; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold; display:inline-block;">Reset My Password</a>
       </div>
-    `;
+
+      <p style="color:#94a3b8; font-size: 14px;">If you did not request this, please ignore this email. Your account remains secure.</p>
+      <hr style="border:none; border-top: 1px solid #334155; margin: 24px 0;" />
+      <p style="color:#64748b; font-size: 12px; text-align:center;">Regards,<br/>The Fixify Security Team</p>
+    </div>
+  </div>
+`;
 
     try {
       await sendEmail(user.email, "Password Reset Request - Fixify", html);
