@@ -12,7 +12,6 @@ app.use(cors({
   credentials: true
 }));
 
-app.options("/*", cors());
 
 app.use(express.json({ limit: "50mb" }))
 
@@ -87,6 +86,10 @@ app.use("/announcement", announcementRoutes)
 
 const reviewRoutes = require("./src/routes/reviewRoutes")
 app.use("/review", reviewRoutes)
+
+app.use((req, res) => {
+  res.status(404).json({ message: "Route not found" });
+});
 
 const PORT = process.env.PORT
 server.listen(PORT, () => {
