@@ -67,15 +67,20 @@ const registerUser = async (req, res) => {
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      return res.status(400).json({
-        message: "User already exists"
+      return res.status(409).json({
+        success: false,
+        message: "Email already registered"
       });
     }
 
     let imageUrl = "";
     if (req.file) {
-      const cloudinaryResponse = await uploadToCloudinary(req.file.path);
-      imageUrl = cloudinaryResponse.secure_url;
+      try {
+        const cloudinaryResponse = await uploadToCloudinary(req.file.path);
+        imageUrl = cloudinaryResponse.secure_url;
+      } catch (cloudErr) {
+        console.error("Cloudinary Upload Error (Non-blocking):", cloudErr.message);
+      }
     }
 
     // ✅ HASH PASSWORD
@@ -90,27 +95,34 @@ const registerUser = async (req, res) => {
       password: hashedPassword,
       role,
       designation,
-      status: initialStatus
-      // imagePath: imageUrl
+      status: initialStatus,
+      profilePicture: imageUrl
     });
 
-    // ================= 📧 EMAIL FUNCTIONALITY ADDED =================
-    const FRONTEND_URL = process.env.FRONTEND_URL || "https://fixify46.vercel.app";
-    const html = (initialStatus === "active") ? welcomeEmail(name) : pendingEmail(name);
-    const subject = (initialStatus === "active") 
-      ? "Welcome to the Future of Bug Tracking — Fixify 🔥" 
-      : "Registration Received — Verification Pending 📨";
-    await sendEmail(email, subject, html);
+    // ================= 📧 EMAIL FUNCTIONALITY ADDED (NON-BLOCKING) =================
+    try {
+      const html = (initialStatus === "active") ? welcomeEmail(name) : pendingEmail(name);
+      const subject = (initialStatus === "active") 
+        ? "Welcome to the Future of Bug Tracking — Fixify 🔥" 
+        : "Registration Received — Verification Pending 📨";
+      await sendEmail(email, subject, html);
+    } catch (emailErr) {
+      console.error("Registration Email Error (Non-blocking):", emailErr.message);
+    }
     // ===============================================================
 
-    // Create notification for new user
-    await createAndEmitNotification(req.app, {
-      title: "New User Registered",
-      message: `${name} (${role.replace('_', ' ')}) has joined the system`,
-      type: "user_registered",
-      targetRoles: ["admin", "project_manager"],
-      referenceId: user._id
-    });
+    // Create notification for new user (Non-blocking)
+    try {
+      await createAndEmitNotification(req.app, {
+        title: "New User Registered",
+        message: `${name} (${role.replace('_', ' ')}) has joined the system`,
+        type: "user_registered",
+        targetRoles: ["admin", "project_manager"],
+        referenceId: user._id
+      });
+    } catch (notifErr) {
+      console.error("Notification Error (Non-blocking):", notifErr.message);
+    }
 
     res.status(201).json({
       message: "User created successfully",
@@ -118,12 +130,13 @@ const registerUser = async (req, res) => {
     })
 
   } catch (error) {
-    console.log("REGISTER ERROR:", error)
+    console.error("REGISTER ERROR:", error);
 
     res.status(500).json({
-      message: "Error creating user",
+      success: false,
+      message: "Registration failed",
       error: error.message
-    })
+    });
   }
 }
 
@@ -507,9 +520,13 @@ const approveUser = async (req, res) => {
     user.approvedAt = new Date();
     await user.save();
 
-    // Send Approval Email
-    const html = approvalEmail(user.name);
-    await sendEmail(user.email, "Your Fixify Account is Approved 🎉", html);
+    // Send Approval Email (Non-blocking)
+    try {
+      const html = approvalEmail(user.name);
+      await sendEmail(user.email, "Your Fixify Account is Approved 🎉", html);
+    } catch (emailErr) {
+      console.error("Approval Email Error (Non-blocking):", emailErr.message);
+    }
 
     res.json({
       success: true,

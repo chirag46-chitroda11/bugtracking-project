@@ -229,7 +229,7 @@ After review, your request has been
 </p>
 
 <p class="text" style="font-size:14px;background:#f8fafc;padding:14px;border-radius:12px;border:1px solid #e2e8f0;">
-If you think this was a mistake, please contact your administrator.
+If you think this was a mistake, please contact our administrator and try again.
 </p>
 
 <p class="text" style="margin-bottom:0;">
