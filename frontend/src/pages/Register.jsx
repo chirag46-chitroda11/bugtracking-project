@@ -35,7 +35,7 @@ const Register = () => {
         password: formData.password,
         role: "tester" // This is REQUIRED by your currently deployed backend!
       }, {
-        headers: { Authorization: undefined }
+        headers: { Authorization: false }
       });
       triggerToast("Welcome! Redirecting...");
       setTimeout(() => navigate("/login"), 2000);
