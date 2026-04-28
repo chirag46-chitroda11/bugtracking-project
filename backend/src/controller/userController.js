@@ -67,20 +67,20 @@ const registerUser = async (req, res) => {
     // ================= 📧 EMAIL FUNCTIONALITY ADDED =================
     const FRONTEND_URL = process.env.FRONTEND_URL || "https://fixify46.vercel.app";
     const html = `
-  <div style="font-family: 'Inter', Arial, sans-serif; background:#f8fafc; padding:40px 20px;">
-    <div style="max-width:500px; margin:auto; background:#ffffff; padding:30px; border-radius:16px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
-      <h2 style="color:#4f46e5; text-align:center; margin-bottom: 24px; font-size: 28px; font-weight: 800;">
+  <div style="font-family: 'Inter', Arial, sans-serif; background:#0f172a; padding:40px 20px;">
+    <div style="max-width:500px; margin:auto; background:#1e293b; padding:30px; border-radius:16px; border: 1px solid #334155;">
+      <h2 style="color:#38bdf8; text-align:center; margin-bottom: 24px; font-size: 28px;">
         Fixify
       </h2>
-      <p style="color:#0f172a; font-size: 16px;">Hello <b>${name}</b>,</p>
-      <p style="color:#475569; font-size: 16px; line-height: 1.6;">Your Fixify account is ready.</p>
-      <p style="color:#475569; font-size: 16px; line-height: 1.6;">A faster, smarter way to manage bugs, teams, and productivity starts now.</p>
+      <p style="color:#f8fafc; font-size: 16px;">Hello <b>${name}</b>,</p>
+      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">Your Fixify account is ready.</p>
+      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">A faster, smarter way to manage bugs, teams, and productivity starts now.</p>
       
       <div style="text-align: center; margin: 32px 0;">
-        <a href="${FRONTEND_URL}/login" style="background:#4f46e5; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold; display:inline-block;">Access Workspace</a>
+        <a href="${FRONTEND_URL}/login" style="background:#38bdf8; color:#0f172a; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold; display:inline-block;">Access Workspace</a>
       </div>
 
-      <p style="color:#64748b; font-size: 14px;">Regards,<br/><b>The Fixify Team</b></p>
+      <p style="color:#94a3b8; font-size: 14px;">Regards,<br/>The Fixify Team</p>
     </div>
   </div>
 `;
@@ -221,7 +221,7 @@ const toggleUserStatus = async (req, res) => {
   }
 };
 
-//================= SOFT DELETE USER (ADMIN ONLY )======
+//================= DELETE USER (SELF or ADMIN) ======
 const deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -229,16 +229,67 @@ const deleteUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // 🔒 Role hierarchy check — cannot delete users with same or higher role
-    if (req.user && getRoleLevel(user.role) >= getRoleLevel(req.user.role)) {
+    const isSelfDelete = req.user && req.user.id === req.params.id;
+
+    // 🔒 Role hierarchy check — skip if user is deleting their own account
+    if (!isSelfDelete && req.user && getRoleLevel(user.role) >= getRoleLevel(req.user.role)) {
       return res.status(403).json({ message: "You cannot delete a user with equal or higher role" });
     }
 
-    await User.findByIdAndDelete(req.params.id);
+    // 🧹 Clean up related data from all collections
+    const Task = require("../models/taskModel");
+    const Bug = require("../models/bugModel");
+    const TimeLog = require("../models/timelogModel");
+    const Notification = require("../models/notificationModel");
+    const ActivityLog = require("../models/activityLogModel");
+
+    const userId = req.params.id;
+
+    // Remove user assignments from tasks (unassign, don't delete the tasks)
+    await Task.updateMany(
+      { assignedDeveloper: userId },
+      { $unset: { assignedDeveloper: "" } }
+    );
+    await Task.updateMany(
+      { assignedTester: userId },
+      { $unset: { assignedTester: "" } }
+    );
+    await Task.updateMany(
+      { assignBy: userId },
+      { $unset: { assignBy: "" } }
+    );
+
+    // Remove user references from bugs (unassign, don't delete the bugs)
+    await Bug.updateMany(
+      { reportById: userId },
+      { $unset: { reportById: "" } }
+    );
+    await Bug.updateMany(
+      { assignedDeveloper: userId },
+      { $unset: { assignedDeveloper: "" } }
+    );
+    await Bug.updateMany(
+      { qaTesterId: userId },
+      { $unset: { qaTesterId: "" } }
+    );
+
+    // Delete user's time logs
+    await TimeLog.deleteMany({ developerId: userId });
+
+    // Delete user's notifications
+    await Notification.deleteMany({
+      $or: [{ targetUserId: userId }, { userId: userId }]
+    });
+
+    // Delete user's activity logs
+    await ActivityLog.deleteMany({ userId: userId });
+
+    // Finally delete the user
+    await User.findByIdAndDelete(userId);
 
     res.json({
       success: true,
-      message: "User deleted permanently"
+      message: "User and related data deleted permanently"
     });
 
   } catch (err) {
@@ -316,20 +367,20 @@ const approveUser = async (req, res) => {
     // Send Approval Email
     const FRONTEND_URL = process.env.FRONTEND_URL || "https://fixify46.vercel.app";
     const html = `
-  <div style="font-family: 'Inter', Arial, sans-serif; background:#f8fafc; padding:40px 20px;">
-    <div style="max-width:500px; margin:auto; background:#ffffff; padding:30px; border-radius:16px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
-      <h2 style="color:#10b981; text-align:center; margin-bottom: 24px; font-size: 24px; font-weight: 800;">
+  <div style="font-family: 'Inter', Arial, sans-serif; background:#0f172a; padding:40px 20px;">
+    <div style="max-width:500px; margin:auto; background:#1e293b; padding:30px; border-radius:16px; border: 1px solid #334155;">
+      <h2 style="color:#22c55e; text-align:center; margin-bottom: 24px; font-size: 24px;">
         Account Approved ✅
       </h2>
-      <p style="color:#0f172a; font-size: 16px;">Hello <b>${user.name}</b>,</p>
-      <p style="color:#475569; font-size: 16px; line-height: 1.6;">Congratulations! Your Fixify account has been approved.</p>
-      <p style="color:#475569; font-size: 16px; line-height: 1.6;">You can now access your dashboard and start working.</p>
+      <p style="color:#f8fafc; font-size: 16px;">Hello <b>${user.name}</b>,</p>
+      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">Congratulations! Your Fixify account has been approved.</p>
+      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">You can now access your dashboard and start working.</p>
       
       <div style="text-align: center; margin: 32px 0;">
-        <a href="${FRONTEND_URL}/login" style="background:#10b981; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold; display:inline-block;">Go to Dashboard</a>
+        <a href="${FRONTEND_URL}/login" style="background:#22c55e; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold; display:inline-block;">Go to Dashboard</a>
       </div>
 
-      <p style="color:#64748b; font-size: 14px;">Regards,<br/><b>The Fixify Team</b></p>
+      <p style="color:#94a3b8; font-size: 14px;">Regards,<br/>The Fixify Team</p>
     </div>
   </div>
 `;
@@ -385,22 +436,22 @@ const forgotPassword = async (req, res) => {
     const resetUrl = `${FRONTEND_URL}/reset-password/${resetToken}`;
 
     const html = `
-  <div style="font-family: 'Inter', Arial, sans-serif; background:#f8fafc; padding:40px 20px;">
-    <div style="max-width:500px; margin:auto; background:#ffffff; padding:30px; border-radius:16px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
-      <h2 style="color:#4f46e5; text-align:center; margin-bottom: 24px; font-size: 24px; font-weight: 800;">
+  <div style="font-family: 'Inter', Arial, sans-serif; background:#0f172a; padding:40px 20px;">
+    <div style="max-width:500px; margin:auto; background:#1e293b; padding:30px; border-radius:16px; border: 1px solid #334155;">
+      <h2 style="color:#eab308; text-align:center; margin-bottom: 24px; font-size: 24px;">
         Password Reset Request 🔐
       </h2>
-      <p style="color:#0f172a; font-size: 16px;">We received a request to reset your password.</p>
-      <p style="color:#475569; font-size: 16px; line-height: 1.6;">Click below to create a new password:</p>
+      <p style="color:#f8fafc; font-size: 16px;">We received a request to reset your password.</p>
+      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">Click below to create a new password:</p>
       
       <div style="text-align: center; margin: 32px 0;">
-        <a href="${resetUrl}" style="background:#4f46e5; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold; display:inline-block;">Reset Password</a>
+        <a href="${resetUrl}" style="background:#eab308; color:#0f172a; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold; display:inline-block;">Reset Password</a>
       </div>
 
-      <p style="color:#64748b; font-size: 14px;">This link expires soon.</p>
-      <p style="color:#64748b; font-size: 14px;">If you didn’t request this, ignore this email.</p>
-      <hr style="border:none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
-      <p style="color:#94a3b8; font-size: 12px; text-align:center;"><b>Team Fixify</b></p>
+      <p style="color:#94a3b8; font-size: 14px;">This link expires soon.</p>
+      <p style="color:#94a3b8; font-size: 14px;">If you didn’t request this, ignore this email.</p>
+      <hr style="border:none; border-top: 1px solid #334155; margin: 24px 0;" />
+      <p style="color:#64748b; font-size: 12px; text-align:center;">Team Fixify</p>
     </div>
   </div>
 `;

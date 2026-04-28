@@ -105,7 +105,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   return (
-    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#ccd6ff", minHeight: "100vh", overflowX: "clip", position: "relative" }}>
+    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#ccd6ff", minHeight: "100vh", overflowX: "hidden", position: "relative" }}>
       <style>{`
         @keyframes orbit {
           from { transform: rotate(0deg) translateX(var(--orbit-r)) rotate(0deg); }
@@ -120,6 +120,7 @@ const Dashboard = () => {
           .hero-grid { grid-template-columns: 1fr !important; text-align: center; }
           .hero-grid > div:last-child { max-width: 360px; margin: 0 auto; }
           .features-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .benefits-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .steps-grid { grid-template-columns: 1fr !important; }
           .hero-btns { justify-content: center !important; }
         }
@@ -202,7 +203,7 @@ const Dashboard = () => {
             <p style={{ fontSize: 15, color: "#64748b", maxWidth: 480, margin: "12px auto 0", fontWeight: 500 }}>Powerful tools designed for modern development teams</p>
           </div>
         </FadeIn>
-        <div className="features-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, maxWidth: 1200, margin: "0 auto" }}>
+        <div className="features-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20, maxWidth: 1200, margin: "0 auto" }}>
           {features.map((f, i) => (
             <FadeIn key={i} delay={i * 0.06}>
               <div style={{
@@ -271,7 +272,7 @@ const Dashboard = () => {
             </h2>
           </div>
         </FadeIn>
-        <div className="benefits-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20, maxWidth: 1100, margin: "0 auto" }}>
+        <div className="benefits-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20, maxWidth: 1200, margin: "0 auto" }}>
           {benefits.map((b, i) => (
             <FadeIn key={i} delay={i * 0.1}>
               <div style={{

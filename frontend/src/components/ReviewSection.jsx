@@ -262,8 +262,7 @@ const ReviewSection = () => {
         <div style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(min(320px, 100%), 1fr))",
-          gap: 24, maxWidth: 1200, margin: "0 auto",
-          maxHeight: "500px", overflowY: "auto", paddingRight: "10px"
+          gap: 24, maxWidth: 1200, margin: "0 auto"
         }}>
           {reviews.map((review, i) => (
             <motion.div

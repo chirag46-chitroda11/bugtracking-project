@@ -7,11 +7,32 @@ const cors = require("cors")
 
 require("dotenv").config()
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5000",
+  "https://fixify46.vercel.app",
+  "https://fixify-six.vercel.app"
+];
+
 app.use(cors({
-  origin: process.env.CLIENT_URL,
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("CORS blocked: " + origin));
+  },
+  credentials: true,
+  methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type","Authorization"]
+}));
+
+app.use(cors({
+  origin: true,
   credentials: true
 }));
 
+app.options(/.*/, cors());
 
 app.use(express.json({ limit: "50mb" }))
 
@@ -86,10 +107,6 @@ app.use("/announcement", announcementRoutes)
 
 const reviewRoutes = require("./src/routes/reviewRoutes")
 app.use("/review", reviewRoutes)
-
-app.use((req, res) => {
-  res.status(404).json({ message: "Route not found" });
-});
 
 const PORT = process.env.PORT
 server.listen(PORT, () => {
