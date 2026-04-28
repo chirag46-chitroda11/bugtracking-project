@@ -32,7 +32,8 @@ const Register = () => {
       await API.post("/user/register", {
         name: formData.name,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        role: "tester" // This is REQUIRED by your currently deployed backend!
       }, {
         headers: { Authorization: undefined }
       });
