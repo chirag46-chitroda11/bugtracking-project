@@ -26,6 +26,7 @@ const EditSprint = () => {
   const [devs, setDevs] = useState([]);
   const [testers, setTesters] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -78,12 +79,15 @@ const EditSprint = () => {
       return;
     }
 
+    setSaving(true);
     try {
       await updateSprint(id, form);
       toast.success("Sprint metrics updated successfully.");
       setTimeout(() => navigate(-1), 1500);
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed to update Sprint");
+      toast.error(error?.message || error?.response?.data?.message || "Failed to update Sprint");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -201,7 +205,9 @@ const EditSprint = () => {
              </div>
           </div>
 
-          <button type="submit" className="btn-primary mt-6">Apply Sprint Matrix Edits</button>
+          <button type="submit" className="btn-primary mt-6" disabled={saving}>
+            {saving ? "Updating Sprint..." : "Apply Sprint Matrix Edits"}
+          </button>
         </form>
       </div>
     </div>

@@ -15,6 +15,7 @@ const EditTask = () => {
   const [testers, setTesters] = useState([]);
   const [sprints, setSprints] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState({
     taskTitle: "",
@@ -93,7 +94,7 @@ const EditTask = () => {
     if (!form.taskTitle || !form.projectId) {
       return toast.error("Title and Target Project are required!");
     }
-
+    setSaving(true);
     try {
       await updateTask(id, {
         ...form,
@@ -101,7 +102,11 @@ const EditTask = () => {
       });
       toast.success("Task updated successfully ✅");
       setTimeout(() => navigate(-1), 1500);
-    } catch (error) { toast.error("Task update failed ❌"); }
+    } catch (error) { 
+      toast.error(error?.message || error?.response?.data?.message || "Task update failed ❌"); 
+    } finally {
+      setSaving(false);
+    }
   };
   
   if (loading) return (
@@ -235,7 +240,9 @@ const EditTask = () => {
             <textarea className="custom-input h-16 resize-none" placeholder="Additional notes..." value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} />
           </div>
 
-          <button type="submit" className="btn-primary mt-4">Save Changes ✓</button>
+          <button type="submit" className="btn-primary mt-4" disabled={saving}>
+            {saving ? "Updating Task..." : "Save Changes ✓"}
+          </button>
         </form>
       </div>
     </div>

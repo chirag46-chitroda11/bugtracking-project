@@ -26,6 +26,7 @@ const CreateSprint = () => {
   const [projects, setProjects] = useState([]);
   const [devs, setDevs] = useState([]);
   const [testers, setTesters] = useState([]);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,13 +53,15 @@ const CreateSprint = () => {
       toast.error("Sprint Name and Project are mandatory.");
       return;
     }
-
+    setSaving(true);
     try {
       await createSprint(form);
       toast.success("Sprint configured successfully.");
       setTimeout(() => navigate(-1), 1500);
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed to create Sprint");
+      toast.error(error?.message || error?.response?.data?.message || "Failed to create Sprint");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -173,7 +176,9 @@ const CreateSprint = () => {
              </div>
           </div>
 
-          <button type="submit" className="btn-primary mt-6">Confirm Sprint Configuration</button>
+          <button type="submit" className="btn-primary mt-6" disabled={saving}>
+            {saving ? "Creating Sprint..." : "Confirm Sprint Configuration"}
+          </button>
         </form>
       </div>
     </div>

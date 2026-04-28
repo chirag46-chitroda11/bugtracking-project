@@ -1,5 +1,6 @@
 const Task = require("../models/taskModel")
 const ActivityLog = require("../models/activityLogModel")
+const mongoose = require("mongoose");
 
 // create task
 const createTask = async (req, res) => {
@@ -163,11 +164,26 @@ const updateTask = async (req, res) => {
 
   try {
 
-    const oldTask = await Task.findById(req.params.id);
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Task ID format"
+      });
+    }
+
+    const oldTask = await Task.findById(id);
+    if (!oldTask) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found"
+      });
+    }
+
     const task = await Task.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
+      id,
+      { $set: req.body },
+      { new: true, runValidators: true }
     )
 
     const currentUserId = req.user?.id || req.user?._id;
@@ -281,12 +297,11 @@ const updateTask = async (req, res) => {
     })
 
   } catch (error) {
-
+    console.error("Task Update Error:", error);
     res.status(500).json({
       success: false,
       message: error.message
-    })
-
+    });
   }
 
 }
