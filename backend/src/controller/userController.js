@@ -15,13 +15,15 @@ const registerUser = async (req, res) => {
   try {
     let { name, email, password, role, designation } = req.body;
 
-    // Determine if this is a public (non-admin) registration
     let isPublic = true;
+    let creatorRole = null;
+
     if (req.headers.authorization) {
       try {
         const token = req.headers.authorization.split(" ")[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        if (decoded.role === "admin") {
+        creatorRole = decoded.role;
+        if (creatorRole === "admin" || creatorRole === "project_manager") {
           isPublic = false;
         }
       } catch (err) { }
@@ -30,6 +32,13 @@ const registerUser = async (req, res) => {
     // Public registration always defaults to tester role
     if (isPublic) {
       role = "tester";
+    } else {
+      // Role hierarchy enforcement
+      if (creatorRole === "project_manager") {
+        if (role === "admin" || role === "project_manager") {
+          return res.status(403).json({ message: "Project Managers can only create developers and testers." });
+        }
+      }
     }
 
     // Validate required fields
@@ -58,7 +67,6 @@ const registerUser = async (req, res) => {
     }
 
     let imageUrl = "";
-
     if (req.file) {
       const cloudinaryResponse = await uploadToCloudinary(req.file.path);
       imageUrl = cloudinaryResponse.secure_url;
@@ -67,13 +75,16 @@ const registerUser = async (req, res) => {
     // ✅ HASH PASSWORD
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // ✅ DETERMINE STATUS: Admin creates active users, everyone else (Public/PM) creates pending
+    const initialStatus = (creatorRole === "admin") ? "active" : "pending";
+
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
       role,
       designation,
-      status: isPublic ? "pending" : "active"
+      status: initialStatus
       // imagePath: imageUrl
     });
 
