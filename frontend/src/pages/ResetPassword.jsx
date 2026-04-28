@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../api/axios";
-import bugMascot from "../assets/vite.svg";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -46,24 +45,29 @@ const ResetPassword = () => {
         .auth-wrapper { font-family: 'Plus Jakarta Sans'; background: #ccd6ff; min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 20px; }
         .circle { position: absolute; border: 15px solid rgba(79, 70, 229, 0.08); border-radius: 50%; animation: float 10s infinite; }
         @keyframes float { 50% { transform: translateY(-20px) scale(1.05); } }
-        .toast-box { position: fixed; top: 20px; right: 20px; padding: 1rem 2rem; border-radius: 12px; color: #fff; font-weight: 700; z-index: 1000; transform: translateX(150%); transition: 0.4s; }
+        .toast-box { position: fixed; top: 20px; right: 20px; padding: 1rem 2rem; border-radius: 12px; color: #fff; font-weight: 700; z-index: 1000; transform: translateX(150%); transition: 0.4s; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
         .toast-box.show { transform: translateX(0); }
         .auth-card { width: 100%; max-width: 450px; background: rgba(255,255,255,0.7); backdrop-filter: blur(25px); border-radius: 40px; border: 1px solid #fff; overflow: hidden; z-index: 10; box-shadow: 0 30px 60px rgba(0,0,0,0.08); }
         .form-side { padding: 3.5rem; display: flex; flex-direction: column; justify-content: center; }
-        .field { width: 100%; padding: 0.9rem 1.2rem; border-radius: 15px; border: 1px solid rgba(0,0,0,0.05); background: #fff; margin-bottom: 1.2rem; outline: none; transition: 0.3s; }
-        .btn-reg { width: 100%; padding: 1rem; background: #121212; color: #fff; border-radius: 15px; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; }
-        .btn-reg:hover:not(:disabled) { background: #4f46e5; transform: translateY(-2px); }
-        @media (max-width: 800px) { .auth-card { max-width: 90%; } }
+        .field { width: 100%; padding: 0.9rem 1.2rem; border-radius: 15px; border: 1px solid rgba(0,0,0,0.05); background: #fff; margin-bottom: 1.2rem; outline: none; transition: 0.3s; font-family: inherit; font-size: 0.95rem; box-sizing: border-box; }
+        .field:focus { border-color: #4f46e5; box-shadow: 0 0 0 4px rgba(79,70,229,0.1); }
+        .btn-reg { width: 100%; padding: 1rem; background: linear-gradient(135deg, #4f46e5, #6366f1); color: #fff; border-radius: 15px; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; font-size: 0.95rem; box-shadow: 0 6px 20px rgba(79,70,229,0.25); }
+        .btn-reg:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(79,70,229,0.35); }
+        .btn-reg:disabled { opacity: 0.6; cursor: not-allowed; }
+        @media (max-width: 800px) { .auth-card { max-width: 90%; } .form-side { padding: 2.5rem; } }
       `}</style>
 
-      <div className="circle" style={{width: 300, height: 300, top: -100, left: -100}}></div>
+      <div className="circle" style={{width: 350, height: 350, top: -120, left: -120}}></div>
+      <div className="circle" style={{width: 200, height: 200, bottom: -60, right: -60, animationDelay: '3s'}}></div>
       <div className={`toast-box ${toast.show ? 'show' : ''}`} style={{ background: toast.isError ? '#ff4757' : '#2ed573' }}>{toast.msg}</div>
 
       <div className="auth-card">
         <div className="form-side">
           <div className="flex items-center gap-2 mb-8">
-            <img src={bugMascot} className="w-8 h-8 bg-black p-1.5 rounded-lg invert" alt="L" />
-            <span className="font-extrabold text-xl tracking-tighter uppercase font-sans">Fixify<span className="text-indigo-600">.</span></span>
+            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
+              <span className="text-lg">⚡</span>
+            </div>
+            <span className="font-extrabold text-lg tracking-tighter uppercase font-sans">FIXIFY<span className="text-indigo-600">.</span></span>
           </div>
           <h1 className="text-3xl font-extrabold text-slate-900 mb-1">New Password</h1>
           <p className="text-slate-400 text-sm mb-8 font-medium">Create a strong new password for your account.</p>
