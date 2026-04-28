@@ -244,34 +244,161 @@ const deleteUser = async (req, res) => {
     const ActivityLog = require("../models/activityLogModel");
 
     const userId = req.params.id;
+    const deletedRole = user.role;
 
-    // Remove user assignments from tasks (unassign, don't delete the tasks)
-    await Task.updateMany(
-      { assignedDeveloper: userId },
-      { $unset: { assignedDeveloper: "" } }
-    );
-    await Task.updateMany(
-      { assignedTester: userId },
-      { $unset: { assignedTester: "" } }
-    );
-    await Task.updateMany(
-      { assignBy: userId },
-      { $unset: { assignBy: "" } }
-    );
+    // ═══ REASSIGNMENT LOGIC ═══
+    // Find another active user with the same role to reassign work to
+    const findReplacement = async (role) => {
+      const candidates = await User.find({
+        _id: { $ne: userId },
+        role: role,
+        status: { $in: ["active", "approved"] }
+      }).select("_id").lean();
 
-    // Remove user references from bugs (unassign, don't delete the bugs)
+      if (candidates.length === 0) return null;
+
+      // Pick the one with fewest task assignments (load balancing)
+      let bestCandidate = candidates[0]._id;
+      let minCount = Infinity;
+
+      for (const c of candidates) {
+        const taskCount = await Task.countDocuments({
+          $or: [
+            { assignedDeveloper: c._id },
+            { assignedTester: c._id }
+          ]
+        });
+        if (taskCount < minCount) {
+          minCount = taskCount;
+          bestCandidate = c._id;
+        }
+      }
+
+      return bestCandidate;
+    };
+
+    // Reassign developer tasks & bugs
+    if (deletedRole === "developer") {
+      const replacement = await findReplacement("developer");
+      if (replacement) {
+        await Task.updateMany(
+          { assignedDeveloper: userId },
+          { $set: { assignedDeveloper: replacement } }
+        );
+        await Bug.updateMany(
+          { assignedDeveloper: userId },
+          { $set: { assignedDeveloper: replacement } }
+        );
+      } else {
+        // No other developer available — unassign
+        await Task.updateMany(
+          { assignedDeveloper: userId },
+          { $unset: { assignedDeveloper: "" } }
+        );
+        await Bug.updateMany(
+          { assignedDeveloper: userId },
+          { $unset: { assignedDeveloper: "" } }
+        );
+      }
+    }
+
+    // Reassign tester tasks & bugs
+    if (deletedRole === "tester") {
+      const replacement = await findReplacement("tester");
+      if (replacement) {
+        await Task.updateMany(
+          { assignedTester: userId },
+          { $set: { assignedTester: replacement } }
+        );
+        await Bug.updateMany(
+          { qaTesterId: userId },
+          { $set: { qaTesterId: replacement } }
+        );
+      } else {
+        // No other tester available — unassign
+        await Task.updateMany(
+          { assignedTester: userId },
+          { $unset: { assignedTester: "" } }
+        );
+        await Bug.updateMany(
+          { qaTesterId: userId },
+          { $unset: { qaTesterId: "" } }
+        );
+      }
+    }
+
+    // For project managers — reassign their "assignBy" references
+    if (deletedRole === "project_manager") {
+      const replacement = await findReplacement("project_manager");
+      if (replacement) {
+        await Task.updateMany(
+          { assignBy: userId },
+          { $set: { assignBy: replacement } }
+        );
+        await Bug.updateMany(
+          { assignedBy: userId },
+          { $set: { assignedBy: replacement } }
+        );
+      } else {
+        await Task.updateMany(
+          { assignBy: userId },
+          { $unset: { assignBy: "" } }
+        );
+        await Bug.updateMany(
+          { assignedBy: userId },
+          { $unset: { assignedBy: "" } }
+        );
+      }
+    }
+
+    // For any role — handle cross-role assignments
+    // (e.g. a developer who was also assigned as tester somewhere, or vice versa)
+    const devTaskCount = await Task.countDocuments({ assignedDeveloper: userId });
+    if (devTaskCount > 0) {
+      const devReplacement = await findReplacement("developer");
+      if (devReplacement) {
+        await Task.updateMany({ assignedDeveloper: userId }, { $set: { assignedDeveloper: devReplacement } });
+      } else {
+        await Task.updateMany({ assignedDeveloper: userId }, { $unset: { assignedDeveloper: "" } });
+      }
+    }
+
+    const testerTaskCount = await Task.countDocuments({ assignedTester: userId });
+    if (testerTaskCount > 0) {
+      const testerReplacement = await findReplacement("tester");
+      if (testerReplacement) {
+        await Task.updateMany({ assignedTester: userId }, { $set: { assignedTester: testerReplacement } });
+      } else {
+        await Task.updateMany({ assignedTester: userId }, { $unset: { assignedTester: "" } });
+      }
+    }
+
+    // Bug reportById — clear this (reporter is historical, don't reassign)
     await Bug.updateMany(
       { reportById: userId },
       { $unset: { reportById: "" } }
     );
-    await Bug.updateMany(
-      { assignedDeveloper: userId },
-      { $unset: { assignedDeveloper: "" } }
-    );
-    await Bug.updateMany(
-      { qaTesterId: userId },
-      { $unset: { qaTesterId: "" } }
-    );
+
+    // Remaining bug developer assignments
+    const devBugCount = await Bug.countDocuments({ assignedDeveloper: userId });
+    if (devBugCount > 0) {
+      const devReplacement = await findReplacement("developer");
+      if (devReplacement) {
+        await Bug.updateMany({ assignedDeveloper: userId }, { $set: { assignedDeveloper: devReplacement } });
+      } else {
+        await Bug.updateMany({ assignedDeveloper: userId }, { $unset: { assignedDeveloper: "" } });
+      }
+    }
+
+    const qaBugCount = await Bug.countDocuments({ qaTesterId: userId });
+    if (qaBugCount > 0) {
+      const testerReplacement = await findReplacement("tester");
+      if (testerReplacement) {
+        await Bug.updateMany({ qaTesterId: userId }, { $set: { qaTesterId: testerReplacement } });
+      } else {
+        await Bug.updateMany({ qaTesterId: userId }, { $unset: { qaTesterId: "" } });
+      }
+    }
 
     // Delete user's time logs
     await TimeLog.deleteMany({ developerId: userId });
@@ -289,7 +416,7 @@ const deleteUser = async (req, res) => {
 
     res.json({
       success: true,
-      message: "User and related data deleted permanently"
+      message: "User deleted. Tasks and bugs reassigned to available team members."
     });
 
   } catch (err) {
@@ -404,13 +531,38 @@ const rejectUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    user.status = "rejected";
-    await user.save();
+    // Send Rejection Email before deleting
+    try {
+      const html = `
+  <div style="font-family: 'Inter', Arial, sans-serif; background:#0f172a; padding:40px 20px;">
+    <div style="max-width:500px; margin:auto; background:#1e293b; padding:30px; border-radius:16px; border: 1px solid #334155;">
+      <h2 style="color:#ef4444; text-align:center; margin-bottom: 24px; font-size: 24px;">
+        Registration Request Declined
+      </h2>
+      <p style="color:#f8fafc; font-size: 16px;">Hello <b>${user.name}</b>,</p>
+      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">We're sorry, but your Fixify account request has been declined by the admin.</p>
+      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">If you believe this is a mistake, please contact the administrator or try registering again.</p>
+      <p style="color:#94a3b8; font-size: 14px; margin-top: 24px;">Regards,<br/>The Fixify Team</p>
+    </div>
+  </div>
+`;
+      await sendEmail(user.email, "Your Fixify Registration Request Was Declined", html);
+    } catch (emailErr) {
+      console.log("Rejection email failed (non-blocking):", emailErr.message);
+    }
+
+    // Clean up related data
+    const Notification = require("../models/notificationModel");
+    await Notification.deleteMany({
+      $or: [{ targetUserId: user._id }, { userId: user._id }, { referenceId: user._id }]
+    });
+
+    // Delete the user permanently from DB
+    await User.findByIdAndDelete(req.params.id);
 
     res.json({
       success: true,
-      message: "User rejected",
-      data: user
+      message: "User rejected and removed from system"
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

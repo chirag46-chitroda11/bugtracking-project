@@ -9,44 +9,33 @@ require("dotenv").config()
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "http://localhost:5000",
+  "http://127.0.0.1:5173",
   "https://fixify46.vercel.app",
-  "https://fixify-six.vercel.app"
-];
+  process.env.FRONTEND_URL
+].filter(Boolean);
 
-app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (Postman, server-to-server, curl)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS blocked: " + origin));
     }
-    return callback(new Error("CORS blocked: " + origin));
   },
   credentials: true,
-  methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
-  allowedHeaders: ["Content-Type","Authorization"]
-}));
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+};
 
-app.use(cors({
-  origin: true,
-  credentials: true
-}));
-
-app.options(/.*/, cors());
+app.use(cors(corsOptions));
 
 app.use(express.json({ limit: "50mb" }))
 
 const server = http.createServer(app)
 
 const io = new Server(server, {
-  cors: {
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-      return callback(null, true);
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"]
-  }
+  cors: corsOptions
 })
 
 // Make io accessible in controllers via req.app.get("io")
