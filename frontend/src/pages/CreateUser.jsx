@@ -7,13 +7,20 @@ const CreateUser = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "developer", country: "", state: "", city: "", designation: "", profilePicture: "" });
 
+  const userContext = JSON.parse(localStorage.getItem("user")) || {};
+  const currentRole = userContext.role || "tester";
+
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.password) return toast.error("All info required!");
 
     try {
       await API.post("/user/register", form);
-      toast.success("User Added! Access Granted. 🎉");
+      if (currentRole === "project_manager") {
+         toast.success("User Added! Sent to Admin for approval. ⏳");
+      } else {
+         toast.success("User Added! Access Granted. 🎉");
+      }
       setTimeout(() => navigate(-1), 1500);
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to create user");
@@ -70,8 +77,7 @@ const CreateUser = () => {
             <select className="custom-input cursor-pointer" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
               <option value="developer">Developer</option>
               <option value="tester">Tester</option>
-              <option value="project_manager">Project Manager</option>
-              <option value="admin">Administrator</option>
+              {currentRole === "admin" && <option value="project_manager">Project Manager</option>}
             </select>
           </div>
 
