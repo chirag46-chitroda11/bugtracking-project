@@ -360,7 +360,14 @@ const updateBug = async (req, res) => {
 // delete bug 
 const deleteBug = async (req, res) => {
   try {
-    const bug = await Bug.findByIdAndDelete(req.params.id);
+    const bugId = req.params.id;
+    const bug = await Bug.findByIdAndDelete(bugId);
+
+    if (bug) {
+      // 🧹 CASCADE CLEANUP: Remove activity logs associated with this bug
+      const ActivityLog = require("../models/activityLogModel");
+      await ActivityLog.deleteMany({ entityId: bugId, entityType: "bug" });
+    }
 
     res.status(200).json({
       success: true,

@@ -126,7 +126,18 @@ const updateModule = async (req, res) => {
 // DELETE
 const deleteModule = async (req, res) => {
   try {
-    const module = await Module.findByIdAndDelete(req.params.id);
+    const moduleId = req.params.id;
+    const module = await Module.findByIdAndDelete(moduleId);
+
+    if (module) {
+      // 🧹 CASCADE CLEANUP: Unassign tasks from this module (return to project backlog)
+      // We don't delete tasks here to prevent data loss (timelogs, bugs)
+      const Task = require("../models/taskModel");
+      await Task.updateMany(
+        { moduleId: moduleId },
+        { $unset: { moduleId: "" } }
+      );
+    }
 
     res.status(200).json({
       success: true,

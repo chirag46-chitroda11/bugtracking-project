@@ -316,9 +316,20 @@ const deleteTask = async (req, res) => {
 
     await Task.findByIdAndDelete(req.params.id);
 
+    // 🧹 CASCADE CLEANUP: Remove orphan records linked to this task
+    const TimeLog = require("../models/timelogModel");
+    const Comment = require("../models/commentModel");
+    const Bug = require("../models/bugModel");
+
+    await Promise.all([
+      TimeLog.deleteMany({ taskId: task._id }),
+      Comment.deleteMany({ taskId: task._id }),
+      Bug.updateMany({ taskId: task._id }, { $unset: { taskId: "" } })
+    ]);
+
     res.status(200).json({
       success: true,
-      message: "Task deleted successfully"
+      message: "Task deleted successfully and related records cleaned"
     })
 
   } catch (error) {

@@ -152,7 +152,17 @@ const updateSprint = async (req, res) => {
 // DELETE
 const deleteSprint = async (req, res) => {
   try {
-    const sprint = await Sprint.findByIdAndDelete(req.params.id);
+    const sprintId = req.params.id;
+    const sprint = await Sprint.findByIdAndDelete(sprintId);
+
+    if (sprint) {
+      // 🧹 CASCADE CLEANUP: Unassign tasks from this sprint (return to backlog)
+      const Task = require("../models/taskModel");
+      await Task.updateMany(
+        { sprintId: sprintId },
+        { $unset: { sprintId: "" } }
+      );
+    }
 
     res.status(200).json({
       success: true,

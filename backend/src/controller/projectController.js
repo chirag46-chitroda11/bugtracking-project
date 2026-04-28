@@ -184,15 +184,51 @@ const updateProject = async (req, res) => {
 
 // delete project
 const deleteProject = async (req, res) => {
-
   try {
+    const projectId = req.params.id;
+    const project = await Project.findById(projectId);
 
-    await Project.findByIdAndDelete(req.params.id)
+    if (!project) {
+      return res.status(404).json({ success: false, message: "Project not found" });
+    }
+
+    // 🧹 CASCADE CLEANUP: Full wipe of project contents
+    const Task = require("../models/taskModel");
+    const Module = require("../models/moduleModel");
+    const Sprint = require("../models/sprintModel");
+    const TimeLog = require("../models/timelogModel");
+    const Comment = require("../models/commentModel");
+    const Bug = require("../models/bugModel");
+    const ActivityLog = require("../models/activityLogModel");
+
+    // 1. Get all tasks for this project
+    const tasks = await Task.find({ projectId });
+    const taskIds = tasks.map(t => t._id);
+
+    // 2. Delete all child records of those tasks
+    if (taskIds.length > 0) {
+      await Promise.all([
+        TimeLog.deleteMany({ taskId: { $in: taskIds } }),
+        Comment.deleteMany({ taskId: { $in: taskIds } }),
+        Bug.deleteMany({ taskId: { $in: taskIds } }) // For a full project delete, we wipe the bugs too
+      ]);
+    }
+
+    // 3. Delete Project-level entities
+    await Promise.all([
+      Task.deleteMany({ projectId }),
+      Module.deleteMany({ projectId }),
+      Sprint.deleteMany({ projectId }),
+      ActivityLog.deleteMany({ entityId: projectId, entityType: "project" })
+    ]);
+
+    // 4. Finally delete the project
+    await Project.findByIdAndDelete(projectId);
 
     res.status(200).json({
       success: true,
-      message: "Project deleted successfully"
-    })
+      message: "Project and all its related data were permanently deleted"
+    });
 
   } catch (error) {
 
