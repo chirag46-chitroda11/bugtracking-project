@@ -15,6 +15,7 @@ const registerUser = async (req, res) => {
   try {
     let { name, email, password, role, designation } = req.body;
 
+    // Determine if this is a public (non-admin) registration
     let isPublic = true;
     if (req.headers.authorization) {
       try {
@@ -26,13 +27,25 @@ const registerUser = async (req, res) => {
       } catch (err) { }
     }
 
+    // Public registration always defaults to tester role
     if (isPublic) {
       role = "tester";
     }
 
-    if (!name || !email || !password || !role) {
+    // Validate required fields
+    if (!name || !email || !password) {
+      const missing = [];
+      if (!name) missing.push("name");
+      if (!email) missing.push("email");
+      if (!password) missing.push("password");
       return res.status(400).json({
-        message: "All required fields missing"
+        message: `Required fields missing: ${missing.join(", ")}`
+      });
+    }
+
+    if (!role) {
+      return res.status(400).json({
+        message: "Role is required"
       });
     }
 
