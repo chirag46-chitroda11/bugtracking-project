@@ -7,7 +7,7 @@ const LandingFooter = () => {
   const scrollTo = (id) => document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
 
   return (
-    <footer id="footer" style={{ background: "#0f172a", position: "relative", zIndex: 10, color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", overflow: "hidden" }}>
+    <footer id="footer" style={{ background: "#0f172a", position: "relative", zIndex: 10, color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", overflow: "hidden", marginTop: "auto" }}>
       <style>{`
         .footer-inner {
           display: grid;

@@ -105,7 +105,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   return (
-    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#ccd6ff", minHeight: "100vh", overflowX: "hidden", position: "relative" }}>
+    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#ccd6ff", minHeight: "100vh", overflowX: "hidden", position: "relative", display: "flex", flexDirection: "column" }}>
       <style>{`
         @keyframes orbit {
           from { transform: rotate(0deg) translateX(var(--orbit-r)) rotate(0deg); }
