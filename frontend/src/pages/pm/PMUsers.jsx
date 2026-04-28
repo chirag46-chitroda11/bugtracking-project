@@ -36,11 +36,11 @@ const PMUsers = () => {
   };
 
   const handleReject = async (id) => {
-    if (await confirm({ title: "Reject User", message: "Reject this tester request?" })) {
+    if (await confirm({ title: "Reject User", message: "Reject this tester request? This will permanently remove the user." })) {
       try {
         await API.put(`/user/users/reject/${id}`);
-        setUsers(users.map(u => u._id === id ? { ...u, status: "rejected" } : u));
-        toast.success("User Rejected!");
+        setUsers(prev => prev.filter(u => u._id !== id));
+        toast.success("User Rejected & Removed!");
       } catch (err) {
         toast.error("Failed to reject user");
       }

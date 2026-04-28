@@ -28,7 +28,14 @@ const Register = () => {
     }
     setLoading(true);
     try {
-      await API.post("/user/register", formData);
+      // Send without auth header — public registration should not carry stale tokens
+      await API.post("/user/register", {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password
+      }, {
+        headers: { Authorization: undefined }
+      });
       triggerToast("Welcome! Redirecting...");
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {

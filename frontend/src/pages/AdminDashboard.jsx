@@ -428,11 +428,11 @@ const AdminDashboard = () => {
                           }
                         }}>Approve</button>
                         <button className="btn-action danger flex-1 justify-center py-1.5 text-xs" onClick={async () => {
-                          if (await confirm({ title: "Reject User", message: "Reject this tester request?" })) {
+                          if (await confirm({ title: "Reject User", message: "Reject this tester request? This will permanently remove the user." })) {
                             try {
                               await API.put(`/user/users/reject/${u._id}`);
-                              setUsers(users.map(usr => usr._id === u._id ? { ...usr, status: "rejected" } : usr));
-                              toast.success("User Rejected!");
+                              setUsers(prev => prev.filter(usr => usr._id !== u._id));
+                              toast.success("User Rejected & Removed!");
                             } catch (e) { toast.error("Failed to reject"); }
                           }
                         }}>Reject</button>
