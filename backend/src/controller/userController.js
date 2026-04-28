@@ -5,6 +5,12 @@ const jwt = require("jsonwebtoken");
 const sendEmail = require("../utils/sendEmail");
 const { createAndEmitNotification } = require("../utils/notificationHelper");
 const crypto = require("crypto");
+const { 
+  welcomeEmail, 
+  approvalEmail, 
+  rejectionEmail, 
+  resetPasswordEmail 
+} = require("../utils/emailTemplates");
 
 // ================= ROLE HIERARCHY =================
 const ROLE_HIERARCHY = { admin: 4, project_manager: 3, developer: 2, tester: 1 };
@@ -90,25 +96,11 @@ const registerUser = async (req, res) => {
 
     // ================= 📧 EMAIL FUNCTIONALITY ADDED =================
     const FRONTEND_URL = process.env.FRONTEND_URL || "https://fixify46.vercel.app";
-    const html = `
-  <div style="font-family: 'Inter', Arial, sans-serif; background:#0f172a; padding:40px 20px;">
-    <div style="max-width:500px; margin:auto; background:#1e293b; padding:30px; border-radius:16px; border: 1px solid #334155;">
-      <h2 style="color:#38bdf8; text-align:center; margin-bottom: 24px; font-size: 28px;">
-        Fixify
-      </h2>
-      <p style="color:#f8fafc; font-size: 16px;">Hello <b>${name}</b>,</p>
-      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">Your Fixify account is ready.</p>
-      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">A faster, smarter way to manage bugs, teams, and productivity starts now.</p>
-      
-      <div style="text-align: center; margin: 32px 0;">
-        <a href="${FRONTEND_URL}/login" style="background:#38bdf8; color:#0f172a; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold; display:inline-block;">Access Workspace</a>
-      </div>
-
-      <p style="color:#94a3b8; font-size: 14px;">Regards,<br/>The Fixify Team</p>
-    </div>
-  </div>
-`;
-    await sendEmail(email, "Welcome to the Future of Bug Tracking — Fixify 🔥", html);
+    const html = (initialStatus === "active") ? welcomeEmail(name) : pendingEmail(name);
+    const subject = (initialStatus === "active") 
+      ? "Welcome to the Future of Bug Tracking — Fixify 🔥" 
+      : "Registration Received — Verification Pending 📨";
+    await sendEmail(email, subject, html);
     // ===============================================================
 
     // Create notification for new user
@@ -516,25 +508,7 @@ const approveUser = async (req, res) => {
     await user.save();
 
     // Send Approval Email
-    const FRONTEND_URL = process.env.FRONTEND_URL || "https://fixify46.vercel.app";
-    const html = `
-  <div style="font-family: 'Inter', Arial, sans-serif; background:#0f172a; padding:40px 20px;">
-    <div style="max-width:500px; margin:auto; background:#1e293b; padding:30px; border-radius:16px; border: 1px solid #334155;">
-      <h2 style="color:#22c55e; text-align:center; margin-bottom: 24px; font-size: 24px;">
-        Account Approved ✅
-      </h2>
-      <p style="color:#f8fafc; font-size: 16px;">Hello <b>${user.name}</b>,</p>
-      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">Congratulations! Your Fixify account has been approved.</p>
-      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">You can now access your dashboard and start working.</p>
-      
-      <div style="text-align: center; margin: 32px 0;">
-        <a href="${FRONTEND_URL}/login" style="background:#22c55e; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold; display:inline-block;">Go to Dashboard</a>
-      </div>
-
-      <p style="color:#94a3b8; font-size: 14px;">Regards,<br/>The Fixify Team</p>
-    </div>
-  </div>
-`;
+    const html = approvalEmail(user.name);
     await sendEmail(user.email, "Your Fixify Account is Approved 🎉", html);
 
     res.json({
@@ -557,19 +531,7 @@ const rejectUser = async (req, res) => {
 
     // Send Rejection Email before deleting
     try {
-      const html = `
-  <div style="font-family: 'Inter', Arial, sans-serif; background:#0f172a; padding:40px 20px;">
-    <div style="max-width:500px; margin:auto; background:#1e293b; padding:30px; border-radius:16px; border: 1px solid #334155;">
-      <h2 style="color:#ef4444; text-align:center; margin-bottom: 24px; font-size: 24px;">
-        Registration Request Declined
-      </h2>
-      <p style="color:#f8fafc; font-size: 16px;">Hello <b>${user.name}</b>,</p>
-      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">We're sorry, but your Fixify account request has been declined by the admin.</p>
-      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">If you believe this is a mistake, please contact the administrator or try registering again.</p>
-      <p style="color:#94a3b8; font-size: 14px; margin-top: 24px;">Regards,<br/>The Fixify Team</p>
-    </div>
-  </div>
-`;
+      const html = rejectionEmail(user.name);
       await sendEmail(user.email, "Your Fixify Registration Request Was Declined", html);
     } catch (emailErr) {
       console.log("Rejection email failed (non-blocking):", emailErr.message);
@@ -611,26 +573,7 @@ const forgotPassword = async (req, res) => {
     const FRONTEND_URL = process.env.FRONTEND_URL || "https://fixify46.vercel.app";
     const resetUrl = `${FRONTEND_URL}/reset-password/${resetToken}`;
 
-    const html = `
-  <div style="font-family: 'Inter', Arial, sans-serif; background:#0f172a; padding:40px 20px;">
-    <div style="max-width:500px; margin:auto; background:#1e293b; padding:30px; border-radius:16px; border: 1px solid #334155;">
-      <h2 style="color:#eab308; text-align:center; margin-bottom: 24px; font-size: 24px;">
-        Password Reset Request 🔐
-      </h2>
-      <p style="color:#f8fafc; font-size: 16px;">We received a request to reset your password.</p>
-      <p style="color:#cbd5e1; font-size: 16px; line-height: 1.6;">Click below to create a new password:</p>
-      
-      <div style="text-align: center; margin: 32px 0;">
-        <a href="${resetUrl}" style="background:#eab308; color:#0f172a; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold; display:inline-block;">Reset Password</a>
-      </div>
-
-      <p style="color:#94a3b8; font-size: 14px;">This link expires soon.</p>
-      <p style="color:#94a3b8; font-size: 14px;">If you didn’t request this, ignore this email.</p>
-      <hr style="border:none; border-top: 1px solid #334155; margin: 24px 0;" />
-      <p style="color:#64748b; font-size: 12px; text-align:center;">Team Fixify</p>
-    </div>
-  </div>
-`;
+    const html = resetPasswordEmail(user.name, resetUrl);
 
     try {
       await sendEmail(user.email, "Password Reset Request - Fixify", html);
