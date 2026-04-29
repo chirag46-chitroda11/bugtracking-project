@@ -154,8 +154,8 @@ body{
 </div>
 
 <div class="footer">
-    <p class="footer-text">© 2026 Fixify. All rights reserved.</p>
-    <p class="footer-text">Bug Tracking • Sprint Planning • Team Collaboration</p>
+    <p class="footer-text">© 2026 Fixify. All rights reserved by chirag chitroda.</p>
+    <p class="footer-text">Bug Tracking • Sprint Planning • Team Collaboration • Review</p>
 </div>
 
 </div>
@@ -163,6 +163,8 @@ body{
 </body>
 </html>
 `;
+
+const FRONTEND_URL = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'https://fixify46.vercel.app';
 
 const welcomeEmail = (name) => {
 return generateEmailTemplate(`
@@ -177,7 +179,7 @@ Start managing bugs, tasks, sprints and collaboration with a faster and smarter 
 </p>
 
 <div style="text-align:center;margin:38px 0;">
-<a href="${process.env.FRONTEND_URL || 'https://fixify46.vercel.app'}/login" class="button">
+<a href="${FRONTEND_URL}/login" class="button">
 Access Your Workspace
 </a>
 </div>
@@ -202,7 +204,7 @@ You can now login and access your dashboard.
 </p>
 
 <div style="text-align:center;margin:38px 0;">
-<a href="${process.env.FRONTEND_URL || 'https://fixify46.vercel.app'}/login"
+<a href="${FRONTEND_URL}/login"
 class="button"
 style="background:#10b981;box-shadow:0 10px 22px rgba(16,185,129,.25);">
 Go to Dashboard
@@ -229,7 +231,7 @@ After review, your request has been
 </p>
 
 <p class="text" style="font-size:14px;background:#f8fafc;padding:14px;border-radius:12px;border:1px solid #e2e8f0;">
-If you think this was a mistake, please contact our administrator and try again.
+If you think this was a mistake, please contact chirag (our administrator) and try again.
 </p>
 
 <p class="text" style="margin-bottom:0;">
@@ -291,10 +293,35 @@ Thank you for your patience.<br><strong>Team Fixify</strong>
 `, "Registration Received 📨");
 };
 
+const deletedEmail = (name) => {
+return generateEmailTemplate(`
+<p class="text">Hello <span class="highlight">${name}</span>,</p>
+
+<p class="text">
+This is to inform you that your account at <span class="highlight">Fixify</span> has been removed from our system.
+</p>
+
+<p class="text">
+If you believe this was an error, or if you'd like to rejoin, please contact the administrator or register for a new account.
+</p>
+
+<div style="text-align:center;margin:38px 0;">
+<a href="${FRONTEND_URL}/register" class="button">
+Register New Account
+</a>
+</div>
+
+<p class="text" style="margin-bottom:0;">
+Regards,<br><strong>Team Fixify</strong>
+</p>
+`, "Account Removed");
+};
+
 module.exports = {
 welcomeEmail,
 approvalEmail,
 rejectionEmail,
 resetPasswordEmail,
-pendingEmail
+pendingEmail,
+deletedEmail
 };

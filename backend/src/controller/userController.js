@@ -2,14 +2,16 @@ const User = require("../models/userModel")
 const uploadToCloudinary = require("../utils/CloudinaryUtil")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const sendEmail = require("../utils/sendEmail");
+const { sendEmail } = require("../services/mailService");
 const { createAndEmitNotification } = require("../utils/notificationHelper");
 const crypto = require("crypto");
 const { 
   welcomeEmail, 
   approvalEmail, 
   rejectionEmail, 
-  resetPasswordEmail 
+  resetPasswordEmail,
+  pendingEmail,
+  deletedEmail
 } = require("../utils/emailTemplates");
 
 // ================= ROLE HIERARCHY =================
@@ -105,7 +107,7 @@ const registerUser = async (req, res) => {
       const subject = (initialStatus === "active") 
         ? "Welcome to the Future of Bug Tracking — Fixify 🔥" 
         : "Registration Received — Verification Pending 📨";
-      await sendEmail(email, subject, html);
+      await sendEmail({ to: email, subject, html });
     } catch (emailErr) {
       console.error("Registration Email Error (Non-blocking):", emailErr.message);
     }
@@ -440,6 +442,14 @@ const deleteUser = async (req, res) => {
     // Delete user's activity logs
     await ActivityLog.deleteMany({ userId: userId });
 
+    // Send Deletion Email (Non-blocking)
+    try {
+      const html = deletedEmail(user.name);
+      await sendEmail({ to: user.email, subject: "Account Removed - Fixify", html });
+    } catch (emailErr) {
+      console.error("Deletion Email Error (Non-blocking):", emailErr.message);
+    }
+
     // Finally delete the user
     await User.findByIdAndDelete(userId);
 
@@ -523,7 +533,7 @@ const approveUser = async (req, res) => {
     // Send Approval Email (Non-blocking)
     try {
       const html = approvalEmail(user.name);
-      await sendEmail(user.email, "Your Fixify Account is Approved 🎉", html);
+      await sendEmail({ to: user.email, subject: "Your Fixify Account is Approved 🎉", html });
     } catch (emailErr) {
       console.error("Approval Email Error (Non-blocking):", emailErr.message);
     }
@@ -549,7 +559,7 @@ const rejectUser = async (req, res) => {
     // Send Rejection Email before deleting
     try {
       const html = rejectionEmail(user.name);
-      await sendEmail(user.email, "Your Fixify Registration Request Was Declined", html);
+      await sendEmail({ to: user.email, subject: "Your Fixify Registration Request Was Declined", html });
     } catch (emailErr) {
       console.log("Rejection email failed (non-blocking):", emailErr.message);
     }
@@ -593,7 +603,7 @@ const forgotPassword = async (req, res) => {
     const html = resetPasswordEmail(user.name, resetUrl);
 
     try {
-      await sendEmail(user.email, "Password Reset Request - Fixify", html);
+      await sendEmail({ to: user.email, subject: "Password Reset Request - Fixify", html });
       res.status(200).json({ success: true, message: "If account exists, reset link sent" });
     } catch (err) {
       user.resetPasswordToken = undefined;
