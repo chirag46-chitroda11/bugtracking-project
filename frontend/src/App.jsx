@@ -1,10 +1,18 @@
+import { useState } from "react";
 import AppRouter from "./router/AppRouter";
 import { Toaster } from "react-hot-toast";
 import { ConfirmProvider } from "./context/ConfirmContext";
+import FixifyPreloader from "./components/loader/FixifyPreloader";
 
 function App() {
+  const [preloaderDone, setPreloaderDone] = useState(false);
+
   return (
     <ConfirmProvider>
+      {/* Premium brand preloader — overlays via position:fixed */}
+      {!preloaderDone && (
+        <FixifyPreloader onComplete={() => setPreloaderDone(true)} />
+      )}
       <Toaster 
         position="top-right"
         containerStyle={{ zIndex: 99999 }}

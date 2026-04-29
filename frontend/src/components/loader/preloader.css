@@ -1,0 +1,210 @@
+/* ══════════════════════════════════════════════════════════════
+   FIXIFY PREMIUM PRELOADER — Styles
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Base Overlay ── */
+.fixify-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: opacity 0.5s ease-out;
+}
+
+/* ── Dark Gradient + Radial Glow Background ── */
+.fixify-preloader__bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 45%, rgba(127, 152, 245, 0.14) 0%, transparent 70%),
+    radial-gradient(ellipse 35% 35% at 50% 50%, rgba(160, 181, 249, 0.07) 0%, transparent 60%),
+    linear-gradient(180deg, #080c18 0%, #111827 50%, #0d1322 100%);
+}
+
+/* ── Subtle Noise Texture ── */
+.fixify-preloader__noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events: none;
+}
+
+/* ── Particles ── */
+.fixify-particle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: particleFloat var(--p-dur, 6s) var(--p-delay, 0s) ease-in-out infinite;
+}
+
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: var(--p-opa, 0.3);
+  }
+  33% {
+    transform: translate(var(--p-dx, 15px), var(--p-dy, -20px)) scale(1.3);
+    opacity: calc(var(--p-opa, 0.3) * 1.6);
+  }
+  66% {
+    transform: translate(calc(var(--p-dx, 15px) * -0.7), calc(var(--p-dy, -20px) * 0.5)) scale(0.7);
+    opacity: calc(var(--p-opa, 0.3) * 0.6);
+  }
+}
+
+/* ── Logo Container ── */
+.fixify-logo-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+}
+
+/* ── Energy Ring ── */
+@keyframes ringPulse {
+  0%, 100% { opacity: 0.18; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(1.04); }
+}
+
+.fixify-energy-ring {
+  animation: ringPulse 2.5s ease-in-out infinite;
+  animation-delay: 1.5s;
+}
+
+/* ── Shine Sweep ── */
+@keyframes shineSweep {
+  0% { transform: translateX(-120%) skewX(-15deg); }
+  100% { transform: translateX(220%) skewX(-15deg); }
+}
+
+.fixify-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 30%,
+    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0.06) 70%,
+    transparent 100%
+  );
+  pointer-events: none;
+  opacity: 0;
+}
+
+.fixify-shine--active {
+  opacity: 1;
+  animation: shineSweep 0.7s ease-in-out forwards;
+}
+
+/* ── Glow Pulse on Logo ── */
+@keyframes glowSettle {
+  0%, 100% { filter: drop-shadow(0 0 18px rgba(127, 152, 245, 0.25)); }
+  50% { filter: drop-shadow(0 0 32px rgba(127, 152, 245, 0.45)); }
+}
+
+.fixify-logo-glow {
+  animation: glowSettle 2.5s ease-in-out infinite;
+}
+
+/* ── Brand Text ── */
+.fixify-brand-text {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 2.4rem;
+  letter-spacing: 0.18em;
+  color: #ffffff;
+  margin-top: 22px;
+  text-align: center;
+}
+
+.fixify-tagline {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 0.82rem;
+  letter-spacing: 0.22em;
+  color: rgba(160, 181, 249, 0.6);
+  text-transform: uppercase;
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* ── Progress Section ── */
+.fixify-progress-wrap {
+  margin-top: 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  min-height: 50px;
+}
+
+.fixify-status-text {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+}
+
+.fixify-progress-bar {
+  width: 180px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.fixify-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7f98f5, #a0b5f9);
+  border-radius: 2px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Reflection Floor ── */
+.fixify-reflection {
+  position: absolute;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%) scaleY(-1);
+  opacity: 0.06;
+  filter: blur(6px);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), transparent);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), transparent);
+  pointer-events: none;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .fixify-brand-text { font-size: 1.9rem; letter-spacing: 0.14em; }
+  .fixify-tagline { font-size: 0.7rem; }
+  .fixify-progress-bar { width: 140px; }
+}
+
+@media (max-width: 480px) {
+  .fixify-brand-text { font-size: 1.5rem; letter-spacing: 0.1em; }
+  .fixify-tagline { font-size: 0.65rem; letter-spacing: 0.15em; }
+  .fixify-progress-bar { width: 120px; }
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .fixify-particle { display: none !important; }
+  .fixify-shine { display: none !important; }
+  .fixify-energy-ring { animation: none !important; }
+  .fixify-logo-glow { animation: none !important; filter: none !important; }
+  .fixify-preloader__noise { display: none !important; }
+}
