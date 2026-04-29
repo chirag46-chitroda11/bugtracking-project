@@ -10,27 +10,27 @@ import toast from "react-hot-toast";
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const severityColors = {
   critical: "bg-red-100 text-red-700 border-red-200",
-  high:     "bg-orange-100 text-orange-700 border-orange-200",
-  medium:   "bg-yellow-100 text-yellow-700 border-yellow-200",
-  low:      "bg-blue-100 text-blue-700 border-blue-200",
+  high: "bg-orange-100 text-orange-700 border-orange-200",
+  medium: "bg-yellow-100 text-yellow-700 border-yellow-200",
+  low: "bg-blue-100 text-blue-700 border-blue-200",
 };
 
 const statusMeta = {
-  draft:       { label: "Draft",              cls: "bg-slate-100 text-slate-600 border-slate-200" },
-  open:        { label: "Open",               cls: "bg-amber-100 text-amber-700 border-amber-200" },
-  submitted:   { label: "Submitted",          cls: "bg-amber-100 text-amber-700 border-amber-200" },
-  in_progress: { label: "In Progress",        cls: "bg-blue-100 text-blue-700 border-blue-200" },
-  retest:      { label: "Ready for Retest",   cls: "bg-purple-100 text-purple-700 border-purple-200" },
-  resolved:    { label: "Fixed / Resolved",   cls: "bg-purple-100 text-purple-700 border-purple-200" },
-  reopened:    { label: "Reopened",           cls: "bg-rose-100 text-rose-700 border-rose-200" },
-  closed:      { label: "Closed ✓",          cls: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+  draft: { label: "Draft", cls: "bg-slate-100 text-slate-600 border-slate-200" },
+  open: { label: "Open", cls: "bg-amber-100 text-amber-700 border-amber-200" },
+  submitted: { label: "Submitted", cls: "bg-amber-100 text-amber-700 border-amber-200" },
+  in_progress: { label: "In Progress", cls: "bg-blue-100 text-blue-700 border-blue-200" },
+  retest: { label: "Ready for Retest", cls: "bg-purple-100 text-purple-700 border-purple-200" },
+  resolved: { label: "Fixed / Resolved", cls: "bg-purple-100 text-purple-700 border-purple-200" },
+  reopened: { label: "Reopened", cls: "bg-rose-100 text-rose-700 border-rose-200" },
+  closed: { label: "Closed ✓", cls: "bg-emerald-100 text-emerald-700 border-emerald-200" },
 };
 
 // Status rules
-const isClosed         = (s) => ["closed"].includes(s?.toLowerCase());
-const testerCanAct     = (s) => ["retest", "resolved", "reopened"].includes(s?.toLowerCase());
+const isClosed = (s) => ["closed"].includes(s?.toLowerCase());
+const testerCanAct = (s) => ["retest", "resolved", "reopened"].includes(s?.toLowerCase());
 // Tester can request edit when bug is in a state they own
-const testerCanEdit    = (s) => ["draft", "open", "retest", "reopened"].includes(s?.toLowerCase());
+const testerCanEdit = (s) => ["draft", "open", "retest", "reopened"].includes(s?.toLowerCase());
 
 // ─── Dev Card ────────────────────────────────────────────────────────────────
 const DevCard = ({ dev }) => {
@@ -60,35 +60,35 @@ const DevCard = ({ dev }) => {
 const timeAgo = (date) => {
   if (!date) return "";
   const s = Math.floor((Date.now() - new Date(date)) / 1000);
-  if (s < 60)  return "Just now";
+  if (s < 60) return "Just now";
   const m = Math.floor(s / 60);
-  if (m < 60)  return `${m}m ago`;
+  if (m < 60) return `${m}m ago`;
   const h = Math.floor(m / 60);
-  if (h < 24)  return `${h}h ago`;
-  if (h < 48)  return "Yesterday";
+  if (h < 24) return `${h}h ago`;
+  if (h < 48) return "Yesterday";
   return new Date(date).toLocaleDateString();
 };
 
 const actionIcon = (action) => {
   const map = {
-    created:       "🐛",
-    edit:          "✏️",
+    created: "🐛",
+    edit: "✏️",
     status_update: "🔄",
-    comment:       "💬",
+    comment: "💬",
   };
   return map[action] || "📌";
 };
 
 // ════════════════════════════════════════════════════════════════════════════
 const BugDetails = () => {
-  const { id }   = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
 
-  const [bug,       setBug]       = useState(null);
-  const [loading,   setLoading]   = useState(true);
-  const [newComment,setNewComment] = useState("");
-  const [commenting,setCommenting] = useState(false);
-  const [actioning, setActioning]  = useState(false);
+  const [bug, setBug] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [newComment, setNewComment] = useState("");
+  const [commenting, setCommenting] = useState(false);
+  const [actioning, setActioning] = useState(false);
 
   const loggedInUser = JSON.parse(localStorage.getItem("user")) || { name: "Tester", role: "tester" };
   const userRole = loggedInUser.role?.toLowerCase() || "tester";
@@ -131,9 +131,9 @@ const BugDetails = () => {
     setCommenting(true);
     try {
       const res = await API.post(`/bug/${id}/comments`, {
-        comment:    newComment.trim(),
-        commenter:  loggedInUser.name,
-        authorId:   loggedInUser._id || loggedInUser.id,
+        comment: newComment.trim(),
+        commenter: loggedInUser.name,
+        authorId: loggedInUser._id || loggedInUser.id,
         authorRole: loggedInUser.role,
         authorName: loggedInUser.name,
       });
@@ -141,8 +141,10 @@ const BugDetails = () => {
       else setBug(prev => ({
         ...prev,
         reviewComments: [...(prev.reviewComments || []),
-          { commenter: loggedInUser.name, authorName: loggedInUser.name,
-            authorRole: loggedInUser.role, comment: newComment.trim(), date: new Date() }]
+        {
+          commenter: loggedInUser.name, authorName: loggedInUser.name,
+          authorRole: loggedInUser.role, comment: newComment.trim(), date: new Date()
+        }]
       }));
       setNewComment("");
       toast.success("Comment posted");
@@ -170,10 +172,10 @@ const BugDetails = () => {
     </div>
   );
 
-  const sl      = statusMeta[bug.status?.toLowerCase()] || statusMeta.open;
-  const sc      = severityColors[bug.severity?.toLowerCase()] || severityColors.medium;
-  const canAct  = testerCanAct(bug.status);
-  const closed  = isClosed(bug.status);
+  const sl = statusMeta[bug.status?.toLowerCase()] || statusMeta.open;
+  const sc = severityColors[bug.severity?.toLowerCase()] || severityColors.medium;
+  const canAct = testerCanAct(bug.status);
+  const closed = isClosed(bug.status);
   const canEdit = testerCanEdit(bug.status);
 
   // Role-filtered comments
@@ -347,11 +349,11 @@ const BugDetails = () => {
                 ) : visibleComments.map((c, idx) => (
                   <div key={idx} className="bg-white/60 p-4 rounded-xl border border-white flex gap-3 shadow-sm">
                     <div className={`w-9 h-9 rounded-full overflow-hidden flex items-center justify-center font-black flex-shrink-0 border-2 border-white shadow text-sm
-                      ${c.authorRole === "tester"          ? "bg-blue-100 text-blue-700" :
-                        c.authorRole === "developer"        ? "bg-indigo-100 text-indigo-700" :
-                        c.authorRole === "project_manager"  ? "bg-violet-100 text-violet-700" :
-                        c.authorRole === "admin"            ? "bg-red-100 text-red-700" :
-                        "bg-slate-100 text-slate-700"}`}>
+                      ${c.authorRole === "tester" ? "bg-blue-100 text-blue-700" :
+                        c.authorRole === "developer" ? "bg-indigo-100 text-indigo-700" :
+                          c.authorRole === "project_manager" ? "bg-violet-100 text-violet-700" :
+                            c.authorRole === "admin" ? "bg-red-100 text-red-700" :
+                              "bg-slate-100 text-slate-700"}`}>
                       {c.authorId?.profilePicture
                         ? <img src={c.authorId.profilePicture} alt={c.authorId.name || c.authorName} className="w-full h-full object-cover" />
                         : (c.authorName || c.commenter || "U").charAt(0).toUpperCase()}
@@ -488,10 +490,10 @@ const BugDetails = () => {
             <div className="glass-card p-6 space-y-3">
               <span className="fl mb-2">Bug Timeline</span>
               {[
-                ["Created",      new Date(bug.createdAt).toLocaleString()],
+                ["Created", new Date(bug.createdAt).toLocaleString()],
                 ["Last Updated", new Date(bug.updatedAt).toLocaleString()],
-                ["Comments",     bug.reviewComments?.length || 0],
-                ["Activity Logs",bug.activityLogs?.length || 0],
+                ["Comments", bug.reviewComments?.length || 0],
+                ["Activity Logs", bug.activityLogs?.length || 0],
                 ...(closed ? [[
                   "Resolution Time",
                   `${Math.round((new Date(bug.updatedAt) - new Date(bug.createdAt)) / 3600000)}h`

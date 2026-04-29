@@ -9,7 +9,7 @@ const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: "", isError: false });
-  
+
   // Forgot Password States
   const [showForgot, setShowForgot] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
@@ -29,32 +29,32 @@ const Login = () => {
       const user = response.data.data;
       const token = response.data.token;
 
-        // Clear ALL previous user state before storing new user
-        localStorage.clear();
+      // Clear ALL previous user state before storing new user
+      localStorage.clear();
 
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            ...user,
-            token: token
-          })
-        );
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          ...user,
+          token: token
+        })
+      );
       triggerToast(" 🎉 Access Granted!");
-      
-        const roleRoutes = {
-      admin: "/admin-dashboard",
-      developer: "/developer-dashboard",
-      tester: "/tester-dashboard",
-      project_manager: "/pm-dashboard",
-    };
 
-    setTimeout(() => {
-      if (user.status === "pending") {
-        navigate("/waiting");
-      } else {
-        navigate(roleRoutes[user.role] || "/dashboard");
-      }
-    }, 1000);
+      const roleRoutes = {
+        admin: "/admin-dashboard",
+        developer: "/developer-dashboard",
+        tester: "/tester-dashboard",
+        project_manager: "/pm-dashboard",
+      };
+
+      setTimeout(() => {
+        if (user.status === "pending") {
+          navigate("/waiting");
+        } else {
+          navigate(roleRoutes[user.role] || "/dashboard");
+        }
+      }, 1000);
     } catch (err) {
       triggerToast(err.response?.data?.message || "Login failed!", true);
     } finally { setLoading(false); }
@@ -97,8 +97,8 @@ const Login = () => {
         @media (max-width: 800px) { .auth-card { max-width: 90%; } .form-side { padding: 2.5rem; } }
       `}</style>
 
-      <div className="circle" style={{width: 350, height: 350, top: -120, left: -120}} />
-      <div className="circle" style={{width: 250, height: 250, bottom: -80, right: -80, animationDelay: '3s'}} />
+      <div className="circle" style={{ width: 350, height: 350, top: -120, left: -120 }} />
+      <div className="circle" style={{ width: 250, height: 250, bottom: -80, right: -80, animationDelay: '3s' }} />
       <div className={`toast-box ${toast.show ? 'show' : ''}`} style={{ background: toast.isError ? '#ff4757' : '#2ed573' }}>{toast.msg}</div>
 
       <div className="auth-card">
@@ -114,9 +114,9 @@ const Login = () => {
               <h1 className="text-3xl font-extrabold text-slate-900 mb-1">Welcome Back.</h1>
               <p className="text-slate-400 text-sm mb-8 font-medium">Enter credentials to access the console.</p>
               <form onSubmit={handleSubmit}>
-                <input name="email" type="email" placeholder="Email Address" required className="field" onChange={e => setForm({...form, email: e.target.value})} />
+                <input name="email" type="email" placeholder="Email Address" required className="field" onChange={e => setForm({ ...form, email: e.target.value })} />
                 <div className="mb-6">
-                  <input name="password" type="password" placeholder="Password" required className="field !mb-2" onChange={e => setForm({...form, password: e.target.value})} />
+                  <input name="password" type="password" placeholder="Password" required className="field !mb-2" onChange={e => setForm({ ...form, password: e.target.value })} />
                   <p className="text-right text-xs font-bold">
                     <span onClick={() => setShowForgot(true)} className="text-indigo-600 cursor-pointer hover:underline">Forgot Password?</span>
                   </p>

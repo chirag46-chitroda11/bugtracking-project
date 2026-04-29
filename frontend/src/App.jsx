@@ -13,7 +13,7 @@ function App() {
       {!preloaderDone && (
         <FixifyPreloader onComplete={() => setPreloaderDone(true)} />
       )}
-      <Toaster 
+      <Toaster
         position="top-right"
         containerStyle={{ zIndex: 99999 }}
         toastOptions={{
@@ -41,7 +41,7 @@ function App() {
             iconTheme: { primary: '#ef4444', secondary: '#fff' },
             style: { borderLeft: '4px solid #ef4444' },
           },
-        }} 
+        }}
       />
       <AppRouter />
     </ConfirmProvider>
