@@ -22,7 +22,11 @@
 
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+html { 
+  scroll-behavior: smooth; 
+  -webkit-font-smoothing: antialiased; 
+  scroll-padding-top: 80px; /* Account for fixed navbar */
+}
 
 body {
   font-family: var(--font);
@@ -30,13 +34,19 @@ body {
   background: var(--primary-bg);
   line-height: 1.6;
   overflow-x: hidden;
+  /* Soft scrolling feel */
+  -webkit-overflow-scrolling: touch;
 }
 
 ::selection { background: #dbe3ff; color: var(--text-dark); }
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { 
+  background: #cbd5e1; 
+  border-radius: 20px;
+  border: 2px solid #f1f5f9;
+}
 ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
 /* ── Reusable Components ── */

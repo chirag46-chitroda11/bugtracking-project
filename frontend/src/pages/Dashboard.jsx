@@ -141,203 +141,206 @@ const Dashboard = () => {
 
       <LandingNavbar />
 
-      {/* ═══ HERO ═══ */}
-      <section id="hero" style={{ padding: "140px 5% 80px", position: "relative", zIndex: 10, minHeight: "100vh", display: "flex", alignItems: "center" }}>
-        <div className="hero-grid" style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", alignItems: "center", gap: 60, width: "100%", maxWidth: 1200, margin: "0 auto" }}>
-          <div>
-            <FadeIn>
+      <main style={{ flex: 1 }}>
+        {/* ═══ HERO ═══ */}
+        <section id="hero" style={{ padding: "140px 5% 80px", position: "relative", zIndex: 10, minHeight: "100vh", display: "flex", alignItems: "center" }}>
+          <div className="hero-grid" style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", alignItems: "center", gap: 60, width: "100%", maxWidth: 1200, margin: "0 auto" }}>
+            <div>
+              <FadeIn>
+                <div style={{
+                  display: "inline-flex", alignItems: "center", gap: 8,
+                  background: "rgba(255,255,255,0.6)", backdropFilter: "blur(10px)",
+                  padding: "8px 18px", borderRadius: 50, marginBottom: 28,
+                  border: "1px solid rgba(255,255,255,0.8)"
+                }}>
+                  <span style={{ fontSize: 14 }}>⚡</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: 1.5 }}>"Your code has a secret... let's find it."</span>
+                </div>
+              </FadeIn>
+              <FadeIn delay={0.1}>
+                <h1 style={{ fontSize: "clamp(2.8rem, 6vw, 4.2rem)", fontWeight: 900, lineHeight: 1.05, letterSpacing: "-0.03em", marginBottom: 20, color: "#0f172a" }}>
+                  Stop chasing<br /><span style={{ color: "#4f46e5", fontStyle: "italic" }}>shadows.</span>
+                </h1>
+              </FadeIn>
+              <FadeIn delay={0.2}>
+                <p style={{ fontSize: 16, color: "#64748b", maxWidth: 400, marginBottom: 12, lineHeight: 1.7, fontWeight: 500 }}>
+                  Fixify catches the bugs you missed, before your users do.
+                </p>
+                <p style={{ fontSize: 15, fontWeight: 800, color: "#0f172a", marginBottom: 36 }}>Fast. Fluid. Fearless.</p>
+              </FadeIn>
+              <FadeIn delay={0.3}>
+                <div className="hero-btns" style={{ display: "flex", gap: 14 }}>
+                  <button onClick={() => navigate("/register")} style={{
+                    padding: "15px 32px", borderRadius: 50, fontWeight: 700, fontSize: 15,
+                    cursor: "pointer", border: "none",
+                    background: "#121212", color: "#fff",
+                    boxShadow: "0 8px 25px rgba(0,0,0,0.15)", transition: "0.3s",
+                    display: "flex", alignItems: "center", gap: 8
+                  }}>Start Debugging</button>
+                  <button onClick={() => navigate("/login")} style={{
+                    padding: "15px 32px", borderRadius: 50, fontWeight: 700, fontSize: 15,
+                    cursor: "pointer", background: "#fff", color: "#0f172a",
+                    border: "1px solid #e2e8f0", transition: "0.3s"
+                  }}>Log in</button>
+                </div>
+              </FadeIn>
+            </div>
+            <HeroVisual />
+          </div>
+        </section>
+
+        {/* ═══ FEATURES ═══ */}
+        <section id="features" style={{
+          padding: "80px 5%", position: "relative", zIndex: 10,
+          background: "rgba(255,255,255,0.35)", backdropFilter: "blur(10px)",
+          borderTop: "1px solid rgba(255,255,255,0.6)", borderBottom: "1px solid rgba(255,255,255,0.6)"
+        }}>
+          <FadeIn>
+            <div style={{ textAlign: "center", marginBottom: 56 }}>
+              <span style={{ fontSize: 12, fontWeight: 800, color: "#4f46e5", textTransform: "uppercase", letterSpacing: 3, background: "rgba(79,70,229,0.08)", padding: "6px 18px", borderRadius: 50 }}>Features</span>
+              <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 900, marginTop: 18, letterSpacing: "-1px", color: "#0f172a" }}>
+                Everything you need to <span style={{ color: "#4f46e5" }}>squash bugs</span>
+              </h2>
+              <p style={{ fontSize: 15, color: "#64748b", maxWidth: 480, margin: "12px auto 0", fontWeight: 500 }}>Powerful tools designed for modern development teams</p>
+            </div>
+          </FadeIn>
+          <div className="features-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20, maxWidth: 1200, margin: "0 auto" }}>
+            {features.map((f, i) => (
+              <FadeIn key={i} delay={i * 0.06}>
+                <div style={{
+                  background: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)",
+                  border: "1px solid rgba(255,255,255,0.9)", borderRadius: 20,
+                  padding: 28, height: "100%", display: "flex", flexDirection: "column",
+                  transition: "0.3s", cursor: "default",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.03)"
+                }}>
+                  <div style={{
+                    width: 48, height: 48, background: f.bg, borderRadius: 14,
+                    display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 18
+                  }}>
+                    <f.icon size={22} color={f.color} />
+                  </div>
+                  <h3 style={{ fontSize: 17, fontWeight: 800, marginBottom: 8, color: "#0f172a" }}>{f.title}</h3>
+                  <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.7, fontWeight: 500 }}>{f.desc}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        {/* ═══ HOW IT WORKS ═══ */}
+        <section style={{ padding: "80px 5%", position: "relative", zIndex: 10 }}>
+          <FadeIn>
+            <div style={{ textAlign: "center", marginBottom: 56 }}>
+              <span style={{ fontSize: 12, fontWeight: 800, color: "#22c55e", textTransform: "uppercase", letterSpacing: 3, background: "rgba(34,197,94,0.08)", padding: "6px 18px", borderRadius: 50 }}>How It Works</span>
+              <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 900, marginTop: 18, letterSpacing: "-1px", color: "#0f172a" }}>
+                Get started in <span style={{ color: "#22c55e" }}>3 simple steps</span>
+              </h2>
+            </div>
+          </FadeIn>
+          <div className="steps-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 28, maxWidth: 1000, margin: "0 auto" }}>
+            {steps.map((s, i) => (
+              <FadeIn key={i} delay={i * 0.15}>
+                <div style={{ textAlign: "center" }}>
+                  <div style={{
+                    width: 64, height: 64, borderRadius: 18, margin: "0 auto 20px",
+                    background: `${s.color}12`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    border: `2px solid ${s.color}20`
+                  }}>
+                    <s.icon size={26} color={s.color} />
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 900, color: s.color, letterSpacing: 2 }}>{s.num}</span>
+                  <h3 style={{ fontSize: 20, fontWeight: 800, color: "#0f172a", margin: "8px 0 10px" }}>{s.title}</h3>
+                  <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.7, fontWeight: 500, maxWidth: 280, margin: "0 auto" }}>{s.desc}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        {/* ═══ WHY CHOOSE FIXIFY ═══ */}
+        <section style={{
+          padding: "80px 5%", position: "relative", zIndex: 10,
+          background: "rgba(255,255,255,0.35)", backdropFilter: "blur(10px)",
+          borderTop: "1px solid rgba(255,255,255,0.6)", borderBottom: "1px solid rgba(255,255,255,0.6)"
+        }}>
+          <FadeIn>
+            <div style={{ textAlign: "center", marginBottom: 56 }}>
+              <span style={{ fontSize: 12, fontWeight: 800, color: "#f59e0b", textTransform: "uppercase", letterSpacing: 3, background: "rgba(245,158,11,0.08)", padding: "6px 18px", borderRadius: 50 }}>Why Fixify</span>
+              <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 900, marginTop: 18, letterSpacing: "-1px", color: "#0f172a" }}>
+                Built for teams that <span style={{ color: "#f59e0b" }}>care about quality</span>
+              </h2>
+            </div>
+          </FadeIn>
+          <div className="benefits-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20, maxWidth: 1200, margin: "0 auto" }}>
+            {benefits.map((b, i) => (
+              <FadeIn key={i} delay={i * 0.1}>
+                <div style={{
+                  background: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)",
+                  border: "1px solid rgba(255,255,255,0.9)", borderRadius: 20,
+                  padding: 28, display: "flex", gap: 16, alignItems: "flex-start",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.03)"
+                }}>
+                  <div style={{
+                    width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                    background: `${b.color}12`, display: "flex",
+                    alignItems: "center", justifyContent: "center"
+                  }}>
+                    <b.icon size={20} color={b.color} />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: 16, fontWeight: 800, color: "#0f172a", marginBottom: 6 }}>{b.title}</h3>
+                    <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.7, fontWeight: 500 }}>{b.desc}</p>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        {/* ═══ REVIEWS ═══ */}
+        <ReviewSection />
+
+        {/* ═══ CTA BANNER ═══ */}
+        <section style={{ padding: "60px 5%", position: "relative", zIndex: 10 }}>
+          <FadeIn>
+            <div style={{
+              background: "#0f172a",
+              borderRadius: 24, padding: "60px 40px", textAlign: "center",
+              maxWidth: 800, margin: "0 auto", position: "relative", overflow: "hidden"
+            }}>
               <div style={{
-                display: "inline-flex", alignItems: "center", gap: 8,
-                background: "rgba(255,255,255,0.6)", backdropFilter: "blur(10px)",
-                padding: "8px 18px", borderRadius: 50, marginBottom: 28,
-                border: "1px solid rgba(255,255,255,0.8)"
-              }}>
-                <span style={{ fontSize: 14 }}>⚡</span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: 1.5 }}>"Your code has a secret... let's find it."</span>
-              </div>
-            </FadeIn>
-            <FadeIn delay={0.1}>
-              <h1 style={{ fontSize: "clamp(2.8rem, 6vw, 4.2rem)", fontWeight: 900, lineHeight: 1.05, letterSpacing: "-0.03em", marginBottom: 20, color: "#0f172a" }}>
-                Stop chasing<br /><span style={{ color: "#4f46e5", fontStyle: "italic" }}>shadows.</span>
-              </h1>
-            </FadeIn>
-            <FadeIn delay={0.2}>
-              <p style={{ fontSize: 16, color: "#64748b", maxWidth: 400, marginBottom: 12, lineHeight: 1.7, fontWeight: 500 }}>
-                Fixify catches the bugs you missed, before your users do.
+                position: "absolute", top: -50, right: -50, width: 200, height: 200,
+                background: "radial-gradient(circle, rgba(79,70,229,0.3), transparent)",
+                borderRadius: "50%", filter: "blur(50px)"
+              }} />
+              <h2 style={{ fontSize: "clamp(1.6rem, 4vw, 2.4rem)", fontWeight: 900, color: "#fff", marginBottom: 14, letterSpacing: "-0.5px", position: "relative" }}>
+                Ready to simplify bug tracking?
+              </h2>
+              <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 16, marginBottom: 32, fontWeight: 500, maxWidth: 450, margin: "0 auto 32px", position: "relative" }}>
+                Join hundreds of teams already using Fixify to ship better software, faster.
               </p>
-              <p style={{ fontSize: 15, fontWeight: 800, color: "#0f172a", marginBottom: 36 }}>Fast. Fluid. Fearless.</p>
-            </FadeIn>
-            <FadeIn delay={0.3}>
-              <div className="hero-btns" style={{ display: "flex", gap: 14 }}>
+              <div style={{ display: "flex", justifyContent: "center", gap: 14, position: "relative", flexWrap: "wrap" }}>
                 <button onClick={() => navigate("/register")} style={{
-                  padding: "15px 32px", borderRadius: 50, fontWeight: 700, fontSize: 15,
-                  cursor: "pointer", border: "none",
-                  background: "#121212", color: "#fff",
-                  boxShadow: "0 8px 25px rgba(0,0,0,0.15)", transition: "0.3s",
+                  padding: "15px 34px", borderRadius: 50, fontWeight: 700, fontSize: 15,
+                  border: "none", cursor: "pointer", background: "#fff", color: "#0f172a",
+                  boxShadow: "0 8px 25px rgba(0,0,0,0.2)", transition: "0.3s",
                   display: "flex", alignItems: "center", gap: 8
-                }}>Start Debugging</button>
+                }}>Start Free <ArrowRight size={16} /></button>
                 <button onClick={() => navigate("/login")} style={{
-                  padding: "15px 32px", borderRadius: 50, fontWeight: 700, fontSize: 15,
-                  cursor: "pointer", background: "#fff", color: "#0f172a",
-                  border: "1px solid #e2e8f0", transition: "0.3s"
+                  padding: "15px 34px", borderRadius: 50, fontWeight: 700, fontSize: 15,
+                  cursor: "pointer", background: "rgba(255,255,255,0.1)", color: "#fff",
+                  border: "1px solid rgba(255,255,255,0.2)", transition: "0.3s"
                 }}>Log in</button>
               </div>
-            </FadeIn>
-          </div>
-          <HeroVisual />
-        </div>
-      </section>
-
-      {/* ═══ FEATURES ═══ */}
-      <section id="features" style={{
-        padding: "80px 5%", position: "relative", zIndex: 10,
-        background: "rgba(255,255,255,0.35)", backdropFilter: "blur(10px)",
-        borderTop: "1px solid rgba(255,255,255,0.6)", borderBottom: "1px solid rgba(255,255,255,0.6)"
-      }}>
-        <FadeIn>
-          <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <span style={{ fontSize: 12, fontWeight: 800, color: "#4f46e5", textTransform: "uppercase", letterSpacing: 3, background: "rgba(79,70,229,0.08)", padding: "6px 18px", borderRadius: 50 }}>Features</span>
-            <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 900, marginTop: 18, letterSpacing: "-1px", color: "#0f172a" }}>
-              Everything you need to <span style={{ color: "#4f46e5" }}>squash bugs</span>
-            </h2>
-            <p style={{ fontSize: 15, color: "#64748b", maxWidth: 480, margin: "12px auto 0", fontWeight: 500 }}>Powerful tools designed for modern development teams</p>
-          </div>
-        </FadeIn>
-        <div className="features-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20, maxWidth: 1200, margin: "0 auto" }}>
-          {features.map((f, i) => (
-            <FadeIn key={i} delay={i * 0.06}>
-              <div style={{
-                background: "rgba(255,255,255,0.7)", backdropFilter: "blur(15px)",
-                border: "1px solid rgba(255,255,255,0.9)", borderRadius: 20,
-                padding: 28, height: "100%", display: "flex", flexDirection: "column",
-                transition: "0.3s", cursor: "default",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.03)"
-              }}>
-                <div style={{
-                  width: 48, height: 48, background: f.bg, borderRadius: 14,
-                  display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 18
-                }}>
-                  <f.icon size={22} color={f.color} />
-                </div>
-                <h3 style={{ fontSize: 17, fontWeight: 800, marginBottom: 8, color: "#0f172a" }}>{f.title}</h3>
-                <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.7, fontWeight: 500 }}>{f.desc}</p>
-              </div>
-            </FadeIn>
-          ))}
-        </div>
-      </section>
-
-      {/* ═══ HOW IT WORKS ═══ */}
-      <section style={{ padding: "80px 5%", position: "relative", zIndex: 10 }}>
-        <FadeIn>
-          <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <span style={{ fontSize: 12, fontWeight: 800, color: "#22c55e", textTransform: "uppercase", letterSpacing: 3, background: "rgba(34,197,94,0.08)", padding: "6px 18px", borderRadius: 50 }}>How It Works</span>
-            <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 900, marginTop: 18, letterSpacing: "-1px", color: "#0f172a" }}>
-              Get started in <span style={{ color: "#22c55e" }}>3 simple steps</span>
-            </h2>
-          </div>
-        </FadeIn>
-        <div className="steps-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 28, maxWidth: 1000, margin: "0 auto" }}>
-          {steps.map((s, i) => (
-            <FadeIn key={i} delay={i * 0.15}>
-              <div style={{ textAlign: "center" }}>
-                <div style={{
-                  width: 64, height: 64, borderRadius: 18, margin: "0 auto 20px",
-                  background: `${s.color}12`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  border: `2px solid ${s.color}20`
-                }}>
-                  <s.icon size={26} color={s.color} />
-                </div>
-                <span style={{ fontSize: 12, fontWeight: 900, color: s.color, letterSpacing: 2 }}>{s.num}</span>
-                <h3 style={{ fontSize: 20, fontWeight: 800, color: "#0f172a", margin: "8px 0 10px" }}>{s.title}</h3>
-                <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.7, fontWeight: 500, maxWidth: 280, margin: "0 auto" }}>{s.desc}</p>
-              </div>
-            </FadeIn>
-          ))}
-        </div>
-      </section>
-
-      {/* ═══ WHY CHOOSE FIXIFY ═══ */}
-      <section style={{
-        padding: "80px 5%", position: "relative", zIndex: 10,
-        background: "rgba(255,255,255,0.35)", backdropFilter: "blur(10px)",
-        borderTop: "1px solid rgba(255,255,255,0.6)", borderBottom: "1px solid rgba(255,255,255,0.6)"
-      }}>
-        <FadeIn>
-          <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <span style={{ fontSize: 12, fontWeight: 800, color: "#f59e0b", textTransform: "uppercase", letterSpacing: 3, background: "rgba(245,158,11,0.08)", padding: "6px 18px", borderRadius: 50 }}>Why Fixify</span>
-            <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 900, marginTop: 18, letterSpacing: "-1px", color: "#0f172a" }}>
-              Built for teams that <span style={{ color: "#f59e0b" }}>care about quality</span>
-            </h2>
-          </div>
-        </FadeIn>
-        <div className="benefits-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20, maxWidth: 1200, margin: "0 auto" }}>
-          {benefits.map((b, i) => (
-            <FadeIn key={i} delay={i * 0.1}>
-              <div style={{
-                background: "rgba(255,255,255,0.7)", backdropFilter: "blur(15px)",
-                border: "1px solid rgba(255,255,255,0.9)", borderRadius: 20,
-                padding: 28, display: "flex", gap: 16, alignItems: "flex-start",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.03)"
-              }}>
-                <div style={{
-                  width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-                  background: `${b.color}12`, display: "flex",
-                  alignItems: "center", justifyContent: "center"
-                }}>
-                  <b.icon size={20} color={b.color} />
-                </div>
-                <div>
-                  <h3 style={{ fontSize: 16, fontWeight: 800, color: "#0f172a", marginBottom: 6 }}>{b.title}</h3>
-                  <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.7, fontWeight: 500 }}>{b.desc}</p>
-                </div>
-              </div>
-            </FadeIn>
-          ))}
-        </div>
-      </section>
-
-      {/* ═══ REVIEWS ═══ */}
-      <ReviewSection />
-
-      {/* ═══ CTA BANNER ═══ */}
-      <section style={{ padding: "60px 5%", position: "relative", zIndex: 10 }}>
-        <FadeIn>
-          <div style={{
-            background: "#0f172a",
-            borderRadius: 24, padding: "60px 40px", textAlign: "center",
-            maxWidth: 800, margin: "0 auto", position: "relative", overflow: "hidden"
-          }}>
-            <div style={{
-              position: "absolute", top: -50, right: -50, width: 200, height: 200,
-              background: "radial-gradient(circle, rgba(79,70,229,0.3), transparent)",
-              borderRadius: "50%", filter: "blur(50px)"
-            }} />
-            <h2 style={{ fontSize: "clamp(1.6rem, 4vw, 2.4rem)", fontWeight: 900, color: "#fff", marginBottom: 14, letterSpacing: "-0.5px", position: "relative" }}>
-              Ready to simplify bug tracking?
-            </h2>
-            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 16, marginBottom: 32, fontWeight: 500, maxWidth: 450, margin: "0 auto 32px", position: "relative" }}>
-              Join hundreds of teams already using Fixify to ship better software, faster.
-            </p>
-            <div style={{ display: "flex", justifyContent: "center", gap: 14, position: "relative", flexWrap: "wrap" }}>
-              <button onClick={() => navigate("/register")} style={{
-                padding: "15px 34px", borderRadius: 50, fontWeight: 700, fontSize: 15,
-                border: "none", cursor: "pointer", background: "#fff", color: "#0f172a",
-                boxShadow: "0 8px 25px rgba(0,0,0,0.2)", transition: "0.3s",
-                display: "flex", alignItems: "center", gap: 8
-              }}>Start Free <ArrowRight size={16} /></button>
-              <button onClick={() => navigate("/login")} style={{
-                padding: "15px 34px", borderRadius: 50, fontWeight: 700, fontSize: 15,
-                cursor: "pointer", background: "rgba(255,255,255,0.1)", color: "#fff",
-                border: "1px solid rgba(255,255,255,0.2)", transition: "0.3s"
-              }}>Log in</button>
             </div>
-          </div>
-        </FadeIn>
-      </section>
+          </FadeIn>
+        </section>
+      </main>
 
       <LandingFooter />
+
     </div>
   );
 };
