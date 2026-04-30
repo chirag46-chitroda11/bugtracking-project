@@ -11,7 +11,9 @@ const createTransporter = () => {
   if (transporter) return transporter;
 
   const config = {
-    service: "gmail", // Default to Gmail
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // Use STARTTLS on port 587
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
@@ -19,9 +21,9 @@ const createTransporter = () => {
     // 🔥 Fix for ENETUNREACH: Force IPv4 instead of IPv6
     family: 4, 
     // Production reliability settings
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 5000,
-    socketTimeout: 15000,
+    connectionTimeout: 20000, // Increased to 20s
+    greetingTimeout: 10000,
+    socketTimeout: 30000,
     tls: {
       rejectUnauthorized: false // Helps with some restricted environments
     }
@@ -81,7 +83,7 @@ const sendEmail = async ({ to, subject, html }) => {
     } else if (error.code === 'EAUTH' || error.message.includes('Invalid login')) {
       errorMessage = "Authentication failed. Verify EMAIL_USER and EMAIL_PASS (App Password).";
     } else if (error.code === 'ETIMEDOUT') {
-      errorMessage = `Connection to SMTP server (${smtpHost}) timed out. Check network/firewall.`;
+      errorMessage = `Connection to SMTP server (${smtpHost}) timed out. Your hosting provider might be blocking Port 587/465.`;
     }
 
     console.error(`❌ [EmailService] Error for ${to}:`, errorMessage);
