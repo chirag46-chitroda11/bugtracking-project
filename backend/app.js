@@ -32,6 +32,14 @@ app.use(cors(corsOptions));
 
 app.use(express.json({ limit: "50mb" }))
 
+// 📝 Request Logger for Production Debugging
+app.use((req, res, next) => {
+  if (process.env.NODE_ENV === "production" || req.path.includes("email")) {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  }
+  next();
+});
+
 const server = http.createServer(app)
 
 const io = new Server(server, {
@@ -100,4 +108,12 @@ app.use("/review", reviewRoutes)
 const PORT = process.env.PORT
 server.listen(PORT, () => {
   console.log(`server started on port ${PORT}`)
+  
+  // 📧 Email System Startup Check
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.warn("⚠️  [Warning] Email credentials (EMAIL_USER/EMAIL_PASS) are missing in .env");
+    console.warn("Emails will fail to send until these are configured.");
+  } else {
+    console.log("📨 Email system initialized with user:", process.env.EMAIL_USER);
+  }
 })
