@@ -1,6 +1,6 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
-const { createTransporter } = require('./services/mailService');
+const { createTransporter } = require('../src/services/mailService');
 
 async function testConnection() {
   console.log("🔍 Checking Email Transporter Configuration...");

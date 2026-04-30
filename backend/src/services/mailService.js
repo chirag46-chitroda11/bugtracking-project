@@ -44,9 +44,13 @@ const createTransporter = () => {
 const sendEmail = async ({ to, subject, html }) => {
   try {
     const mailTransporter = createTransporter();
-    
+
+    // Verify connection before sending in case it's stale
+    // (Optional: can be heavy if many emails are sent, but good for debugging)
+    // await mailTransporter.verify(); 
+
     const mailOptions = {
-      from: process.env.EMAIL_FROM || `"Fixify 🚀" <${process.env.EMAIL_USER}>`,
+      from: process.env.EMAIL_FROM || `"Fixify Bug Tracker" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html,
@@ -56,12 +60,19 @@ const sendEmail = async ({ to, subject, html }) => {
     console.log(`✅ Email sent to ${to}: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error(`❌ Email error for ${to}:`, error.message);
-    // Log more details in non-production
-    if (process.env.NODE_ENV !== 'production') {
-      console.error(error);
+    let errorMessage = error.message;
+    
+    // Descriptive errors for common SMTP issues
+    if (error.code === 'ECONNREFUSED') {
+      errorMessage = "Could not connect to SMTP server. Check host and port.";
+    } else if (error.code === 'EAUTH' || error.message.includes('Invalid login')) {
+      errorMessage = "Authentication failed. Check EMAIL_USER and EMAIL_PASS (App Password).";
+    } else if (error.code === 'ETIMEDOUT') {
+      errorMessage = "Connection to SMTP server timed out.";
     }
-    return { success: false, error: error.message };
+
+    console.error(`❌ Email error for ${to}:`, errorMessage);
+    return { success: false, error: errorMessage };
   }
 };
 

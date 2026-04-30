@@ -1,11 +1,12 @@
 const express = require("express")
 const router = express.Router()
 
-const { registerUser, loginUser, getAllUsers, getUserById, toggleUserStatus, deleteUser, updateUserProfile, approveUser, rejectUser, forgotPassword, resetPassword, changePassword } = require("../controller/userController")
+const { registerUser, loginUser, getAllUsers, getUserById, toggleUserStatus, deleteUser, updateUserProfile, approveUser, rejectUser, forgotPassword, resetPassword, changePassword, testEmail } = require("../controller/userController")
 const authMiddleware = require("../middleware/authMiddleware")
 
 router.post("/register", registerUser)
 router.post("/login", loginUser)
+router.post("/test-email", testEmail)
 
 router.get("/users", authMiddleware, getAllUsers);
 router.get("/users/:id", authMiddleware, getUserById);
