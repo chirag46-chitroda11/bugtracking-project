@@ -11,31 +11,24 @@ const createTransporter = () => {
   if (transporter) return transporter;
 
   const config = {
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false, // Use STARTTLS on port 587
+    // ✅ FIX: Elastic Email SMTP (NOT Gmail)
+    host: process.env.SMTP_HOST || "smtp.elasticemail.com",
+    port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 2525,
+    secure: false, // 2525 → false
+
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
+      user: process.env.EMAIL_USER, // SMTP username
+      pass: process.env.EMAIL_PASS, // SMTP password
     },
-    // 🔥 Fix for ENETUNREACH: Force IPv4 instead of IPv6
-    family: 4, 
-    // Production reliability settings
-    connectionTimeout: 20000, // Increased to 20s
+
+    family: 4, // keep this (good)
+    connectionTimeout: 20000,
     greetingTimeout: 10000,
     socketTimeout: 30000,
     tls: {
-      rejectUnauthorized: false // Helps with some restricted environments
-    }
+      rejectUnauthorized: false,
+    },
   };
-
-  // If generic SMTP host/port are provided, use them instead of Gmail service
-  if (process.env.SMTP_HOST && process.env.SMTP_PORT) {
-    delete config.service;
-    config.host = process.env.SMTP_HOST;
-    config.port = parseInt(process.env.SMTP_PORT);
-    config.secure = config.port === 465; // true for 465, false for other ports
-  }
 
   transporter = nodemailer.createTransport(config);
   return transporter;
