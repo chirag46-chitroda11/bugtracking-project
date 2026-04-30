@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import API from "../../api/axios";
 import toast from "react-hot-toast";
+import { SkeletonCard, SkeletonParticles } from "../../components/skeleton";
 
 const TaskBoard = ({ onSelectTask }) => {
   const [tasks, setTasks] = useState([]);
@@ -56,7 +57,19 @@ const TaskBoard = ({ onSelectTask }) => {
     }
   };
 
-  if(loading) return <div className="text-center font-bold text-slate-500 py-10">Loading Task Board...</div>;
+  if (loading) return (
+    <div className="space-y-6 animate-fade-in h-[calc(100vh-140px)] flex flex-col" style={{ position: 'relative' }}>
+        <SkeletonParticles count={5} />
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div className="flex justify-between items-center bg-white/40 p-4 rounded-2xl backdrop-blur-md border border-white/60 shadow-sm shrink-0 mb-6">
+                <div className="skeleton-shimmer" style={{ height: 32, width: 150, borderRadius: 10 }} />
+            </div>
+            <div className="flex-1 flex gap-6 overflow-x-hidden">
+                <SkeletonCard count={4} columns={4} />
+            </div>
+        </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6 animate-fade-in h-[calc(100vh-140px)] flex flex-col">

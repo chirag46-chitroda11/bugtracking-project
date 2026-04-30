@@ -4,6 +4,7 @@ import API from "../../api/axios";
 import { deleteSprint } from "../../services/sprintService";
 import toast from "react-hot-toast";
 import { Trash2, Edit2, Calendar, Target, CheckCircle } from "lucide-react";
+import { SkeletonCard, SkeletonParticles } from "../../components/skeleton";
 
 const PMSprints = () => {
   const navigate = useNavigate();
@@ -60,7 +61,18 @@ const PMSprints = () => {
     completed: "border-t-blue-500"
   };
 
-  if (loading) return <div className="text-center font-bold text-slate-500 p-8">Loading Sprints...</div>;
+  if (loading) return (
+    <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+      <SkeletonParticles count={5} />
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div className="flex justify-between items-center mb-6">
+          <div className="skeleton-shimmer" style={{ height: 28, width: 220, borderRadius: 10 }} />
+          <div className="skeleton-shimmer" style={{ height: 40, width: 140, borderRadius: 12 }} />
+        </div>
+        <SkeletonCard count={6} columns={3} />
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6 animate-fade-in">

@@ -4,6 +4,7 @@ import { Activity, Bug, CheckCircle, AlertTriangle, MessageSquare, Edit3, Refres
 import { useNavigate } from "react-router-dom";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import AnnouncementBanner from "../../components/AnnouncementBanner";
+import { SkeletonCard, SkeletonChart, SkeletonActivityFeed, SkeletonParticles } from "../../components/skeleton";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 const isSameDay = (d1, d2) =>
@@ -157,7 +158,18 @@ const TesterSummary = () => {
     if (loggedInUser) fetchDashboardData();
   }, [buildFeed]);
 
-  if (loading) return <div className="p-8 text-center text-slate-500 font-bold">Loading Dashboard...</div>;
+  if (loading) return (
+    <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+      <SkeletonParticles count={6} />
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <SkeletonCard count={6} columns={6} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <SkeletonChart type="pie" height={280} />
+          <SkeletonActivityFeed items={6} />
+        </div>
+      </div>
+    </div>
+  );
 
   const totalItems = Object.values(activityGroups).reduce((s, g) => s + g.length, 0);
 

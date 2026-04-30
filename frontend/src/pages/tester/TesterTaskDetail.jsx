@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, MessageSquare, CheckCircle, XCircle, Bug as BugIcon, Clock, User } from "lucide-react";
 import API from "../../api/axios";
 import toast from "react-hot-toast";
+import { SkeletonCard, SkeletonActivityFeed, SkeletonParticles } from "../../components/skeleton";
 
 const TesterTaskDetail = () => {
     const { id } = useParams();
@@ -60,8 +61,21 @@ const TesterTaskDetail = () => {
     };
 
     if (loading) return (
-        <div className="min-h-screen bg-[#ccd6ff] flex items-center justify-center font-bold text-slate-500">
-            Loading Task Details...
+        <div className="min-h-screen bg-[#ccd6ff] p-4 md:p-8" style={{ position: 'relative' }}>
+            <SkeletonParticles count={6} />
+            <div style={{ position: 'relative', zIndex: 1, maxWidth: '72rem', margin: '0 auto' }}>
+                <div className="skeleton-shimmer" style={{ height: 40, width: 120, borderRadius: 12, marginBottom: 24 }} />
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2 space-y-6">
+                        <SkeletonCard count={1} columns={1} />
+                        <SkeletonActivityFeed items={4} />
+                    </div>
+                    <div className="space-y-6">
+                        <SkeletonCard count={1} columns={1} />
+                        <SkeletonCard count={2} columns={1} />
+                    </div>
+                </div>
+            </div>
         </div>
     );
 

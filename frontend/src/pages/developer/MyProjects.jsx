@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import API from "../../api/axios";
+import { SkeletonCard, SkeletonParticles } from "../../components/skeleton";
 
 const MyProjects = () => {
     const [projects, setProjects] = useState([]);
@@ -19,7 +20,17 @@ const MyProjects = () => {
         fetchProjects();
     }, []);
 
-    if(loading) return <div className="text-center font-bold text-slate-500 py-10">Loading projects...</div>;
+    if (loading) return (
+        <div className="space-y-6 animate-fade-in pb-10" style={{ position: 'relative' }}>
+            <SkeletonParticles count={5} />
+            <div style={{ position: 'relative', zIndex: 1 }}>
+                <div className="flex justify-between items-center mb-6">
+                    <div className="skeleton-shimmer" style={{ height: 32, width: 200, borderRadius: 10 }} />
+                </div>
+                <SkeletonCard count={3} columns={1} />
+            </div>
+        </div>
+    );
 
     return (
         <div className="space-y-6 animate-fade-in pb-10">

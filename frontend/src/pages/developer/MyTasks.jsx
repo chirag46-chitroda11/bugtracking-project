@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import API from "../../api/axios";
 import toast from "react-hot-toast";
+import { SkeletonTable, SkeletonParticles } from "../../components/skeleton";
 
 const MyTasks = ({ onSelectTask }) => {
     const [tasks, setTasks] = useState([]);
@@ -32,7 +33,21 @@ const MyTasks = ({ onSelectTask }) => {
         }
     };
 
-    if (loading) return <div className="text-center font-bold text-slate-500 py-10">Loading tasks...</div>;
+    if (loading) return (
+        <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+            <SkeletonParticles count={5} />
+            <div style={{ position: 'relative', zIndex: 1 }}>
+                <div className="flex justify-between items-center mb-6">
+                    <div className="skeleton-shimmer" style={{ height: 28, width: 200, borderRadius: 10 }} />
+                    <div style={{ display: 'flex', gap: 12 }}>
+                        <div className="skeleton-shimmer" style={{ height: 36, width: 200, borderRadius: 8 }} />
+                        <div className="skeleton-shimmer" style={{ height: 36, width: 130, borderRadius: 8 }} />
+                    </div>
+                </div>
+                <SkeletonTable rows={6} columns={8} />
+            </div>
+        </div>
+    );
 
     return (
         <div className="space-y-6 animate-fade-in">

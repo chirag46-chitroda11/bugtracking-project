@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api/axios";
 import { useConfirm } from "../context/ConfirmContext";
+import { SkeletonForm, SkeletonParticles } from "../components/skeleton";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -148,7 +149,14 @@ const Profile = () => {
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#ccd6ff] font-sans"><div className="text-xl font-bold text-indigo-900">Loading Profile...</div></div>;
+  if (loading) return (
+    <div className="min-h-screen bg-[#ccd6ff] p-6 md:p-10" style={{ position: 'relative' }}>
+      <SkeletonParticles count={6} />
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 900, margin: '0 auto' }}>
+        <SkeletonForm fields={6} />
+      </div>
+    </div>
+  );
 
   return (
     <div className="profile-wrapper relative overflow-x-hidden p-6 md:p-10 min-h-screen text-slate-800 font-sans">

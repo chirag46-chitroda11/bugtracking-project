@@ -3,6 +3,7 @@ import { updateProject } from "../services/projectService";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../api/axios";
 import toast from "react-hot-toast";
+import { SkeletonForm, SkeletonParticles } from "../components/skeleton";
 
 const EditProject = () => {
   const { id } = useParams();
@@ -95,7 +96,14 @@ const EditProject = () => {
     setForm({...form, [field]: value});
   };
 
-  if (loading) return null;
+  if (loading) return (
+    <div className="min-h-screen bg-[#ccd6ff] p-6 md:p-10" style={{ position: 'relative' }}>
+      <SkeletonParticles count={6} />
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 900, margin: '0 auto' }}>
+        <SkeletonForm fields={8} />
+      </div>
+    </div>
+  );
 
   return (
     <div className="layout-wrapper relative min-h-screen p-6 md:p-10 text-slate-800">

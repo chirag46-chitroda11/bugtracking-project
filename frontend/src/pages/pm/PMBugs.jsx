@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Trash2, ExternalLink, Search, Bug as BugIcon } from "lucide-react";
 import { useConfirm } from "../../context/ConfirmContext";
+import { SkeletonTable, SkeletonParticles } from "../../components/skeleton";
 
 const PMBugs = () => {
   const navigate = useNavigate();
@@ -71,7 +72,18 @@ const PMBugs = () => {
     draft: "border-slate-200 text-slate-400 bg-slate-50"
   };
 
-  if (loading) return <div className="text-center font-bold text-slate-500 p-8">Loading Bug Reports...</div>;
+  if (loading) return (
+    <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+      <SkeletonParticles count={5} />
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div className="flex justify-between items-center mb-6">
+          <div className="skeleton-shimmer" style={{ height: 28, width: 180, borderRadius: 10 }} />
+          <div className="skeleton-shimmer" style={{ height: 40, width: 120, borderRadius: 12 }} />
+        </div>
+        <SkeletonTable rows={6} columns={8} />
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6 animate-fade-in">

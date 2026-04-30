@@ -4,6 +4,7 @@ import API from "../api/axios";
 import { updateBug } from "../services/bugService";
 import toast from "react-hot-toast";
 import axios from "axios";
+import { SkeletonForm, SkeletonParticles } from "../components/skeleton";
 
 const EditBug = () => {
   const { id } = useParams();
@@ -116,7 +117,14 @@ const EditBug = () => {
     }
   };
 
-  if (load.fetch) return <div className="min-h-screen flex items-center justify-center bg-[#ccd6ff] font-bold text-slate-500">Loading Incident Details...</div>;
+  if (load.fetch) return (
+    <div className="min-h-screen bg-[#ccd6ff] p-6 md:p-10" style={{ position: 'relative' }}>
+      <SkeletonParticles count={6} />
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 600, margin: '0 auto' }}>
+        <SkeletonForm fields={8} />
+      </div>
+    </div>
+  );
 
   return (
     <div className="layout-wrapper relative min-h-screen flex items-center justify-center py-10 px-4 text-slate-800">

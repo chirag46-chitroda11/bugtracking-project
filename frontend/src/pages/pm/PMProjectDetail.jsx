@@ -4,6 +4,7 @@ import API from "../../api/axios";
 import { createModule, deleteModule } from "../../services/moduleService";
 import { Activity, Edit, Users, Trash2, Package, PlusCircle, CheckCircle, Clock, ArrowLeft } from 'lucide-react';
 import toast from "react-hot-toast";
+import { SkeletonCard, SkeletonActivityFeed, SkeletonParticles } from "../../components/skeleton";
 
 const PersonCard = ({ person, label, subLabel }) => {
   if (!person) return (
@@ -119,7 +120,24 @@ const PMProjectDetail = () => {
     }
   };
 
-  if (loading) return <div className="text-center font-bold text-slate-500 p-8">Compiling Project Resources...</div>;
+  if (loading) return (
+    <div className="min-h-screen bg-[#ccd6ff] p-4 md:p-8" style={{ position: 'relative' }}>
+      <SkeletonParticles count={6} />
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: '72rem', margin: '0 auto' }}>
+        <div className="skeleton-shimmer" style={{ height: 40, width: 100, borderRadius: 12, marginBottom: 24 }} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <SkeletonCard count={1} columns={1} />
+            <SkeletonCard count={4} columns={2} />
+          </div>
+          <div className="space-y-6">
+            <SkeletonActivityFeed items={4} />
+            <SkeletonCard count={2} columns={1} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
   if (errorState || !project) return (
      <div className="flex items-center justify-center p-10 py-20 bg-[#ccd6ff]">
         <div className="bg-white p-10 rounded-2xl max-w-lg w-full text-center shadow-lg">

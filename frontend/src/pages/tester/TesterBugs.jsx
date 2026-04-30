@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../api/axios";
+import { SkeletonTable, SkeletonParticles } from "../../components/skeleton";
 
 // ─── Status helpers ─────────────────────────────────────────────────────────
 const ACTIVE_STATUSES = ["draft", "open", "submitted", "in_progress", "retest", "resolved", "reopened"];
@@ -90,7 +91,22 @@ const TesterBugs = () => {
     fetchBugs();
   }, []);
 
-  if (loading) return <div className="text-center font-bold text-slate-500 p-8">Loading Your Bug Reports...</div>;
+  if (loading) return (
+    <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+      <SkeletonParticles count={5} />
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div className="flex justify-between items-center mb-6">
+          <div className="skeleton-shimmer" style={{ height: 28, width: 200, borderRadius: 10 }} />
+          <div className="skeleton-shimmer" style={{ height: 40, width: 140, borderRadius: 12 }} />
+        </div>
+        <SkeletonTable rows={5} columns={7} />
+        <div style={{ marginTop: 32 }}>
+          <div className="skeleton-shimmer" style={{ height: 22, width: 180, borderRadius: 8, marginBottom: 16 }} />
+          <SkeletonTable rows={4} columns={9} />
+        </div>
+      </div>
+    </div>
+  );
 
   // ── Split into Active / Closed ────────────────────────────────────────────
   const activeBugs = allMyBugs.filter(b => ACTIVE_STATUSES.includes(b.status?.toLowerCase()));

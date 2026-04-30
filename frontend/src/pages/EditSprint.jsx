@@ -3,6 +3,7 @@ import { getSprintById, updateSprint } from "../services/sprintService";
 import API from "../api/axios";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import { SkeletonForm, SkeletonParticles } from "../components/skeleton";
 
 const EditSprint = () => {
   const { id } = useParams();
@@ -100,7 +101,14 @@ const EditSprint = () => {
     setForm({...form, [field]: value});
   };
 
-  if(loading) return null;
+  if (loading) return (
+    <div className="min-h-screen bg-[#ccd6ff] p-6 md:p-10" style={{ position: 'relative' }}>
+      <SkeletonParticles count={6} />
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 800, margin: '0 auto' }}>
+        <SkeletonForm fields={6} />
+      </div>
+    </div>
+  );
 
   return (
     <div className="layout-wrapper relative min-h-screen flex items-center justify-center p-6 text-slate-800">

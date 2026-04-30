@@ -5,6 +5,7 @@ import { getModules } from "../services/moduleService";
 import API from "../api/axios";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import { SkeletonForm, SkeletonParticles } from "../components/skeleton";
 
 const EditTask = () => {
   const { id } = useParams();
@@ -110,8 +111,11 @@ const EditTask = () => {
   };
   
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#ccd6ff]">
-      <div className="animate-spin w-10 h-10 border-4 border-violet-500 border-t-transparent rounded-full"></div>
+    <div className="min-h-screen flex items-center justify-center bg-[#ccd6ff]" style={{ position: 'relative' }}>
+      <SkeletonParticles count={5} />
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 700, width: '100%', padding: '0 24px' }}>
+        <SkeletonForm fields={8} />
+      </div>
     </div>
   );
 

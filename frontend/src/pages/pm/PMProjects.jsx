@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../api/axios";
+import { SkeletonCard, SkeletonParticles } from "../../components/skeleton";
 
 const PMProjects = () => {
   const navigate = useNavigate();
@@ -21,7 +22,18 @@ const PMProjects = () => {
     fetchProjects();
   }, []);
 
-  if (loading) return <div className="text-center font-bold text-slate-500 p-8">Loading Projects...</div>;
+  if (loading) return (
+    <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+      <SkeletonParticles count={5} />
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div className="flex justify-between items-center mb-6">
+          <div className="skeleton-shimmer" style={{ height: 28, width: 200, borderRadius: 10 }} />
+          <div className="skeleton-shimmer" style={{ height: 40, width: 140, borderRadius: 12 }} />
+        </div>
+        <SkeletonCard count={6} columns={3} />
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6 animate-fade-in">

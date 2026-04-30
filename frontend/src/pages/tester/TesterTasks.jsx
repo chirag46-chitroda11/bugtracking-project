@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../api/axios";
 import { useConfirm } from "../../context/ConfirmContext";
+import { SkeletonTable, SkeletonParticles } from "../../components/skeleton";
 
 const TesterTasks = () => {
   const navigate = useNavigate();
@@ -27,7 +28,21 @@ const TesterTasks = () => {
     fetchTestingTasks();
   }, []);
 
-  if (loading) return <div className="text-center font-bold text-slate-500 p-8">Loading Testable Tasks...</div>;
+  if (loading) return (
+    <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+      <SkeletonParticles count={5} />
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div className="flex justify-between items-center mb-6">
+          <div className="skeleton-shimmer" style={{ height: 28, width: 200, borderRadius: 10 }} />
+          <div style={{ display: 'flex', gap: 12 }}>
+            <div className="skeleton-shimmer" style={{ height: 36, width: 160, borderRadius: 8 }} />
+            <div className="skeleton-shimmer" style={{ height: 36, width: 130, borderRadius: 8 }} />
+          </div>
+        </div>
+        <SkeletonTable rows={5} columns={6} />
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6 animate-fade-in">

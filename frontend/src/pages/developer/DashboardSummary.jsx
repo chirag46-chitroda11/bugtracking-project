@@ -4,6 +4,7 @@ import { getSocket } from "../../services/socketService";
 import { CheckCircle, Clock, Layers, Bug as BugIcon, Play, Square, RotateCcw, Activity, MessageSquare } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import AnnouncementBanner from "../../components/AnnouncementBanner";
+import { SkeletonCard, SkeletonChart, SkeletonActivityFeed, SkeletonParticles } from "../../components/skeleton";
 
 const DashboardSummary = ({ navigate }) => {
   const [summary, setSummary] = useState({
@@ -18,6 +19,7 @@ const DashboardSummary = ({ navigate }) => {
   });
 
   const [recentLogs, setRecentLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Timer State
   const [seconds, setSeconds] = useState(0);
@@ -39,6 +41,8 @@ const DashboardSummary = ({ navigate }) => {
         if (isMounted) setRecentLogs(logsRes.data?.data?.slice(0, 5) || []);
       } catch (error) {
         console.error("Worklogs fetch error:", error);
+      } finally {
+        if (isMounted) setLoading(false);
       }
     };
     fetchData();
@@ -76,6 +80,23 @@ const DashboardSummary = ({ navigate }) => {
     const secs = (s % 60).toString().padStart(2, "0");
     return `${hrs}:${mins}:${secs}`;
   };
+
+  if (loading) return (
+    <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+      <SkeletonParticles count={6} />
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <SkeletonCard count={5} columns={5} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <SkeletonChart type="pie" height={200} />
+          <SkeletonChart type="bar" height={200} />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <SkeletonActivityFeed items={5} />
+          <SkeletonActivityFeed items={3} />
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6 animate-fade-in">

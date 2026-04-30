@@ -14,6 +14,7 @@ import ModuleFormModal from "../components/ModuleFormModal";
 import AnnouncementBanner from "../components/AnnouncementBanner";
 import toast from "react-hot-toast";
 import { useConfirm } from "../context/ConfirmContext";
+import { SkeletonCard, SkeletonTable, SkeletonChart, SkeletonActivityFeed, SkeletonUserGrid, SkeletonParticles } from "../components/skeleton";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setSearchTerm("");
@@ -208,6 +210,8 @@ const AdminDashboard = () => {
 
       } catch (error) {
         console.error("Dashboard data load failed", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -290,7 +294,109 @@ const AdminDashboard = () => {
     return matchesSearch && matchesProject && matchesStatus;
   });
 
+  // Skeleton renders for each tab while loading
+  const renderSkeleton = () => {
+    switch (activeTab) {
+      case "projects":
+        return (
+          <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+            <SkeletonParticles count={6} />
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div className="flex justify-between items-center mb-6">
+                <div className="skeleton-shimmer" style={{ height: 28, width: 200, borderRadius: 10 }} />
+                <div className="skeleton-shimmer" style={{ height: 40, width: 150, borderRadius: 12 }} />
+              </div>
+              <SkeletonCard count={4} columns={2} />
+            </div>
+          </div>
+        );
+      case "bug_tracking":
+        return (
+          <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+            <SkeletonParticles count={6} />
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div className="flex justify-between items-center mb-6">
+                <div className="skeleton-shimmer" style={{ height: 28, width: 180, borderRadius: 10 }} />
+                <div className="skeleton-shimmer" style={{ height: 40, width: 140, borderRadius: 12 }} />
+              </div>
+              <SkeletonTable rows={6} columns={5} />
+            </div>
+          </div>
+        );
+      case "users":
+        return (
+          <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+            <SkeletonParticles count={6} />
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div className="flex justify-between items-center mb-6">
+                <div className="skeleton-shimmer" style={{ height: 24, width: 160, borderRadius: 10 }} />
+                <div className="skeleton-shimmer" style={{ height: 40, width: 140, borderRadius: 12 }} />
+              </div>
+              <SkeletonUserGrid count={8} columns={4} />
+            </div>
+          </div>
+        );
+      case "tasks_sprints":
+        return (
+          <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+            <SkeletonParticles count={6} />
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <SkeletonCard count={4} columns={4} />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                <SkeletonActivityFeed items={4} />
+                <SkeletonTable rows={4} columns={4} />
+              </div>
+            </div>
+          </div>
+        );
+      case "manage_modules":
+        return (
+          <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+            <SkeletonParticles count={6} />
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div className="flex justify-between items-center mb-6">
+                <div className="skeleton-shimmer" style={{ height: 28, width: 200, borderRadius: 10 }} />
+                <div className="skeleton-shimmer" style={{ height: 40, width: 140, borderRadius: 12 }} />
+              </div>
+              <SkeletonCard count={6} columns={3} />
+            </div>
+          </div>
+        );
+      case "reviews":
+        return (
+          <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+            <SkeletonParticles count={6} />
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <SkeletonCard count={4} columns={4} />
+              <div style={{ marginTop: 24 }}>
+                <SkeletonCard count={4} columns={2} />
+              </div>
+            </div>
+          </div>
+        );
+      case "overview":
+      default:
+        return (
+          <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+            <SkeletonParticles count={8} />
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <SkeletonCard count={4} columns={4} />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                <SkeletonChart type="bar" height={250} />
+                <SkeletonChart type="pie" height={250} />
+              </div>
+              <div style={{ marginTop: 24 }}>
+                <SkeletonActivityFeed items={5} />
+              </div>
+            </div>
+          </div>
+        );
+    }
+  };
+
   const renderContent = () => {
+    if (loading) return renderSkeleton();
+
     switch (activeTab) {
       case "projects":
         return (

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import API from "../../api/axios";
 import toast from "react-hot-toast";
+import { SkeletonTable, SkeletonParticles } from "../../components/skeleton";
 
 const MyBugs = () => {
     const [bugs, setBugs] = useState([]);
@@ -55,7 +56,15 @@ const MyBugs = () => {
         }
     };
 
-    if (loading) return <div className="text-center font-bold text-slate-500 py-10">Loading bugs...</div>;
+    if (loading) return (
+        <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+            <SkeletonParticles count={5} />
+            <div style={{ position: 'relative', zIndex: 1 }}>
+                <div className="skeleton-shimmer" style={{ height: 28, width: 150, borderRadius: 10, marginBottom: 20 }} />
+                <SkeletonTable rows={5} columns={7} />
+            </div>
+        </div>
+    );
 
     return (
         <div className="space-y-6 animate-fade-in">

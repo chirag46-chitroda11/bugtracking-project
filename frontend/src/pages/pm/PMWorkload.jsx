@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import API from "../../api/axios";
 import { AlertTriangle, Clock, CheckCircle, Bug as BugIcon, Users } from "lucide-react";
+import { SkeletonCard, SkeletonUserGrid, SkeletonParticles } from "../../components/skeleton";
 
 const PMWorkload = () => {
   const [workloads, setWorkloads] = useState([]);
@@ -81,7 +82,21 @@ const PMWorkload = () => {
 
   const riskCount = workloads.filter(w => w.capacity === "Overloaded" || w.delayedTasksCount > 0).length;
 
-  if (loading) return <div className="text-center font-bold text-slate-500 p-8">Compiling Team Resources...</div>;
+  if (loading) return (
+    <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+      <SkeletonParticles count={6} />
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div className="flex justify-between items-center mb-6">
+          <div className="skeleton-shimmer" style={{ height: 28, width: 260, borderRadius: 10 }} />
+          <div className="skeleton-shimmer" style={{ height: 36, width: 140, borderRadius: 8 }} />
+        </div>
+        <SkeletonCard count={4} columns={4} />
+        <div style={{ marginTop: 24 }}>
+          <SkeletonUserGrid count={6} columns={3} />
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6 animate-fade-in">

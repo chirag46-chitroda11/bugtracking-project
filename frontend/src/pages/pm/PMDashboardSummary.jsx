@@ -3,6 +3,7 @@ import API from "../../api/axios";
 import { Activity, Layers, CheckCircle, Bug as BugIcon, AlertCircle, Users, Clock } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import AnnouncementBanner from "../../components/AnnouncementBanner";
+import { SkeletonCard, SkeletonTable, SkeletonChart, SkeletonActivityFeed, SkeletonParticles } from "../../components/skeleton";
 import {
   BarChart, Bar,
   PieChart, Pie, Cell,
@@ -108,7 +109,23 @@ const PMDashboardSummary = () => {
     fetchDashboardData();
   }, []);
 
-  if (loading) return <div className="p-8 text-center text-slate-500 font-bold animate-pulse">Loading Dashboard...</div>;
+  if (loading) return (
+    <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+      <SkeletonParticles count={6} />
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <SkeletonCard count={4} columns={4} />
+        <div style={{ marginTop: 16 }}>
+          <SkeletonCard count={4} columns={4} />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          <div className="lg:col-span-2">
+            <SkeletonTable rows={5} columns={5} />
+          </div>
+          <SkeletonActivityFeed items={5} />
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6 animate-fade-in">

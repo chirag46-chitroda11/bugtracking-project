@@ -4,6 +4,7 @@ import API from "../../api/axios";
 import { deleteTask } from "../../services/taskService";
 import toast from "react-hot-toast";
 import { Edit2, Trash2, ExternalLink, Search } from "lucide-react";
+import { SkeletonTable, SkeletonParticles } from "../../components/skeleton";
 
 const PMTasks = () => {
   const navigate = useNavigate();
@@ -66,7 +67,18 @@ const PMTasks = () => {
     low: "text-slate-400"
   };
 
-  if (loading) return <div className="text-center font-bold text-slate-500 p-8">Loading Tasks...</div>;
+  if (loading) return (
+    <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+      <SkeletonParticles count={5} />
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div className="flex justify-between items-center mb-6">
+          <div className="skeleton-shimmer" style={{ height: 28, width: 200, borderRadius: 10 }} />
+          <div className="skeleton-shimmer" style={{ height: 40, width: 120, borderRadius: 12 }} />
+        </div>
+        <SkeletonTable rows={6} columns={9} />
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6 animate-fade-in">

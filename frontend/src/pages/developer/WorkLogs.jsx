@@ -3,6 +3,7 @@ import API from "../../api/axios";
 import { PlusCircle, Search, Edit2, Trash2, Copy, FileText, Calendar, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import toast from "react-hot-toast";
 import { useConfirm } from "../../context/ConfirmContext";
+import { SkeletonTable, SkeletonParticles } from "../../components/skeleton";
 
 const WorkLogs = () => {
     const confirm = useConfirm();
@@ -130,7 +131,18 @@ const WorkLogs = () => {
         if (currentPage > totalPages) setCurrentPage(totalPages);
     }, [totalPages, currentPage]);
 
-    if (loading) return <div className="text-center font-bold text-slate-500 py-10 animate-pulse">Loading worklogs...</div>;
+    if (loading) return (
+        <div className="space-y-6 animate-fade-in" style={{ position: 'relative' }}>
+            <SkeletonParticles count={5} />
+            <div style={{ position: 'relative', zIndex: 1 }}>
+                <div className="flex justify-between items-center mb-6">
+                    <div className="skeleton-shimmer" style={{ height: 28, width: 180, borderRadius: 10 }} />
+                    <div className="skeleton-shimmer" style={{ height: 40, width: 120, borderRadius: 12 }} />
+                </div>
+                <SkeletonTable rows={6} columns={5} />
+            </div>
+        </div>
+    );
 
     return (
         <div className="space-y-6 animate-fade-in relative min-h-screen pb-10">
