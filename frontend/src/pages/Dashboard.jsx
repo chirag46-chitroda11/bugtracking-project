@@ -204,6 +204,7 @@ const Dashboard = () => {
         <section id="hero" style={{ padding: "140px 5% 80px", position: "relative", zIndex: 10, minHeight: "100vh", display: "flex", alignItems: "center" }}>
           <div className="hero-grid" style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", alignItems: "center", gap: 60, width: "100%", maxWidth: 1200, margin: "0 auto" }}>
             <div>
+              <h1 style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}>Fixify Bug Tracking System</h1>
               <FadeIn>
                 <div style={{
                   display: "inline-flex", alignItems: "center", gap: 8,
@@ -216,9 +217,9 @@ const Dashboard = () => {
                 </div>
               </FadeIn>
               <FadeIn delay={0.1}>
-                <h1 style={{ fontSize: "clamp(2.8rem, 6vw, 4.2rem)", fontWeight: 900, lineHeight: 1.05, letterSpacing: "-0.03em", marginBottom: 20, color: "#0f172a" }}>
+                <h2 style={{ fontSize: "clamp(2.8rem, 6vw, 4.2rem)", fontWeight: 900, lineHeight: 1.05, letterSpacing: "-0.03em", marginBottom: 20, color: "#0f172a" }}>
                   Stop chasing<br /><span style={{ color: "#4f46e5", fontStyle: "italic" }}>shadows.</span>
-                </h1>
+                </h2>
               </FadeIn>
               <FadeIn delay={0.2}>
                 <p style={{ fontSize: 16, color: "#64748b", maxWidth: 400, marginBottom: 12, lineHeight: 1.7, fontWeight: 500 }}>
@@ -245,6 +246,22 @@ const Dashboard = () => {
             </div>
             <HeroVisual />
           </div>
+        </section>
+
+        {/* ═══ WHAT IS FIXIFY ═══ */}
+        <section style={{
+          padding: "60px 5%", position: "relative", zIndex: 10,
+          background: "rgba(255,255,255,0.35)", backdropFilter: "blur(10px)",
+          borderTop: "1px solid rgba(255,255,255,0.6)"
+        }}>
+          <FadeIn>
+            <div style={{ textAlign: "center", maxWidth: 800, margin: "0 auto" }}>
+              <h2 style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)", fontWeight: 900, color: "#0f172a", marginBottom: 16 }}>What is Fixify?</h2>
+              <p style={{ fontSize: 16, color: "#64748b", lineHeight: 1.8, fontWeight: 500 }}>
+                Fixify is a bug tracking system designed for developers to manage issues efficiently, track bugs, and improve overall development workflow.
+              </p>
+            </div>
+          </FadeIn>
         </section>
 
         {/* ═══ FEATURES ═══ */}
