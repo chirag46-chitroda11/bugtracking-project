@@ -104,8 +104,66 @@ const HeroVisual = () => (
 const Dashboard = () => {
   const navigate = useNavigate();
 
+  // Hardware-Accelerated Smooth Scroll (Landing Page Only - No Libraries)
+  const [windowHeight, setWindowHeight] = React.useState(0);
+  const contentRef = React.useRef(null);
+
+  React.useEffect(() => {
+    let currentY = 0;
+    let targetY = 0;
+    let rafId;
+
+    const updateScroll = () => {
+      targetY = window.scrollY;
+      currentY += (targetY - currentY) * 0.08; // Adjust for smoothness
+
+      if (contentRef.current) {
+        contentRef.current.style.transform = `translate3d(0, -${currentY}px, 0)`;
+      }
+
+      rafId = requestAnimationFrame(updateScroll);
+    };
+
+    const handleResize = () => {
+      if (contentRef.current) {
+        setWindowHeight(contentRef.current.getBoundingClientRect().height);
+      }
+    };
+
+    handleResize(); // Initial height
+
+    rafId = requestAnimationFrame(updateScroll);
+    window.addEventListener("resize", handleResize);
+
+    // Observe changes in DOM for dynamic resizing
+    const resizeObserver = new ResizeObserver(() => handleResize());
+    if (contentRef.current) resizeObserver.observe(contentRef.current);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", handleResize);
+      resizeObserver.disconnect();
+    };
+  }, []);
+
   return (
-    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#ccd6ff", minHeight: "100vh", overflowX: "hidden", position: "relative", display: "flex", flexDirection: "column" }}>
+    <>
+      <div style={{ height: windowHeight }} /> {/* Fake body height for native scrollbar */}
+      <div 
+        ref={contentRef}
+        style={{ 
+          fontFamily: "'Plus Jakarta Sans', sans-serif", 
+          background: "#ccd6ff", 
+          position: "fixed", 
+          top: 0, 
+          left: 0, 
+          width: "100%", 
+          willChange: "transform",
+          overflow: "hidden",
+          display: "flex", 
+          flexDirection: "column" 
+        }}
+      >
       <style>{`
         @keyframes orbit {
           from { transform: rotate(0deg) translateX(var(--orbit-r)) rotate(0deg); }
@@ -341,7 +399,8 @@ const Dashboard = () => {
 
       <LandingFooter />
 
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -14,7 +14,7 @@ const activityLogSchema = new mongoose.Schema(
     },
     entityType: {
       type: String,
-      enum: ["task", "bug", "timelog", "comment", "project", "sprint"],
+      enum: ["task", "bug", "timelog", "comment", "project", "sprint", "user", "email"],
       required: true
     },
     entityId: {

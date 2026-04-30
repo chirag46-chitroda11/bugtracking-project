@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { sendEmail } = require("../services/mailService");
 const { createAndEmitNotification } = require("../utils/notificationHelper");
+const ActivityLog = require("../models/activityLogModel");
 const crypto = require("crypto");
 const { 
   welcomeEmail, 
@@ -107,7 +108,16 @@ const registerUser = async (req, res) => {
       const subject = (initialStatus === "active") 
         ? "Welcome to the Future of Bug Tracking — Fixify 🔥" 
         : "Registration Received — Verification Pending 📨";
-      await sendEmail({ to: email, subject, html });
+      const emailResult = await sendEmail({ to: email, subject, html });
+      
+      await ActivityLog.create({
+        userId: req.user ? req.user.id : user._id,
+        action: emailResult.success ? "email_sent" : "email_failed",
+        entityType: "email",
+        entityId: user._id,
+        title: emailResult.success ? `Email Sent: Registration` : `Email Failed: Registration`,
+        description: emailResult.success ? `Successfully sent to ${email}` : `Failed to send to ${email}. Error: ${emailResult.error || "Unknown"}`,
+      });
     } catch (emailErr) {
       console.error("Registration Email Error (Non-blocking):", emailErr.message);
     }
@@ -445,7 +455,16 @@ const deleteUser = async (req, res) => {
     // Send Deletion Email (Non-blocking)
     try {
       const html = deletedEmail(user.name);
-      await sendEmail({ to: user.email, subject: "Account Removed - Fixify", html });
+      const emailResult = await sendEmail({ to: user.email, subject: "Account Removed - Fixify", html });
+      
+      await ActivityLog.create({
+        userId: req.user ? req.user.id : user._id,
+        action: emailResult.success ? "email_sent" : "email_failed",
+        entityType: "email",
+        entityId: user._id,
+        title: emailResult.success ? `Email Sent: Account Removed` : `Email Failed: Account Removed`,
+        description: emailResult.success ? `Successfully sent to ${user.email}` : `Failed to send to ${user.email}. Error: ${emailResult.error || "Unknown"}`,
+      });
     } catch (emailErr) {
       console.error("Deletion Email Error (Non-blocking):", emailErr.message);
     }
@@ -533,7 +552,16 @@ const approveUser = async (req, res) => {
     // Send Approval Email (Non-blocking)
     try {
       const html = approvalEmail(user.name);
-      await sendEmail({ to: user.email, subject: "Your Fixify Account is Approved 🎉", html });
+      const emailResult = await sendEmail({ to: user.email, subject: "Your Fixify Account is Approved 🎉", html });
+      
+      await ActivityLog.create({
+        userId: req.user ? req.user.id : user._id,
+        action: emailResult.success ? "email_sent" : "email_failed",
+        entityType: "email",
+        entityId: user._id,
+        title: emailResult.success ? `Email Sent: Account Approved` : `Email Failed: Account Approved`,
+        description: emailResult.success ? `Successfully sent to ${user.email}` : `Failed to send to ${user.email}. Error: ${emailResult.error || "Unknown"}`,
+      });
     } catch (emailErr) {
       console.error("Approval Email Error (Non-blocking):", emailErr.message);
     }
@@ -559,7 +587,16 @@ const rejectUser = async (req, res) => {
     // Send Rejection Email before deleting
     try {
       const html = rejectionEmail(user.name);
-      await sendEmail({ to: user.email, subject: "Your Fixify Registration Request Was Declined", html });
+      const emailResult = await sendEmail({ to: user.email, subject: "Your Fixify Registration Request Was Declined", html });
+      
+      await ActivityLog.create({
+        userId: req.user ? req.user.id : user._id,
+        action: emailResult.success ? "email_sent" : "email_failed",
+        entityType: "email",
+        entityId: user._id,
+        title: emailResult.success ? `Email Sent: Account Rejected` : `Email Failed: Account Rejected`,
+        description: emailResult.success ? `Successfully sent to ${user.email}` : `Failed to send to ${user.email}. Error: ${emailResult.error || "Unknown"}`,
+      });
     } catch (emailErr) {
       console.log("Rejection email failed (non-blocking):", emailErr.message);
     }
@@ -603,7 +640,20 @@ const forgotPassword = async (req, res) => {
     const html = resetPasswordEmail(user.name, resetUrl);
 
     try {
-      await sendEmail({ to: user.email, subject: "Password Reset Request - Fixify", html });
+      const emailResult = await sendEmail({ to: user.email, subject: "Password Reset Request - Fixify", html });
+      
+      await ActivityLog.create({
+        userId: user._id,
+        action: emailResult.success ? "email_sent" : "email_failed",
+        entityType: "email",
+        entityId: user._id,
+        title: emailResult.success ? `Email Sent: Password Reset` : `Email Failed: Password Reset`,
+        description: emailResult.success ? `Successfully sent to ${user.email}` : `Failed to send to ${user.email}. Error: ${emailResult.error || "Unknown"}`,
+      });
+
+      if (!emailResult.success) {
+         throw new Error("Email could not be sent");
+      }
       res.status(200).json({ success: true, message: "If account exists, reset link sent" });
     } catch (err) {
       user.resetPasswordToken = undefined;
