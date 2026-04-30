@@ -16,6 +16,8 @@ const createTransporter = () => {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
+    // 🔥 Fix for ENETUNREACH: Force IPv4 instead of IPv6
+    family: 4, 
     // Production reliability settings
     connectionTimeout: 10000, // 10 seconds
     greetingTimeout: 5000,
@@ -74,6 +76,8 @@ const sendEmail = async ({ to, subject, html }) => {
     // Descriptive errors for common SMTP issues
     if (error.code === 'ECONNREFUSED') {
       errorMessage = `Could not connect to SMTP server (${smtpHost}). Port might be blocked by provider.`;
+    } else if (error.code === 'ENETUNREACH') {
+      errorMessage = `Network unreachable. This often happens in production when IPv6 is used. I have forced IPv4 to fix this.`;
     } else if (error.code === 'EAUTH' || error.message.includes('Invalid login')) {
       errorMessage = "Authentication failed. Verify EMAIL_USER and EMAIL_PASS (App Password).";
     } else if (error.code === 'ETIMEDOUT') {
