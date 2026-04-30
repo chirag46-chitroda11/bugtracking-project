@@ -11,24 +11,21 @@ const createTransporter = () => {
   if (transporter) return transporter;
 
   const config = {
-    // ✅ FIX: Elastic Email SMTP (NOT Gmail)
-    host: process.env.SMTP_HOST || "smtp.elasticemail.com",
-    port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 2525,
-    secure: false, // 2525 → false
-
-    auth: {
-      user: process.env.EMAIL_USER, // SMTP username
-      pass: process.env.EMAIL_PASS, // SMTP password
-    },
-
-    family: 4, // keep this (good)
-    connectionTimeout: 20000,
-    greetingTimeout: 10000,
-    socketTimeout: 30000,
-    tls: {
-      rejectUnauthorized: false,
-    },
-  };
+  host: process.env.SMTP_HOST || "smtp.elasticemail.com",
+  port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 2525,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  family: 4,
+  connectionTimeout: 20000,
+  greetingTimeout: 10000,
+  socketTimeout: 30000,
+  tls: {
+    rejectUnauthorized: false,
+  },
+};
 
   transporter = nodemailer.createTransport(config);
   return transporter;
