@@ -11,8 +11,8 @@ const createTransporter = () => {
   if (transporter) return transporter;
 
   const config = {
-  host: process.env.SMTP_HOST || "smtp.elasticemail.com",
-  port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 2525,
+  host: process.env.SMTP_HOST || "smtp-relay.brevo.com",
+  port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 587,
   secure: false,
   auth: {
     user: process.env.EMAIL_USER,
