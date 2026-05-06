@@ -7,6 +7,7 @@ import { getModulesByProject, getModules, deleteModule } from "../services/modul
 import { getTasks, deleteTask } from "../services/taskService";
 import { getSprints, assignTaskToSprint, deleteSprint } from "../services/sprintService";
 import { getAllReviews, approveReview, rejectReview, deleteReview as deleteReviewApi } from "../services/reviewService";
+import { getAllContactRequests, updateContactRequestStatus, deleteContactRequest } from "../services/contactService";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Layers, CheckCircle, Bug as BugIcon, Users, Settings, Activity, FileText, ChevronRight, Menu, LogOut, PlusCircle, Trash2, Edit, Search, Package, Filter, Calendar, Flag, AlertTriangle, X, Star, MessageSquare, ShieldCheck } from 'lucide-react';
 import NotificationBell from "../components/NotificationBell";
@@ -50,6 +51,8 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [activityFeed, setActivityFeed] = useState([]);
   const [taskSprintMap, setTaskSprintMap] = useState({});
+  const [contactRequests, setContactRequests] = useState([]);
+  const [contactFilterStatus, setContactFilterStatus] = useState("all");
 
   // Manage Modules state
   const [allModules, setAllModules] = useState([]);
@@ -159,6 +162,7 @@ const AdminDashboard = () => {
           userRes,
           allModRes,
           reviewRes,
+          contactRes,
           activityRes
         ] = await Promise.all([
           getAdminDashboard().catch(() => ({ stats: {}, bugs: [] })),
@@ -168,6 +172,7 @@ const AdminDashboard = () => {
           API.get("/user/users").catch(() => ({ data: { data: [] } })),
           getModules().catch(() => ({ data: [] })),
           getAllReviews().catch(() => ({ data: { data: [] } })),
+          getAllContactRequests().catch(() => ({ data: [] })),
           API.get("/activity/recent?limit=25").catch(() => ({ data: { data: [] } }))
         ]);
 
@@ -183,6 +188,7 @@ const AdminDashboard = () => {
         setUsers(userRes.data?.data || []);
         setAllModules(allModRes.data || []);
         setAllReviews(reviewRes.data?.data || []);
+        setContactRequests(contactRes.data || []);
         setActivityFeed(activityRes.data?.data || []);
 
         let taskTemp = {};
@@ -394,10 +400,124 @@ const AdminDashboard = () => {
     }
   };
 
+  const renderContactRequests = () => {
+    const filtered = contactRequests.filter(r => {
+      const matchStatus = contactFilterStatus === 'all' || r.status === contactFilterStatus;
+      const matchSearch = r.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          r.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          r.message.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchStatus && matchSearch;
+    });
+
+    return (
+      <div className="animate-fade-in">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+          <div>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Let's <span className="text-indigo-600">Talk!</span> Requests</h2>
+            <p className="text-slate-500 font-bold mt-1 italic">Manage inbound inquiries and partnership requests.</p>
+          </div>
+          <div className="flex items-center gap-3 bg-white/60 p-1.5 rounded-2xl border border-white shadow-sm">
+            {['all', 'new', 'read', 'replied'].map((s) => (
+              <button
+                key={s}
+                onClick={() => setContactFilterStatus(s)}
+                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${contactFilterStatus === s ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-500 hover:text-slate-800'}`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {filtered.length === 0 ? (
+          <div className="glass-card p-20 text-center flex flex-col items-center justify-center border-dashed border-2 border-slate-200 bg-slate-50/50">
+            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center text-slate-300 mb-6">
+              <MessageSquare size={40} />
+            </div>
+            <h3 className="text-xl font-black text-slate-400 uppercase tracking-widest">No requests found</h3>
+            <p className="text-slate-400 font-bold mt-2">Try adjusting your filters or search term.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filtered.map((r) => (
+              <div key={r._id} className="glass-card p-6 flex flex-col hover:shadow-xl hover:shadow-indigo-500/10 transition-all group relative overflow-hidden">
+                {r.status === 'new' && <div className="absolute top-0 right-0 w-20 h-20 overflow-hidden pointer-events-none"><div className="absolute top-2 -right-6 bg-indigo-600 text-white text-[10px] font-black py-1 w-24 text-center transform rotate-45 uppercase tracking-widest shadow-lg">New</div></div>}
+                
+                <div className="flex justify-between items-start mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-black text-lg border-2 border-white shadow-sm group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                      {r.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 leading-none mb-1">{r.name}</h4>
+                      <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">{r.email}</p>
+                    </div>
+                  </div>
+                  <span className={`text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-tighter ${
+                    r.inquiryType === 'bug_report' ? 'bg-red-100 text-red-600' :
+                    r.inquiryType === 'feature_request' ? 'bg-emerald-100 text-emerald-600' :
+                    r.inquiryType === 'partnership' ? 'bg-purple-100 text-purple-600' :
+                    'bg-slate-100 text-slate-600'
+                  }`}>
+                    {r.inquiryType.replace('_', ' ')}
+                  </span>
+                </div>
+
+                <div className="bg-slate-50/80 rounded-2xl p-4 mb-6 flex-1 border border-white/50">
+                  <p className="text-sm text-slate-600 leading-relaxed italic line-clamp-4">"{r.message}"</p>
+                </div>
+
+                <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100/50">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1"><Calendar size={10} /> {new Date(r.createdAt).toLocaleDateString()}</span>
+                    <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1 mt-1"><Flag size={10} /> {r.phone}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    {r.status !== 'replied' && (
+                      <button 
+                        onClick={async () => {
+                          const newStatus = r.status === 'new' ? 'read' : 'replied';
+                          try {
+                            await updateContactRequestStatus(r._id, newStatus);
+                            setContactRequests(contactRequests.map(req => req._id === r._id ? {...req, status: newStatus} : req));
+                            toast.success(`Marked as ${newStatus}`);
+                          } catch (e) { toast.error("Failed to update status"); }
+                        }}
+                        className="btn-action py-1.5 px-3 text-[11px] bg-white shadow-sm"
+                      >
+                        {r.status === 'new' ? 'Mark Read' : 'Mark Replied'}
+                      </button>
+                    )}
+                    <button 
+                      onClick={async () => {
+                        if (await confirm({ title: "Delete Request", message: "Permanently delete this contact request?" })) {
+                          try {
+                            await deleteContactRequest(r._id);
+                            setContactRequests(contactRequests.filter(req => req._id !== r._id));
+                            toast.success("Request deleted 🗑️");
+                          } catch (e) { toast.error("Failed to delete"); }
+                        }
+                      }}
+                      className="btn-action danger py-1.5 px-3 text-[11px] bg-white shadow-sm"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderContent = () => {
     if (loading) return renderSkeleton();
 
     switch (activeTab) {
+      case 'contact_requests':
+        return renderContactRequests();
       case "projects":
         return (
           <div className="space-y-6 animate-fade-in">
@@ -1180,6 +1300,14 @@ const AdminDashboard = () => {
               <div className="flex items-center gap-3"><MessageSquare size={18} /> Reviews</div>
               {allReviews.filter(r => !r.isApproved).length > 0 && (
                 <span className="w-5 h-5 bg-amber-500 text-white rounded-full flex items-center justify-center text-[10px] font-black shadow-md shadow-amber-500/40">{allReviews.filter(r => !r.isApproved).length}</span>
+              )}
+            </div>
+          </div>
+          <div className={`nav-link ${activeTab === 'contact_requests' ? 'active' : ''}`} onClick={() => setActiveTab('contact_requests')}>
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-3"><Activity size={18} /> Let's Talk Requests</div>
+              {contactRequests.filter(r => r.status === 'new').length > 0 && (
+                <span className="w-5 h-5 bg-indigo-500 text-white rounded-full flex items-center justify-center text-[10px] font-black shadow-md shadow-indigo-500/40">{contactRequests.filter(r => r.status === 'new').length}</span>
               )}
             </div>
           </div>

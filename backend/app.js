@@ -105,6 +105,9 @@ app.use("/announcement", announcementRoutes)
 const reviewRoutes = require("./src/routes/reviewRoutes")
 app.use("/review", reviewRoutes)
 
+const contactRoutes = require("./src/routes/contactRoutes")
+app.use("/contact", contactRoutes)
+
 const PORT = process.env.PORT
 server.listen(PORT, () => {
   console.log(`server started on port ${PORT}`)

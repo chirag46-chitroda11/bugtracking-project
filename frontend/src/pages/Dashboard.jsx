@@ -6,13 +6,151 @@ import LandingNavbar from "../components/LandingNavbar";
 import LandingFooter from "../components/LandingFooter";
 import ReviewSection from "../components/ReviewSection";
 
+import { submitContactRequest } from "../services/contactService";
+import toast from "react-hot-toast";
+
 /* ── Fade-In Wrapper ── */
 const FadeIn = ({ children, delay = 0 }) => (
   <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.6, delay }}>
-    {children}
+  {children}
   </motion.div>
 );
+
+/* ── Let's Talk Section ── */
+const LetsTalkSection = () => {
+  const [formData, setFormData] = React.useState({
+    name: "",
+    email: "",
+    phone: "",
+    inquiryType: "general",
+    message: ""
+  });
+  const [loading, setLoading] = React.useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.email || !formData.phone || !formData.message) {
+      return toast.error("Please fill all required fields");
+    }
+    setLoading(true);
+    try {
+      await submitContactRequest(formData);
+      toast.success("Request sent successfully! We'll contact you soon.");
+      setFormData({ name: "", email: "", phone: "", inquiryType: "general", message: "" });
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to send request");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <section id="contact" style={{ padding: "100px 5%", position: "relative", zIndex: 10 }}>
+      <FadeIn>
+        <div style={{ textAlign: "center", marginBottom: 50 }}>
+          <span style={{ fontSize: 12, fontWeight: 800, color: "#6366f1", textTransform: "uppercase", letterSpacing: 3, background: "rgba(99,102,241,0.08)", padding: "6px 18px", borderRadius: 50 }}>Connect</span>
+          <h2 style={{ fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 900, marginTop: 15, color: "#0f172a" }}>Let's <span style={{ color: "#6366f1" }}>Talk!</span></h2>
+          <p style={{ color: "#64748b", fontWeight: 500, marginTop: 10 }}>Have questions? Our team is here to help you get started.</p>
+        </div>
+      </FadeIn>
+
+      <div style={{ maxWidth: 800, margin: "0 auto" }}>
+        <FadeIn delay={0.2}>
+          <form onSubmit={handleSubmit} className="glass-card" style={{ padding: "40px", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.7)", background: "rgba(255,255,255,0.4)", backdropFilter: "blur(20px)" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "20px", marginBottom: "20px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <label style={{ fontSize: "13px", fontWeight: 700, color: "#475569", marginLeft: "4px" }}>Full Name</label>
+                <input 
+                  type="text" 
+                  placeholder="John Doe"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  style={{ padding: "14px 20px", borderRadius: "14px", border: "1px solid #e2e8f0", background: "white", outline: "none", transition: "0.3s", fontSize: "14px", fontWeight: 600 }}
+                  onFocus={(e) => e.target.style.borderColor = "#6366f1"}
+                  onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
+                />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <label style={{ fontSize: "13px", fontWeight: 700, color: "#475569", marginLeft: "4px" }}>Email Address</label>
+                <input 
+                  type="email" 
+                  placeholder="john@example.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  style={{ padding: "14px 20px", borderRadius: "14px", border: "1px solid #e2e8f0", background: "white", outline: "none", transition: "0.3s", fontSize: "14px", fontWeight: 600 }}
+                  onFocus={(e) => e.target.style.borderColor = "#6366f1"}
+                  onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
+                />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <label style={{ fontSize: "13px", fontWeight: 700, color: "#475569", marginLeft: "4px" }}>Contact Number</label>
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <select style={{ padding: "14px", borderRadius: "14px", border: "1px solid #e2e8f0", background: "white", outline: "none", fontSize: "14px", fontWeight: 700 }}>
+                    <option>+1</option>
+                    <option>+91</option>
+                    <option>+44</option>
+                    <option>+971</option>
+                  </select>
+                  <input 
+                    type="tel" 
+                    placeholder="1234567890"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    style={{ flex: 1, padding: "14px 20px", borderRadius: "14px", border: "1px solid #e2e8f0", background: "white", outline: "none", transition: "0.3s", fontSize: "14px", fontWeight: 600 }}
+                    onFocus={(e) => e.target.style.borderColor = "#6366f1"}
+                    onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
+                  />
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <label style={{ fontSize: "13px", fontWeight: 700, color: "#475569", marginLeft: "4px" }}>What are you looking for?</label>
+                <select 
+                  value={formData.inquiryType}
+                  onChange={(e) => setFormData({...formData, inquiryType: e.target.value})}
+                  style={{ padding: "14px 20px", borderRadius: "14px", border: "1px solid #e2e8f0", background: "white", outline: "none", fontSize: "14px", fontWeight: 700, cursor: "pointer" }}
+                >
+                  <option value="general">General Inquiry</option>
+                  <option value="bug_report">Report a Bug</option>
+                  <option value="feature_request">Feature Request</option>
+                  <option value="partnership">Partnership</option>
+                  <option value="support">Technical Support</option>
+                </select>
+              </div>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "30px" }}>
+              <label style={{ fontSize: "13px", fontWeight: 700, color: "#475569", marginLeft: "4px" }}>Message</label>
+              <textarea 
+                placeholder="How can we help you?"
+                value={formData.message}
+                onChange={(e) => setFormData({...formData, message: e.target.value})}
+                style={{ padding: "16px 20px", borderRadius: "18px", border: "1px solid #e2e8f0", background: "white", outline: "none", minHeight: "140px", transition: "0.3s", fontSize: "14px", fontWeight: 600, resize: "none" }}
+                onFocus={(e) => e.target.style.borderColor = "#6366f1"}
+                onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
+              ></textarea>
+            </div>
+
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              disabled={loading}
+              style={{ 
+                width: "100%", padding: "18px", borderRadius: "16px", background: "#0f172a", color: "white", fontWeight: 800, fontSize: "16px", cursor: "pointer", border: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", transition: "0.3s", opacity: loading ? 0.7 : 1
+              }}
+            >
+              {loading ? (
+                <div style={{ width: "20px", height: "20px", border: "3px solid rgba(255,255,255,0.3)", borderTopColor: "white", borderRadius: "50%", animation: "spin 1s linear infinite" }}></div>
+              ) : (
+                <>Send Message <Rocket size={18} /></>
+              )}
+            </motion.button>
+          </form>
+        </FadeIn>
+      </div>
+      <style>{` @keyframes spin { to { transform: rotate(360deg); } } `}</style>
+    </section>
+  );
+};
 
 /* ── Data ── */
 const features = [
@@ -376,6 +514,9 @@ const Dashboard = () => {
 
         {/* ═══ REVIEWS ═══ */}
         <ReviewSection />
+
+        {/* ═══ LET'S TALK ═══ */}
+        <LetsTalkSection />
 
         {/* ═══ CTA BANNER ═══ */}
         <section style={{ padding: "60px 5%", position: "relative", zIndex: 10 }}>
